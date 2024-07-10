@@ -43,7 +43,7 @@ pub enum FileFormat {
     #[cfg(feature = "json")]
     Json,
 
-    /// YAML (parsed with yaml_rust)
+    /// YAML (parsed with yaml_rust2)
     #[cfg(feature = "yaml")]
     Yaml,
 

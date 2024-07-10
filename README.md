@@ -18,7 +18,7 @@
 
 [JSON]: https://github.com/serde-rs/json
 [TOML]: https://github.com/toml-lang/toml
-[YAML]: https://github.com/chyh1990/yaml-rust
+[YAML]: https://github.com/Ethiraric/yaml-rust2
 [INI]: https://github.com/zonyitoo/rust-ini
 [RON]: https://github.com/ron-rs/ron
 [JSON5]: https://github.com/callum-oakley/json5-rs

@@ -13,7 +13,7 @@ jobs:
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2023-10-10
+          toolchain: nightly-2024-02-07
 
       - name: Install cargo-check-external-types
         run: cargo install --locked cargo-check-external-types

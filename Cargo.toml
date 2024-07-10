@@ -17,7 +17,7 @@ maintenance = { status = "actively-developed" }
 [features]
 default = ["toml", "json", "yaml", "ini", "ron", "json5", "jsonc", "convert-case", "async"]
 json = ["serde_json"]
-yaml = ["yaml-rust"]
+yaml = ["yaml-rust2"]
 ini = ["rust-ini"]
 json5 = ["json5_rs", "serde/derive"]
 jsonc = ["jsonc-parser"]
@@ -33,7 +33,7 @@ nom = "7"
 async-trait = { version = "0.1", optional = true }
 toml = { version = "0.8", optional = true }
 serde_json = { version = "1.0", optional = true }
-yaml-rust = { version = "0.4", optional = true }
+yaml-rust2 = { version = "0.8", optional = true }
 rust-ini = { version = "0.20", optional = true }
 ron = { version = "0.8", optional = true }
 json5_rs = { version = "0.4", optional = true, package = "json5" }

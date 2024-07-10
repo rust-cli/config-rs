@@ -85,8 +85,7 @@ fn test_error_parse() {
     assert_eq!(
         res.unwrap_err().to_string(),
         format!(
-            "while parsing a block mapping, did not find expected key at \
-         line 2 column 1 in {}",
+            "simple key expect ':' at byte 21 line 3 column 1 in {}",
             path_with_extension.display()
         )
     );

@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fmt;
 use std::mem;
 
-use yaml_rust as yaml;
+use yaml_rust2 as yaml;
 
 use crate::format;
 use crate::map::Map;
