@@ -17,7 +17,7 @@ impl FromStr for Expression {
     type Err = ConfigError;
 
     fn from_str(s: &str) -> Result<Self> {
-        parser::from_str(s).map_err(ConfigError::PathParse)
+        parser::from_str(s).map_err(|err| ConfigError::PathParse(err.to_string()))
     }
 }
 
@@ -25,7 +25,7 @@ fn sindex_to_uindex(index: isize, len: usize) -> usize {
     if index >= 0 {
         index as usize
     } else {
-        len - (index.abs() as usize)
+        len - index.unsigned_abs()
     }
 }
 
