@@ -46,9 +46,9 @@ pub enum ConfigError {
     NotFound(String),
 
     /// Configuration path could not be parsed.
-    PathParse(nom::error::ErrorKind),
+    PathParse(String),
 
-    /// Configuration could not be parsed from file.
+    /// Configuration could not be parsed from a file.
     FileParse {
         /// The URI used to access the file (if not loaded from a string).
         /// Example: `/path/to/config.json`
@@ -187,11 +187,11 @@ impl fmt::Display for ConfigError {
         match *self {
             ConfigError::Frozen => write!(f, "configuration is frozen"),
 
-            ConfigError::PathParse(ref kind) => write!(f, "{}", kind.description()),
+            ConfigError::PathParse(ref kind) => write!(f, "{kind}"),
 
-            ConfigError::Message(ref s) => write!(f, "{}", s),
+            ConfigError::Message(ref s) => write!(f, "{s}"),
 
-            ConfigError::Foreign(ref cause) => write!(f, "{}", cause),
+            ConfigError::Foreign(ref cause) => write!(f, "{cause}"),
 
             ConfigError::NotFound(ref key) => {
                 write!(f, "configuration property {:?} not found", key)
