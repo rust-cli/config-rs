@@ -20,6 +20,8 @@ fn from_json_value(uri: Option<&String>, value: &serde_json::Value) -> Value {
         serde_json::Value::Number(ref value) => {
             if let Some(value) = value.as_i64() {
                 Value::new(uri, ValueKind::I64(value))
+            } else if let Some(value) = value.as_u64() {
+                Value::new(uri, ValueKind::U64(value))
             } else if let Some(value) = value.as_f64() {
                 Value::new(uri, ValueKind::Float(value))
             } else {
