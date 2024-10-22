@@ -6,7 +6,7 @@ jobs:
   commit-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.2.1
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v5

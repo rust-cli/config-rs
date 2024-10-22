@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v4.1.1
+        uses: actions/checkout@v4.2.1
 
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
