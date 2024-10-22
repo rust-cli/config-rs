@@ -36,7 +36,7 @@ yaml-rust2 = { version = "0.8", optional = true }
 rust-ini = { version = "0.20", optional = true }
 ron = { version = "0.8", optional = true }
 json5_rs = { version = "0.4", optional = true, package = "json5" }
-indexmap = { version = "2.2", features = ["serde"], optional = true }
+indexmap = { version = "2.6", features = ["serde"], optional = true }
 convert_case = { version = "0.6", optional = true }
 pathdiff = "0.2"
 
