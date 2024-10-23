@@ -23,6 +23,9 @@ mod ron;
 #[cfg(feature = "json5")]
 mod json5;
 
+#[cfg(feature = "jsonc")]
+mod jsonc;
+
 /// File formats provided by the library.
 ///
 /// Although it is possible to define custom formats using [`Format`] trait it is recommended to use `FileFormat` if possible.
@@ -51,6 +54,10 @@ pub enum FileFormat {
     /// JSON5 (parsed with json5)
     #[cfg(feature = "json5")]
     Json5,
+
+    /// JSONC (parsed with jsonc)
+    #[cfg(feature = "jsonc")]
+    Jsonc,
 }
 
 pub(crate) fn all_extensions() -> &'static HashMap<FileFormat, Vec<&'static str>> {
@@ -77,6 +84,12 @@ pub(crate) fn all_extensions() -> &'static HashMap<FileFormat, Vec<&'static str>
 
         #[cfg(feature = "json5")]
         formats.insert(FileFormat::Json5, vec!["json5"]);
+
+        #[cfg(all(feature = "jsonc", feature = "json"))]
+        formats.insert(FileFormat::Jsonc, vec!["jsonc"]);
+
+        #[cfg(all(feature = "jsonc", not(feature = "json")))]
+        formats.insert(FileFormat::Jsonc, vec!["jsonc", "json"]);
 
         formats
     })
@@ -114,6 +127,9 @@ impl FileFormat {
             #[cfg(feature = "json5")]
             FileFormat::Json5 => json5::parse(uri, text),
 
+            #[cfg(feature = "jsonc")]
+            FileFormat::Jsonc => jsonc::parse(uri, text),
+
             #[cfg(all(
                 not(feature = "toml"),
                 not(feature = "json"),
@@ -121,6 +137,7 @@ impl FileFormat {
                 not(feature = "ini"),
                 not(feature = "ron"),
                 not(feature = "json5"),
+                not(feature = "jsonc"),
             ))]
             _ => unreachable!("No features are enabled, this library won't work without features"),
         }

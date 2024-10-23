@@ -11,7 +11,7 @@
 
  - Set defaults
  - Set explicit values (to programmatically override)
- - Read from [JSON], [TOML], [YAML], [INI], [RON], [JSON5] files
+ - Read from [JSON], [TOML], [YAML], [INI], [RON], [JSON5], [JSONC] files
  - Read from environment
  - Loosely typed — Configuration values may be read in any supported type, as long as there exists a reasonable conversion
  - Access nested fields using a formatted path — Uses a subset of JSONPath; currently supports the child ( `redis.port` ) and subscript operators ( `databases[0].name` )
@@ -22,6 +22,7 @@
 [INI]: https://github.com/zonyitoo/rust-ini
 [RON]: https://github.com/ron-rs/ron
 [JSON5]: https://github.com/callum-oakley/json5-rs
+[JSONC]: https://github.com/dprint/jsonc-parser
 
 Please note this library
 
@@ -43,6 +44,7 @@ config = "0.14.0"
  - `toml` - Adds support for reading TOML files
  - `ron` - Adds support for reading RON files
  - `json5` - Adds support for reading JSON5 files
+ - `jsonc` - Adds support for reading JSONC files
 
 ### Support for custom formats
 
