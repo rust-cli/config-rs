@@ -13,6 +13,63 @@ use convert_case::{Case, Casing};
 /// config Value type. We have to be aware how the config tree is created from the environment
 /// dictionary, therefore we are mindful about prefixes for the environment keys, level separators,
 /// encoding form (kebab, snake case) etc.
+///
+/// Environment variables are specified using the path to the key they correspond to. When
+/// specifying a value within a list, the index should be specified in the key immediately after
+/// the list type.
+///
+/// ## Example
+///
+/// ```rust
+/// # use config::{Environment, Config};
+/// # use serde::Deserialize;
+/// # use std::collections::HashMap;
+/// # use std::convert::TryInto;
+/// #
+/// # #[test]
+/// # fn test_env_list_of_structs() {
+///     #[derive(Deserialize, Debug, PartialEq)]
+///     struct Struct {
+///         a: Vec<Option<u32>>,
+///         b: u32,
+///     }
+///
+///     #[derive(Deserialize, Debug)]
+///     struct ListOfStructs {
+///         list: Vec<Struct>,
+///     }
+///
+///     let values = vec![
+///         ("LIST_0_A_0".to_owned(), "1".to_owned()),
+///         ("LIST_0_A_2".to_owned(), "2".to_owned()),
+///         ("LIST_0_B".to_owned(), "3".to_owned()),
+///         ("LIST_1_A_1".to_owned(), "4".to_owned()),
+///         ("LIST_1_B".to_owned(), "5".to_owned()),
+///     ];
+///
+///     let environment = Environment::default()
+///         .separator("_")
+///         .try_parsing(true)
+///         .source(Some(values.into_iter().collect()));
+///
+///     let config = Config::builder().add_source(environment).build().unwrap();
+///
+///     let config: ListOfStructs = config.try_deserialize().unwrap();
+///     assert_eq!(
+///         config.list,
+///         vec![
+///             Struct {
+///                 a: vec![Some(1), None, Some(2)],
+///                 b: 3
+///             },
+///             Struct {
+///                 a: vec![None, Some(4)],
+///                 b: 5
+///             },
+///         ]
+///     );
+/// # }
+/// ```
 #[must_use]
 #[derive(Clone, Debug, Default)]
 pub struct Environment {
@@ -291,11 +348,10 @@ impl Source for Environment {
                 } else if let Ok(parsed) = value.parse::<f64>() {
                     ValueKind::Float(parsed)
                 } else if let Some(separator) = &self.list_separator {
-                    if let Some(keys) = &self.list_parse_keys {
+                    if let Some(parse_keys) = &self.list_parse_keys {
                         #[cfg(feature = "convert-case")]
                         let key = key.to_lowercase();
-
-                        if keys.contains(&key) {
+                        if parse_keys.contains(&key) {
                             let v: Vec<Value> = value
                                 .split(separator)
                                 .map(|s| Value::new(Some(&uri), ValueKind::String(s.to_owned())))
