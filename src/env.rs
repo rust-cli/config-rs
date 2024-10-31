@@ -4,6 +4,7 @@ use crate::error::Result;
 use crate::map::Map;
 use crate::source::Source;
 use crate::value::{Value, ValueKind};
+use crate::ConfigError;
 
 #[cfg(feature = "convert-case")]
 use convert_case::{Case, Casing};
@@ -230,8 +231,8 @@ impl Source for Environment {
     }
 
     fn collect(&self) -> Result<Map<String, Value>> {
-        let mut m = Map::new();
         let uri: String = "the environment".into();
+        let mut m = Value::new(Some(&uri), ValueKind::Table(Map::new()));
 
         let separator = self.separator.as_deref().unwrap_or("");
         #[cfg(feature = "convert-case")]
@@ -248,24 +249,25 @@ impl Source for Environment {
             .as_ref()
             .map(|prefix| format!("{prefix}{prefix_separator}").to_lowercase());
 
-        let collector = |(key, value): (String, String)| {
+        let collector = |(key, value): (String, String)| -> Result<()> {
             // Treat empty environment variables as unset
             if self.ignore_empty && value.is_empty() {
-                return;
+                return Ok(());
             }
 
             let mut key = key.to_lowercase();
 
             // Check for prefix
+            let mut kept_prefix = String::new();
             if let Some(ref prefix_pattern) = prefix_pattern {
                 if key.starts_with(prefix_pattern) {
-                    if !self.keep_prefix {
-                        // Remove this prefix from the key
-                        key = key[prefix_pattern.len()..].to_string();
+                    key = key[prefix_pattern.len()..].to_string();
+                    if self.keep_prefix {
+                        kept_prefix = prefix_pattern.clone();
                     }
                 } else {
                     // Skip this key
-                    return;
+                    return Ok(());
                 }
             }
 
@@ -277,9 +279,10 @@ impl Source for Environment {
             #[cfg(feature = "convert-case")]
             if let Some(convert_case) = convert_case {
                 key = key.to_case(*convert_case);
+                kept_prefix = kept_prefix.to_case(*convert_case);
             }
 
-            let value = if self.try_parsing {
+            let value_kind = if self.try_parsing {
                 // convert to lowercase because bool parsing expects all lowercase
                 if let Ok(parsed) = value.to_lowercase().parse::<bool>() {
                     ValueKind::Boolean(parsed)
@@ -315,14 +318,45 @@ impl Source for Environment {
                 ValueKind::String(value)
             };
 
-            m.insert(key, Value::new(Some(&uri), value));
+            let value = Value::new(Some(&uri), value_kind);
+            let mut key_parts = key.split('.');
+            let key = key_parts
+                .next()
+                .ok_or(ConfigError::Message("No key after prefix".to_owned()))?;
+
+            let value = key_parts
+                .rev()
+                .fold(value, |value, key| match key.parse::<usize>() {
+                    Ok(index) => {
+                        let nil = Value::new(Some(&uri), ValueKind::Nil);
+                        let mut array = vec![nil; index + 1];
+                        array[index] = value;
+                        Value::new(Some(&uri), ValueKind::Array(array))
+                    }
+                    Err(_) => {
+                        let mut map = Map::new();
+                        map.insert(key.to_owned(), value);
+                        Value::new(Some(&uri), ValueKind::Table(map))
+                    }
+                });
+
+            let mut map = Map::new();
+            kept_prefix.push_str(key);
+            map.insert(kept_prefix, value);
+            let table = Value::new(Some(&uri), ValueKind::Table(map));
+
+            m.merge(table);
+            Ok(())
         };
 
         match &self.source {
-            Some(source) => source.clone().into_iter().for_each(collector),
-            None => env::vars().for_each(collector),
+            Some(source) => source.clone().into_iter().try_for_each(collector)?,
+            None => env::vars().try_for_each(collector)?,
         }
 
-        Ok(m)
+        match m.kind {
+            ValueKind::Table(m) => Ok(m),
+            _ => unreachable!(),
+        }
     }
 }
