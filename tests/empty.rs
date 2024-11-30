@@ -18,3 +18,22 @@ fn empty_deserializes() {
     assert_eq!(s.foo, 0);
     assert_eq!(s.bar, 0);
 }
+
+#[test]
+fn test_empty_seq() {
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Test {
+        int: u32,
+        seq: Vec<String>,
+    }
+
+    let test = Test {
+        int: 1,
+        seq: vec![],
+    };
+    let config = Config::try_from(&test).unwrap();
+
+    let actual: Test = config.try_into().unwrap();
+    assert_eq!(test, actual);
+}
+
