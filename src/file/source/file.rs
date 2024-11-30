@@ -1,8 +1,10 @@
 use std::env;
 use std::error::Error;
-use std::fs;
 use std::io;
+use std::io::Read;
 use std::path::PathBuf;
+
+use encoding_rs_io::DecodeReaderBytesBuilder;
 
 use crate::file::{
     format::all_extensions, source::FileSourceResult, FileSource, FileStoredFormat, Format,
@@ -114,8 +116,15 @@ where
             .and_then(|base| pathdiff::diff_paths(&filename, base))
             .unwrap_or_else(|| filename.clone());
 
-        // Read contents from file
-        let text = fs::read_to_string(filename)?;
+        let mut text = String::new();
+
+        DecodeReaderBytesBuilder::new()
+            // On Windows, we need to check for added Byte Order Mark (BOM). To
+            // do this, we don't specify an encoding, and enable BOM sniffing.
+            .encoding(None)
+            .bom_sniffing(true)
+            .build(std::fs::File::open(filename)?)
+            .read_to_string(&mut text)?;
 
         Ok(FileSourceResult {
             uri: Some(uri.to_string_lossy().into_owned()),
