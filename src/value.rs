@@ -705,6 +705,40 @@ impl Value {
             )),
         }
     }
+
+    /// Merge the value with another value recursively.
+    ///
+    /// In the case of a conflict, the other value (on the right) will take precedence.
+    pub(crate) fn merge(&mut self, other: Self) {
+        match (&mut self.kind, other.kind) {
+            (ValueKind::Table(ref mut table), ValueKind::Table(other_table)) => {
+                for (k, v) in other_table {
+                    match table.entry(k) {
+                        std::collections::hash_map::Entry::Occupied(mut entry) => {
+                            entry.get_mut().merge(v);
+                        }
+                        std::collections::hash_map::Entry::Vacant(entry) => {
+                            entry.insert(v);
+                        }
+                    }
+                }
+            }
+            (ValueKind::Array(ref mut array), ValueKind::Array(other)) => {
+                for (i, other) in other.into_iter().enumerate() {
+                    if let Some(s) = array.get_mut(i) {
+                        if other.kind != ValueKind::Nil {
+                            s.merge(other);
+                        }
+                    } else {
+                        array.push(other);
+                    }
+                }
+            }
+            (s, other) => {
+                *s = other;
+            }
+        }
+    }
 }
 
 impl<'de> Deserialize<'de> for Value {

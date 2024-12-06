@@ -48,7 +48,7 @@ fn test_separator_behavior() {
     temp_env::with_var("C_B_A", Some("abc"), || {
         let environment = Environment::with_prefix("C").separator("_");
 
-        assert!(environment.collect().unwrap().contains_key("b.a"));
+        assert!(environment.collect().unwrap().contains_key("b"));
     });
 }
 
@@ -85,7 +85,7 @@ fn test_custom_separator_behavior() {
     temp_env::with_var("C.B.A", Some("abc"), || {
         let environment = Environment::with_prefix("C").separator(".");
 
-        assert!(environment.collect().unwrap().contains_key("b.a"));
+        assert!(environment.collect().unwrap().contains_key("b"));
     });
 }
 
@@ -96,7 +96,7 @@ fn test_custom_prefix_separator_behavior() {
             .separator(".")
             .prefix_separator("-");
 
-        assert!(environment.collect().unwrap().contains_key("b.a"));
+        assert!(environment.collect().unwrap().contains_key("b"));
     });
 }
 
@@ -723,4 +723,140 @@ fn test_parse_uint_default() {
 
     let config: TestUint = config.try_deserialize().unwrap();
     assert_eq!(config.int_val, 42);
+}
+
+#[test]
+fn test_env_list_of_structs() {
+    #[derive(Deserialize, Debug, PartialEq)]
+    struct Struct {
+        a: Vec<Option<u32>>,
+        b: u32,
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct ListOfStructs {
+        list: Vec<Struct>,
+    }
+
+    let values = vec![
+        ("LIST_0_A_0".to_owned(), "1".to_owned()),
+        ("LIST_0_A_2".to_owned(), "2".to_owned()),
+        ("LIST_0_B".to_owned(), "3".to_owned()),
+        ("LIST_1_A_1".to_owned(), "4".to_owned()),
+        ("LIST_1_B".to_owned(), "5".to_owned()),
+    ];
+
+    let environment = Environment::default()
+        .separator("_")
+        .try_parsing(true)
+        .source(Some(values.into_iter().collect()));
+
+    let config = Config::builder().add_source(environment).build().unwrap();
+
+    let config: ListOfStructs = config.try_deserialize().unwrap();
+    assert_eq!(
+        config.list,
+        vec![
+            Struct {
+                a: vec![Some(1), None, Some(2)],
+                b: 3
+            },
+            Struct {
+                a: vec![None, Some(4)],
+                b: 5
+            },
+        ]
+    );
+}
+
+#[test]
+fn test_env_list_of_structs_list_sep() {
+    #[derive(Deserialize, Debug, PartialEq)]
+    struct Struct {
+        a: Vec<String>,
+        b: Vec<String>,
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct ListOfStructs {
+        list: Vec<Option<Struct>>,
+    }
+
+    let values = vec![
+        ("LIST_0_A".to_owned(), "hello,darkness".to_owned()),
+        ("LIST_0_B".to_owned(), "hello,world".to_owned()),
+        ("LIST_2_A".to_owned(), "strange".to_owned()),
+        ("LIST_2_B".to_owned(), "charm".to_owned()),
+    ];
+
+    let environment = Environment::default()
+        .separator("_")
+        .list_separator(",")
+        .try_parsing(true)
+        .source(Some(values.into_iter().collect()));
+
+    let config = Config::builder().add_source(environment).build().unwrap();
+
+    let config: ListOfStructs = config.try_deserialize().unwrap();
+    assert_eq!(
+        config.list,
+        vec![
+            Some(Struct {
+                a: vec!["hello".to_owned(), "darkness".to_owned()],
+                b: vec!["hello".to_owned(), "world".to_owned()],
+            }),
+            None,
+            Some(Struct {
+                a: vec!["strange".to_owned()],
+                b: vec!["charm".to_owned()],
+            }),
+        ]
+    );
+}
+
+#[test]
+fn test_env_list_of_structs_list_parse_keys() {
+    #[derive(Deserialize, Debug, PartialEq)]
+    struct Struct {
+        a: Vec<String>,
+        b: String,
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct ListOfStructs {
+        list: Vec<Option<Struct>>,
+    }
+
+    let values = vec![
+        ("LIST_0_A".to_owned(), "hello,darkness".to_owned()),
+        ("LIST_0_B".to_owned(), "hello".to_owned()),
+        ("LIST_2_A".to_owned(), "strange".to_owned()),
+        ("LIST_2_B".to_owned(), "charm".to_owned()),
+    ];
+
+    let environment = Environment::default()
+        .separator("_")
+        .list_separator(",")
+        .with_list_parse_key("list.0.a")
+        .with_list_parse_key("list.2.a")
+        .try_parsing(true)
+        .source(Some(values.into_iter().collect()));
+
+    let config = Config::builder().add_source(environment).build().unwrap();
+
+    let config: ListOfStructs = config.try_deserialize().unwrap();
+    assert_eq!(
+        config.list,
+        vec![
+            Some(Struct {
+                a: vec!["hello".to_owned(), "darkness".to_owned()],
+                b: "hello".to_owned(),
+            }),
+            None,
+            Some(Struct {
+                a: vec!["strange".to_owned()],
+                b: "charm".to_owned(),
+            }),
+        ]
+    );
 }
