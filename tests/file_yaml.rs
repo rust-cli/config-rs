@@ -183,6 +183,8 @@ fn test_override_lowercase_value_for_struct() {
         .build()
         .unwrap();
 
+    assert_eq!(cfg.get_string("Student[0].Name").unwrap(), "Tom".to_owned());
+
     let values: StructSettings = cfg.try_deserialize().unwrap();
     assert_eq!(
         values.bar,

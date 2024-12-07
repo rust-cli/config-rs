@@ -12,6 +12,9 @@ place:
     name: John Smith
     username: jsmith
     email: jsmith@localhost
+Student:
+  - Name: Tom
+  - Name: Bob
 # For override tests
 FOO: FOO should be overridden
 bar: I am bar
