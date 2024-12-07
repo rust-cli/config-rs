@@ -204,6 +204,13 @@ impl Expression {
                             Self::Identifier(key.to_lowercase()).set(target, val.clone());
                         }
                     }
+                    ValueKind::Array(ref incoming_arr) => {
+                        // Continue the deep merge
+                        for (i, val) in incoming_arr.iter().enumerate() {
+                            Self::Subscript(Box::new(self.clone()), i as isize)
+                                .set(root, val.clone());
+                        }
+                    }
 
                     _ => {
                         if let ValueKind::Table(ref mut map) = root.kind {
@@ -240,7 +247,31 @@ impl Expression {
                             array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
                         }
 
-                        array[uindex] = value;
+                        match value.kind {
+                            ValueKind::Table(ref incoming_map) => {
+                                // Pull out another table
+                                let mut target = Map::<String, Value>::new().into();
+
+                                // Continue the deep merge
+                                for (key, val) in incoming_map {
+                                    Self::Identifier(key.to_lowercase())
+                                        .set(&mut target, val.clone());
+                                }
+                                array[uindex] = target;
+                            }
+                            ValueKind::Array(ref incoming_arr) => {
+                                // Continue the deep merge
+                                for (i, val) in incoming_arr.iter().enumerate() {
+                                    Self::Subscript(Box::new(self.clone()), i as isize)
+                                        .set(root, val.clone());
+                                }
+                            }
+
+                            _ => {
+                                // Just do a simple set
+                                array[uindex] = value;
+                            }
+                        }
                     }
                 }
             }
