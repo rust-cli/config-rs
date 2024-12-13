@@ -1,13 +1,12 @@
-#![cfg(feature = "ini")]
+#![cfg(feature = "jsonc")]
 
 use serde_derive::Deserialize;
 
-use std::path::PathBuf;
-
 use config::{Config, File, FileFormat, Map, Value};
 use float_cmp::ApproxEqUlps;
+use std::path::PathBuf;
 
-#[derive(Debug, Default, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize)]
 struct Place {
     name: String,
     longitude: f64,
@@ -15,20 +14,22 @@ struct Place {
     favorite: bool,
     telephone: Option<String>,
     reviews: u64,
-    rating: Option<f32>,
     creator: Map<String, Value>,
+    rating: Option<f32>,
 }
 
-#[derive(Debug, Default, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize)]
 struct Settings {
     debug: f64,
     production: Option<String>,
     place: Place,
+    #[serde(rename = "arr")]
+    elements: Vec<String>,
 }
 
 fn make() -> Config {
     Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Ini))
+        .add_source(File::new("tests/Settings", FileFormat::Jsonc))
         .build()
         .unwrap()
 }
@@ -36,7 +37,10 @@ fn make() -> Config {
 #[test]
 fn test_file() {
     let c = make();
+
+    // Deserialize the entire file as single struct
     let s: Settings = c.try_deserialize().unwrap();
+
     assert!(s.debug.approx_eq_ulps(&1.0, 2));
     assert_eq!(s.production, Some("false".to_string()));
     assert_eq!(s.place.name, "Torre di Pisa");
@@ -46,7 +50,9 @@ fn test_file() {
     assert_eq!(s.place.reviews, 3866);
     assert_eq!(s.place.rating, Some(4.5));
     assert_eq!(s.place.telephone, None);
-    if cfg!(feature = "preserve_order") {
+    assert_eq!(s.elements.len(), 10);
+    assert_eq!(s.elements[3], "4".to_string());
+    if cfg!(feature = "TODO: preserve_order") {
         assert_eq!(
             s.place
                 .creator
@@ -69,17 +75,17 @@ fn test_file() {
 #[test]
 fn test_error_parse() {
     let res = Config::builder()
-        .add_source(File::new("tests/Settings-invalid", FileFormat::Ini))
+        .add_source(File::new("tests/Settings-invalid", FileFormat::Jsonc))
         .build();
 
-    let path: PathBuf = ["tests", "Settings-invalid.ini"].iter().collect();
+    let path_with_extension: PathBuf = ["tests", "Settings-invalid.jsonc"].iter().collect();
 
     assert!(res.is_err());
     assert_eq!(
         res.unwrap_err().to_string(),
         format!(
-            r#"3:1 expecting "[Some('='), Some(':')]" but found EOF. in {}"#,
-            path.display()
+            "Expected a colon after the string or word in an object property on line 4 column 1. in {}",
+            path_with_extension.display()
         )
     );
 }
@@ -105,10 +111,11 @@ fn test_override_uppercase_value_for_struct() {
     std::env::set_var("APP_FOO", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
 
     let cfg = Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Ini))
+        .add_source(File::new("tests/Settings", FileFormat::Jsonc))
         .add_source(config::Environment::with_prefix("APP").separator("_"))
         .build()
         .unwrap();
+
     let cap_settings = cfg.clone().try_deserialize::<CapSettings>();
     let lower_settings = cfg.try_deserialize::<StructSettings>().unwrap();
 
@@ -118,14 +125,14 @@ fn test_override_uppercase_value_for_struct() {
             assert_ne!(v.FOO, "FOO should be overridden");
             assert_eq!(
                 lower_settings.foo,
-                "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned()
+                "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_string()
             );
         }
         Err(e) => {
             if e.to_string().contains("missing field `FOO`") {
                 assert_eq!(
                     lower_settings.foo,
-                    "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned()
+                    "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_string()
                 );
             } else {
                 panic!("{}", e);
@@ -139,7 +146,7 @@ fn test_override_lowercase_value_for_struct() {
     std::env::set_var("config_foo", "I have been overridden_with_lower_case");
 
     let cfg = Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Ini))
+        .add_source(File::new("tests/Settings", FileFormat::Jsonc))
         .add_source(config::Environment::with_prefix("config").separator("_"))
         .build()
         .unwrap();
@@ -147,9 +154,9 @@ fn test_override_lowercase_value_for_struct() {
     let values: StructSettings = cfg.try_deserialize().unwrap();
     assert_eq!(
         values.foo,
-        "I have been overridden_with_lower_case".to_owned()
+        "I have been overridden_with_lower_case".to_string()
     );
-    assert_ne!(values.foo, "I am bar".to_owned());
+    assert_ne!(values.foo, "I am bar".to_string());
 }
 
 #[test]
@@ -157,7 +164,7 @@ fn test_override_uppercase_value_for_enums() {
     std::env::set_var("APPS_BAR", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
 
     let cfg = Config::builder()
-        .add_source(File::new("tests/Settings-enum-test", FileFormat::Ini))
+        .add_source(File::new("tests/Settings-enum-test", FileFormat::Jsonc))
         .add_source(config::Environment::with_prefix("APPS").separator("_"))
         .build()
         .unwrap();
@@ -165,7 +172,7 @@ fn test_override_uppercase_value_for_enums() {
 
     assert_eq!(
         val,
-        EnumSettings::Bar("I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned())
+        EnumSettings::Bar("I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_string())
     );
 }
 
@@ -174,7 +181,7 @@ fn test_override_lowercase_value_for_enums() {
     std::env::set_var("test_bar", "I have been overridden_with_lower_case");
 
     let cfg = Config::builder()
-        .add_source(File::new("tests/Settings-enum-test", FileFormat::Ini))
+        .add_source(File::new("tests/Settings-enum-test", FileFormat::Jsonc))
         .add_source(config::Environment::with_prefix("test").separator("_"))
         .build()
         .unwrap();
@@ -183,6 +190,6 @@ fn test_override_lowercase_value_for_enums() {
 
     assert_eq!(
         param,
-        EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
+        EnumSettings::Bar("I have been overridden_with_lower_case".to_string())
     );
 }

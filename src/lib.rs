@@ -6,7 +6,7 @@
 //!  - Environment variables
 //!  - String literals in well-known formats
 //!  - Another Config instance
-//!  - Files: TOML, JSON, YAML, INI, RON, JSON5 and custom ones defined with Format trait
+//!  - Files: TOML, JSON, YAML, INI, RON, JSON5, JSONC and custom ones defined with Format trait
 //!  - Manual, programmatic override (via a `.set` method on the Config instance)
 //!
 //! Additionally, Config supports:
