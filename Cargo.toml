@@ -123,6 +123,7 @@ async = ["async-trait"]
 [dependencies]
 serde = "1.0"
 nom = "7"
+encoding_rs_io = "0.1"
 
 async-trait = { version = "0.1", optional = true }
 toml = { version = "0.8", optional = true }
