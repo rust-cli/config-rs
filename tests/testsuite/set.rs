@@ -10,11 +10,18 @@ fn test_set_override_scalar() {
     assert_eq!(config.get("value").ok(), Some(true));
 }
 
-#[cfg(feature = "toml")]
 #[test]
+#[cfg(feature = "json")]
 fn test_set_scalar_default() {
     let config = Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Toml))
+        .add_source(File::from_str(
+            r#"
+{
+  "debug": true
+}
+"#,
+            FileFormat::Json,
+        ))
         .set_default("debug", false)
         .unwrap()
         .set_default("staging", false)
@@ -26,13 +33,22 @@ fn test_set_scalar_default() {
     assert_eq!(config.get("staging").ok(), Some(false));
 }
 
-#[cfg(feature = "toml")]
 #[test]
+#[cfg(feature = "json")]
 fn test_set_scalar_path() {
     let config = Config::builder()
         .set_override("first.second.third", true)
         .unwrap()
-        .add_source(File::new("tests/Settings", FileFormat::Toml))
+        .add_source(File::from_str(
+            r#"
+{
+  "place": {
+    "favorite": false
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
         .set_default("place.favorite", true)
         .unwrap()
         .set_default("place.blocked", true)
@@ -45,8 +61,8 @@ fn test_set_scalar_path() {
     assert_eq!(config.get("place.blocked").ok(), Some(true));
 }
 
-#[cfg(feature = "toml")]
 #[test]
+#[cfg(feature = "json")]
 fn test_set_arr_path() {
     let config = Config::builder()
         .set_override("items[0].name", "Ivan")
@@ -57,9 +73,23 @@ fn test_set_arr_path() {
         .unwrap()
         .set_override("data[1]", 0)
         .unwrap()
-        .add_source(File::new("tests/Settings", FileFormat::Toml))
         .set_override("items[2]", "George")
         .unwrap()
+        .add_source(File::from_str(
+            r#"
+{
+  "items": [
+    {
+      "name": "1"
+    },
+    {
+      "name": "2"
+    }
+  ]
+}
+"#,
+            FileFormat::Json,
+        ))
         .build()
         .unwrap();
 
@@ -73,8 +103,8 @@ fn test_set_arr_path() {
     assert_eq!(config.get("items[2]").ok(), Some("George".to_owned()));
 }
 
-#[cfg(feature = "toml")]
 #[test]
+#[cfg(feature = "json")]
 fn test_set_capital() {
     let config = Config::builder()
         .set_default("this", false)
