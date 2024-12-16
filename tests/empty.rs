@@ -1,6 +1,5 @@
-use serde_derive::{Deserialize, Serialize};
-
 use config::Config;
+use serde_derive::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Settings {

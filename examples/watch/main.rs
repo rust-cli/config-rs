@@ -1,12 +1,13 @@
 #![allow(deprecated)]
-use config::{Config, File};
-use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::mpsc::channel;
 use std::sync::OnceLock;
 use std::sync::RwLock;
 use std::time::Duration;
+
+use config::{Config, File};
+use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 
 fn settings() -> &'static RwLock<Config> {
     static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();

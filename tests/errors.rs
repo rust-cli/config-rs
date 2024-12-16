@@ -1,10 +1,9 @@
 #![cfg(feature = "toml")]
 
-use serde_derive::Deserialize;
-
 use std::path::PathBuf;
 
 use config::{Config, ConfigError, File, FileFormat, Map, Value};
+use serde_derive::Deserialize;
 
 fn make() -> Config {
     Config::builder()

@@ -1,10 +1,9 @@
 use std::{error::Error, fmt::Debug};
 
+use async_trait::async_trait;
 use config::{
     builder::AsyncState, AsyncSource, ConfigBuilder, ConfigError, FileFormat, Format, Map,
 };
-
-use async_trait::async_trait;
 use futures::{select, FutureExt};
 use warp::Filter;
 

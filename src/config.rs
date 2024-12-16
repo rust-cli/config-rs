@@ -1,9 +1,9 @@
 use std::fmt::Debug;
 
-use crate::builder::{ConfigBuilder, DefaultState};
 use serde::de::Deserialize;
 use serde::ser::Serialize;
 
+use crate::builder::{ConfigBuilder, DefaultState};
 use crate::error::{ConfigError, Result};
 use crate::map::Map;
 use crate::path;

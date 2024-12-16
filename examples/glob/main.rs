@@ -1,7 +1,8 @@
-use config::{Config, File};
-use glob::glob;
 use std::collections::HashMap;
 use std::path::Path;
+
+use config::{Config, File};
+use glob::glob;
 
 fn main() {
     // Option 1
