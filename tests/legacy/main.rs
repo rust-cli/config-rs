@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 pub mod datetime;
 pub mod errors;
 pub mod file;
