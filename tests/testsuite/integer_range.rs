@@ -1,16 +1,18 @@
-#![cfg(feature = "toml")]
-
 use config::Config;
 
 #[test]
+#[cfg(feature = "json")]
 fn wrapping_u16() {
     let c = Config::builder()
         .add_source(config::File::from_str(
             r#"
-            [settings]
-            port = 66000
-            "#,
-            config::FileFormat::Toml,
+{
+    "settings": {
+        "port": 66000
+    }
+}
+"#,
+            config::FileFormat::Json,
         ))
         .build()
         .unwrap();
@@ -26,14 +28,18 @@ fn wrapping_u16() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn nonwrapping_u32() {
     let c = Config::builder()
         .add_source(config::File::from_str(
             r#"
-            [settings]
-            port = 66000
-            "#,
-            config::FileFormat::Toml,
+{
+    "settings": {
+        "port": 66000
+    }
+}
+"#,
+            config::FileFormat::Json,
         ))
         .build()
         .unwrap();
@@ -44,14 +50,18 @@ fn nonwrapping_u32() {
 
 #[test]
 #[should_panic]
+#[cfg(feature = "json")]
 fn invalid_signedness() {
     let c = Config::builder()
         .add_source(config::File::from_str(
             r#"
-            [settings]
-            port = -1
-            "#,
-            config::FileFormat::Toml,
+{
+    "settings": {
+        "port": -1
+    }
+}
+"#,
+            config::FileFormat::Json,
         ))
         .build()
         .unwrap();
