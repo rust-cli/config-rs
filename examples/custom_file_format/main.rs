@@ -1,5 +1,6 @@
-use config::{Config, File, FileStoredFormat, Format, Map, Value, ValueKind};
 use std::io::{Error, ErrorKind};
+
+use config::{Config, File, FileStoredFormat, Format, Map, Value, ValueKind};
 
 /// The private and public key sources will be read into their associated variable:
 #[derive(serde_derive::Deserialize, Clone, Debug)]

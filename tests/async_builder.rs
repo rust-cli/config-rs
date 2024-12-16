@@ -2,9 +2,10 @@
 #![cfg(feature = "json")]
 #![cfg(feature = "toml")]
 
+use std::{env, fs, path, str::FromStr};
+
 use async_trait::async_trait;
 use config::{AsyncSource, Config, ConfigError, FileFormat, Format, Map, Value};
-use std::{env, fs, path, str::FromStr};
 use tokio::fs::read_to_string;
 
 #[derive(Debug)]

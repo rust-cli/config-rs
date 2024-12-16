@@ -1,8 +1,9 @@
 #![allow(deprecated)]
-use config::Config;
 use std::error::Error;
 use std::sync::OnceLock;
 use std::sync::RwLock;
+
+use config::Config;
 
 fn settings() -> &'static RwLock<Config> {
     static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();

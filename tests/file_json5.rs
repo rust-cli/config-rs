@@ -1,10 +1,10 @@
 #![cfg(feature = "json5")]
 
-use serde_derive::Deserialize;
+use std::path::PathBuf;
 
 use config::{Config, File, FileFormat, Map, Value};
 use float_cmp::ApproxEqUlps;
-use std::path::PathBuf;
+use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct Place {

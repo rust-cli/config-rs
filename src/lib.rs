@@ -35,6 +35,12 @@ mod ser;
 mod source;
 mod value;
 
+// Re-export
+#[cfg(feature = "convert-case")]
+pub use convert_case::Case;
+
+#[allow(deprecated)]
+pub use crate::builder::AsyncConfigBuilder;
 pub use crate::builder::ConfigBuilder;
 pub use crate::config::Config;
 pub use crate::env::Environment;
@@ -47,10 +53,3 @@ pub use crate::map::Map;
 pub use crate::source::AsyncSource;
 pub use crate::source::Source;
 pub use crate::value::{Value, ValueKind};
-
-#[allow(deprecated)]
-pub use crate::builder::AsyncConfigBuilder;
-
-// Re-export
-#[cfg(feature = "convert-case")]
-pub use convert_case::Case;

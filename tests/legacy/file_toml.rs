@@ -1,9 +1,8 @@
 #![cfg(feature = "toml")]
 
-use serde_derive::Deserialize;
-
 use config::{Config, File, FileFormat, Map, Value};
 use float_cmp::ApproxEqUlps;
+use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize)]
 struct Place {

@@ -1,6 +1,7 @@
+use std::env;
+
 use config::{Config, ConfigError, Environment, File};
 use serde_derive::Deserialize;
-use std::env;
 
 #[derive(Debug, Deserialize)]
 #[allow(unused)]

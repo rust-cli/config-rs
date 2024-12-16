@@ -2,9 +2,8 @@
 
 use std::path::PathBuf;
 
-use serde_derive::Deserialize;
-
 use config::{Config, ConfigError, File, FileFormat, Map, Value};
+use serde_derive::Deserialize;
 
 fn make() -> Config {
     let mut c = Config::default();

@@ -1,10 +1,9 @@
 #![cfg(feature = "ini")]
 
-use serde_derive::Deserialize;
-
 use std::path::PathBuf;
 
 use config::{Config, File, FileFormat};
+use serde_derive::Deserialize;
 
 #[derive(Debug, Deserialize, PartialEq)]
 struct Place {

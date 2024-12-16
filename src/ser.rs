@@ -677,10 +677,11 @@ impl ser::SerializeStructVariant for Unreachable {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use serde::{Deserialize, Serialize};
     #[cfg(not(feature = "json5"))]
     use serde_derive::{Deserialize, Serialize};
+
+    use super::*;
 
     #[test]
     fn test_struct() {
