@@ -28,7 +28,7 @@ fn respect_field_case() {
         .build()
         .unwrap();
 
-    c.try_deserialize::<Kafka>().unwrap_err();
+    c.try_deserialize::<Kafka>().unwrap();
 }
 
 #[test]
@@ -53,7 +53,7 @@ fn respect_renamed_field() {
         .build()
         .unwrap();
 
-    c.try_deserialize::<MyConfig>().unwrap_err();
+    c.try_deserialize::<MyConfig>().unwrap();
 }
 
 #[test]

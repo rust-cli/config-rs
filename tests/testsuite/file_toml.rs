@@ -260,7 +260,7 @@ down = 1
     match cap_settings {
         Ok(v) => {
             // this assertion will ensure that the map has only lowercase keys
-            assert_ne!(v.FOO, "FOO should be overridden");
+            assert_eq!(v.FOO, "FOO should be overridden");
             assert_eq!(
                 lower_settings.foo,
                 "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned()

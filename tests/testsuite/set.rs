@@ -115,7 +115,7 @@ fn test_set_capital() {
         .build()
         .unwrap();
 
-    assert_eq!(config.get("this").ok(), Some(false));
-    assert_eq!(config.get("ThAt").ok(), Some(true));
-    assert_eq!(config.get("logLevel").ok(), Some(5));
+    assert_eq!(config.get::<bool>("this").unwrap(), false);
+    config.get::<bool>("ThAt").unwrap_err();
+    config.get::<usize>("logLevel").unwrap_err();
 }
