@@ -1,8 +1,10 @@
 #![cfg(feature = "toml")]
 
-use config::{Config, File, FileFormat, Map, Value};
+use chrono::{DateTime, TimeZone, Utc};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
+
+use config::{Config, File, FileFormat, Map, Value};
 
 #[test]
 fn test_file() {
@@ -204,4 +206,22 @@ fn test_override_lowercase_value_for_enums() {
         values,
         EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
     );
+}
+
+#[test]
+fn toml() {
+    let s = Config::builder()
+        .add_source(File::from_str(
+            r#"
+            toml_datetime = 2017-05-11T14:55:15Z
+            "#,
+            FileFormat::Toml,
+        ))
+        .build()
+        .unwrap();
+
+    let date: String = s.get("toml_datetime").unwrap();
+    assert_eq!(&date, "2017-05-11T14:55:15Z");
+    let date: DateTime<Utc> = s.get("toml_datetime").unwrap();
+    assert_eq!(date, Utc.with_ymd_and_hms(2017, 5, 11, 14, 55, 15).unwrap());
 }

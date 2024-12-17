@@ -2,9 +2,11 @@
 
 use std::path::PathBuf;
 
-use config::{Config, File, FileFormat, Map, Value};
+use chrono::{DateTime, TimeZone, Utc};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
+
+use config::{Config, File, FileFormat, Map, Value};
 
 #[test]
 fn test_file() {
@@ -199,4 +201,24 @@ fn test_override_lowercase_value_for_enums() {
         param,
         EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
     );
+}
+
+#[test]
+fn ron() {
+    let s = Config::builder()
+        .add_source(File::from_str(
+            r#"
+            (
+                ron_datetime: "2021-04-19T11:33:02Z"
+            )
+            "#,
+            FileFormat::Ron,
+        ))
+        .build()
+        .unwrap();
+
+    let date: String = s.get("ron_datetime").unwrap();
+    assert_eq!(&date, "2021-04-19T11:33:02Z");
+    let date: DateTime<Utc> = s.get("ron_datetime").unwrap();
+    assert_eq!(date, Utc.with_ymd_and_hms(2021, 4, 19, 11, 33, 2).unwrap());
 }

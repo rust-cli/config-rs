@@ -2,8 +2,10 @@
 
 use std::path::PathBuf;
 
-use config::{Config, File, FileFormat};
+use chrono::{DateTime, TimeZone, Utc};
 use serde_derive::Deserialize;
+
+use config::{Config, File, FileFormat};
 
 #[test]
 fn test_file() {
@@ -175,4 +177,22 @@ fn test_override_lowercase_value_for_enums() {
         param,
         EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
     );
+}
+
+#[test]
+fn ini() {
+    let s = Config::builder()
+        .add_source(File::from_str(
+            r#"
+                ini_datetime = 2017-05-10T02:14:53Z
+            "#,
+            FileFormat::Ini,
+        ))
+        .build()
+        .unwrap();
+
+    let date: String = s.get("ini_datetime").unwrap();
+    assert_eq!(&date, "2017-05-10T02:14:53Z");
+    let date: DateTime<Utc> = s.get("ini_datetime").unwrap();
+    assert_eq!(date, Utc.with_ymd_and_hms(2017, 5, 10, 2, 14, 53).unwrap());
 }

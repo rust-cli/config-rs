@@ -3,9 +3,11 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use config::{Config, File, FileFormat, Map, Value};
+use chrono::{DateTime, TimeZone, Utc};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
+
+use config::{Config, File, FileFormat, Map, Value};
 
 #[test]
 fn test_file() {
@@ -230,4 +232,22 @@ fn test_override_lowercase_value_for_enums() {
         values,
         EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
     );
+}
+
+#[test]
+fn yaml() {
+    let s = Config::builder()
+        .add_source(File::from_str(
+            r#"
+            yaml_datetime: 2017-06-12T10:58:30Z
+            "#,
+            FileFormat::Yaml,
+        ))
+        .build()
+        .unwrap();
+
+    let date: String = s.get("yaml_datetime").unwrap();
+    assert_eq!(&date, "2017-06-12T10:58:30Z");
+    let date: DateTime<Utc> = s.get("yaml_datetime").unwrap();
+    assert_eq!(date, Utc.with_ymd_and_hms(2017, 6, 12, 10, 58, 30).unwrap());
 }
