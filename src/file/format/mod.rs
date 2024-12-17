@@ -27,6 +27,7 @@ mod json5;
 ///
 /// Although it is possible to define custom formats using [`Format`] trait it is recommended to use `FileFormat` if possible.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[non_exhaustive]
 pub enum FileFormat {
     /// TOML (parsed with toml)
     #[cfg(feature = "toml")]
