@@ -38,6 +38,7 @@ impl fmt::Display for Unexpected {
 
 /// Represents all possible errors that can occur when working with
 /// configuration.
+#[non_exhaustive]
 pub enum ConfigError {
     /// Configuration is frozen and no further mutations can be made.
     Frozen,
