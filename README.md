@@ -23,10 +23,8 @@
 [RON]: https://github.com/ron-rs/ron
 [JSON5]: https://github.com/callum-oakley/json5-rs
 
-Please note this library
-
- - can not be used to write changed configuration values back to the configuration file(s)!
- - Is case insensitive and all the keys are converted to lowercase internally
+Please note that this library can not be used to write changed configuration
+values back to the configuration file(s)!
 
 ## Usage
 
