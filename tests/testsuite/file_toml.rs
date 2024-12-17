@@ -4,46 +4,41 @@ use config::{Config, File, FileFormat, Map, Value};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
 
-#[derive(Debug, Deserialize)]
-struct Place {
-    number: PlaceNumber,
-    name: String,
-    longitude: f64,
-    latitude: f64,
-    favorite: bool,
-    telephone: Option<String>,
-    reviews: u64,
-    creator: Map<String, Value>,
-    rating: Option<f32>,
-}
-
-#[derive(Debug, Deserialize, PartialEq, Eq)]
-struct PlaceNumber(u8);
-
-#[derive(Debug, Deserialize, PartialEq, Eq)]
-struct AsciiCode(i8);
-
-#[derive(Debug, Deserialize)]
-struct Settings {
-    debug: f64,
-    production: Option<String>,
-    code: AsciiCode,
-    place: Place,
-    #[serde(rename = "arr")]
-    elements: Vec<String>,
-}
-
-#[cfg(test)]
-fn make() -> Config {
-    Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Toml))
-        .build()
-        .unwrap()
-}
-
 #[test]
 fn test_file() {
-    let c = make();
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        debug: f64,
+        production: Option<String>,
+        code: AsciiCode,
+        place: Place,
+        #[serde(rename = "arr")]
+        elements: Vec<String>,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct Place {
+        number: PlaceNumber,
+        name: String,
+        longitude: f64,
+        latitude: f64,
+        favorite: bool,
+        telephone: Option<String>,
+        reviews: u64,
+        creator: Map<String, Value>,
+        rating: Option<f32>,
+    }
+
+    #[derive(Debug, Deserialize, PartialEq, Eq)]
+    struct PlaceNumber(u8);
+
+    #[derive(Debug, Deserialize, PartialEq, Eq)]
+    struct AsciiCode(i8);
+
+    let c = Config::builder()
+        .add_source(File::new("tests/Settings", FileFormat::Toml))
+        .build()
+        .unwrap();
 
     // Deserialize the entire file as single struct
     let s: Settings = c.try_deserialize().unwrap();
@@ -94,23 +89,20 @@ fn test_error_parse() {
         .contains("TOML parse error at line 2, column 9"));
 }
 
-#[derive(Debug, Deserialize, PartialEq)]
-enum EnumSettings {
-    Bar(String),
-}
-#[derive(Debug, Deserialize, PartialEq)]
-struct StructSettings {
-    foo: String,
-    bar: String,
-}
-#[derive(Debug, Deserialize, PartialEq)]
-#[allow(non_snake_case)]
-struct CapSettings {
-    FOO: String,
-}
-
 #[test]
 fn test_override_uppercase_value_for_struct() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foo: String,
+        bar: String,
+    }
+
+    #[derive(Debug, Deserialize, PartialEq)]
+    #[allow(non_snake_case)]
+    struct CapSettings {
+        FOO: String,
+    }
+
     std::env::set_var("APP_FOO", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
 
     let cfg = Config::builder()
@@ -146,6 +138,12 @@ fn test_override_uppercase_value_for_struct() {
 
 #[test]
 fn test_override_lowercase_value_for_struct() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foo: String,
+        bar: String,
+    }
+
     std::env::set_var("config_bar", "I have been overridden_with_lower_case");
 
     let cfg = Config::builder()
@@ -164,6 +162,11 @@ fn test_override_lowercase_value_for_struct() {
 
 #[test]
 fn test_override_uppercase_value_for_enums() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    enum EnumSettings {
+        Bar(String),
+    }
+
     std::env::set_var("APPS_BAR", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
 
     let cfg = Config::builder()
@@ -182,6 +185,11 @@ fn test_override_uppercase_value_for_enums() {
 
 #[test]
 fn test_override_lowercase_value_for_enums() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    enum EnumSettings {
+        Bar(String),
+    }
+
     std::env::set_var("test_bar", "I have been overridden_with_lower_case");
 
     let cfg = Config::builder()
