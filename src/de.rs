@@ -272,7 +272,7 @@ impl EnumAccess {
     fn variant_deserializer(&self, name: &str) -> Result<StrDeserializer<'_>> {
         self.variants
             .iter()
-            .find(|&&s| s.to_lowercase() == name.to_lowercase()) // changing to lowercase will enable deserialization of lowercase values to enums
+            .find(|&&s| s == name)
             .map(|&s| StrDeserializer(s))
             .ok_or_else(|| self.no_constructor_error(name))
     }

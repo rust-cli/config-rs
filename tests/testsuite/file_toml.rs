@@ -386,11 +386,11 @@ bar = "bar is a lowercase param"
         .build()
         .unwrap();
 
-    let values: EnumSettings = cfg.try_deserialize().unwrap();
-
-    assert_eq!(
-        values,
-        EnumSettings::Bar("I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned())
+    let param = cfg.try_deserialize::<EnumSettings>();
+    assert!(param.is_err());
+    assert_data_eq!(
+        param.unwrap_err().to_string(),
+        str!["enum EnumSettings does not have variant constructor bar"]
     );
 }
 
@@ -414,11 +414,11 @@ bar = "bar is a lowercase param"
         .build()
         .unwrap();
 
-    let values: EnumSettings = cfg.try_deserialize().unwrap();
-
-    assert_eq!(
-        values,
-        EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
+    let param = cfg.try_deserialize::<EnumSettings>();
+    assert!(param.is_err());
+    assert_data_eq!(
+        param.unwrap_err().to_string(),
+        str!["enum EnumSettings does not have variant constructor bar"]
     );
 }
 
