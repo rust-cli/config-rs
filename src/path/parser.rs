@@ -1,83 +1,72 @@
 use std::str::FromStr;
 
-use nom::{
-    branch::alt,
-    bytes::complete::{is_a, tag},
-    character::complete::{char, digit1, space0},
-    combinator::{map, map_res, opt, recognize},
-    error::ErrorKind,
-    sequence::{delimited, pair, preceded},
-    Err, IResult,
-};
+use winnow::ascii::digit1;
+use winnow::ascii::space0;
+use winnow::combinator::dispatch;
+use winnow::combinator::eof;
+use winnow::combinator::fail;
+use winnow::combinator::opt;
+use winnow::combinator::repeat;
+use winnow::combinator::seq;
+use winnow::error::ContextError;
+use winnow::prelude::*;
+use winnow::token::any;
+use winnow::token::take_while;
 
 use crate::path::Expression;
 
-pub(crate) fn from_str(input: &str) -> Result<Expression, ErrorKind> {
-    match ident(input) {
-        Ok((mut rem, mut expr)) => {
-            while !rem.is_empty() {
-                match postfix(expr)(rem) {
-                    Ok((rem_, expr_)) => {
-                        rem = rem_;
-                        expr = expr_;
-                    }
+pub(crate) fn from_str(mut input: &str) -> Result<Expression, ContextError> {
+    let input = &mut input;
+    path(input).map_err(|e| e.into_inner().unwrap())
+}
 
-                    // Forward Incomplete and Error
-                    result => {
-                        return result.map(|(_, o)| o).map_err(to_error_kind);
-                    }
-                }
-            }
+fn path(i: &mut &str) -> PResult<Expression> {
+    let root = ident.parse_next(i)?;
+    let expr = repeat(0.., postfix)
+        .fold(
+            || root.clone(),
+            |prev, cur| match cur {
+                Child::Key(k) => Expression::Child(Box::new(prev), k),
+                Child::Index(k) => Expression::Subscript(Box::new(prev), k),
+            },
+        )
+        .parse_next(i)?;
+    eof.parse_next(i)?;
+    Ok(expr)
+}
 
-            Ok(expr)
-        }
+fn ident(i: &mut &str) -> PResult<Expression> {
+    raw_ident.map(Expression::Identifier).parse_next(i)
+}
 
-        // Forward Incomplete and Error
-        result => result.map(|(_, o)| o).map_err(to_error_kind),
+fn postfix(i: &mut &str) -> PResult<Child> {
+    dispatch! {any;
+        '[' => seq!(integer.map(Child::Index), _: ']').map(|(i,)| i),
+        '.' => raw_ident.map(Child::Key),
+        _ => fail,
     }
+    .parse_next(i)
 }
 
-fn ident(i: &str) -> IResult<&str, Expression> {
-    map(raw_ident, Expression::Identifier)(i)
+enum Child {
+    Key(String),
+    Index(isize),
 }
 
-fn postfix<'a>(expr: Expression) -> impl FnMut(&'a str) -> IResult<&'a str, Expression> {
-    let e2 = expr.clone();
-    let child = map(preceded(tag("."), raw_ident), move |id| {
-        Expression::Child(Box::new(expr.clone()), id)
-    });
-
-    let subscript = map(delimited(char('['), integer, char(']')), move |num| {
-        Expression::Subscript(Box::new(e2.clone()), num)
-    });
-
-    alt((child, subscript))
+fn raw_ident(i: &mut &str) -> PResult<String> {
+    take_while(1.., ('a'..='z', 'A'..='Z', '0'..='9', '_', '-'))
+        .map(ToString::to_string)
+        .parse_next(i)
 }
 
-fn raw_ident(i: &str) -> IResult<&str, String> {
-    map(
-        is_a(
-            "abcdefghijklmnopqrstuvwxyz \
-         ABCDEFGHIJKLMNOPQRSTUVWXYZ \
-         0123456789 \
-         _-",
-        ),
-        ToString::to_string,
-    )(i)
-}
-
-fn integer(i: &str) -> IResult<&str, isize> {
-    map_res(
-        delimited(space0, recognize(pair(opt(tag("-")), digit1)), space0),
-        FromStr::from_str,
-    )(i)
-}
-
-fn to_error_kind(e: Err<nom::error::Error<&str>>) -> ErrorKind {
-    match e {
-        Err::Incomplete(_) => ErrorKind::Complete,
-        Err::Failure(e) | Err::Error(e) => e.code,
-    }
+fn integer(i: &mut &str) -> PResult<isize> {
+    seq!(
+        _: space0,
+        (opt('-'), digit1).take().try_map(FromStr::from_str),
+        _: space0
+    )
+    .map(|(i,)| i)
+    .parse_next(i)
 }
 
 #[cfg(test)]
