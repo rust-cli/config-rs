@@ -1,8 +1,0 @@
-inner_int:
-    "1":
-        member: "Test Int 1"
-    2:
-        member: "Test Int 2"
-inner_string:
-    str_key:
-        member: "Test String"
