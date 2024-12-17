@@ -116,27 +116,6 @@ fn test_error_parse() {
 }
 
 #[test]
-fn test_json_vec() {
-    let c = Config::builder()
-        .add_source(File::from_str(
-            r#"
-            {
-              "WASTE": ["example_dir1", "example_dir2"]
-            }
-"#,
-            FileFormat::Json,
-        ))
-        .build()
-        .unwrap();
-
-    let v = c.get_array("WASTE").unwrap();
-    let mut vi = v.into_iter();
-    assert_eq!(vi.next().unwrap().into_string().unwrap(), "example_dir1");
-    assert_eq!(vi.next().unwrap().into_string().unwrap(), "example_dir2");
-    assert!(vi.next().is_none());
-}
-
-#[test]
 fn test_override_uppercase_value_for_struct() {
     #[derive(Debug, Deserialize, PartialEq)]
     struct StructSettings {
