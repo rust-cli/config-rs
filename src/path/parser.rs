@@ -12,42 +12,6 @@ use nom::{
 
 use crate::path::Expression;
 
-fn raw_ident(i: &str) -> IResult<&str, String> {
-    map(
-        is_a(
-            "abcdefghijklmnopqrstuvwxyz \
-         ABCDEFGHIJKLMNOPQRSTUVWXYZ \
-         0123456789 \
-         _-",
-        ),
-        ToString::to_string,
-    )(i)
-}
-
-fn integer(i: &str) -> IResult<&str, isize> {
-    map_res(
-        delimited(space0, recognize(pair(opt(tag("-")), digit1)), space0),
-        FromStr::from_str,
-    )(i)
-}
-
-fn ident(i: &str) -> IResult<&str, Expression> {
-    map(raw_ident, Expression::Identifier)(i)
-}
-
-fn postfix<'a>(expr: Expression) -> impl FnMut(&'a str) -> IResult<&'a str, Expression> {
-    let e2 = expr.clone();
-    let child = map(preceded(tag("."), raw_ident), move |id| {
-        Expression::Child(Box::new(expr.clone()), id)
-    });
-
-    let subscript = map(delimited(char('['), integer, char(']')), move |num| {
-        Expression::Subscript(Box::new(e2.clone()), num)
-    });
-
-    alt((child, subscript))
-}
-
 pub(crate) fn from_str(input: &str) -> Result<Expression, ErrorKind> {
     match ident(input) {
         Ok((mut rem, mut expr)) => {
@@ -73,7 +37,43 @@ pub(crate) fn from_str(input: &str) -> Result<Expression, ErrorKind> {
     }
 }
 
-pub(crate) fn to_error_kind(e: Err<nom::error::Error<&str>>) -> ErrorKind {
+fn ident(i: &str) -> IResult<&str, Expression> {
+    map(raw_ident, Expression::Identifier)(i)
+}
+
+fn postfix<'a>(expr: Expression) -> impl FnMut(&'a str) -> IResult<&'a str, Expression> {
+    let e2 = expr.clone();
+    let child = map(preceded(tag("."), raw_ident), move |id| {
+        Expression::Child(Box::new(expr.clone()), id)
+    });
+
+    let subscript = map(delimited(char('['), integer, char(']')), move |num| {
+        Expression::Subscript(Box::new(e2.clone()), num)
+    });
+
+    alt((child, subscript))
+}
+
+fn raw_ident(i: &str) -> IResult<&str, String> {
+    map(
+        is_a(
+            "abcdefghijklmnopqrstuvwxyz \
+         ABCDEFGHIJKLMNOPQRSTUVWXYZ \
+         0123456789 \
+         _-",
+        ),
+        ToString::to_string,
+    )(i)
+}
+
+fn integer(i: &str) -> IResult<&str, isize> {
+    map_res(
+        delimited(space0, recognize(pair(opt(tag("-")), digit1)), space0),
+        FromStr::from_str,
+    )(i)
+}
+
+fn to_error_kind(e: Err<nom::error::Error<&str>>) -> ErrorKind {
     match e {
         Err::Incomplete(_) => ErrorKind::Complete,
         Err::Failure(e) | Err::Error(e) => e.code,
