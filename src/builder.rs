@@ -109,21 +109,6 @@ pub struct DefaultState {
     sources: Vec<Box<dyn Source + Send + Sync>>,
 }
 
-// Dummy useless struct
-//
-// This struct exists only to avoid the semver break
-// which would be implied by removing it.
-//
-// This struct cannot be used for anything useful.
-// (Nor can it be extended without a semver break, either.)
-//
-// In a future release, we should have
-//    type AsyncConfigBuilder = ConfigBuilder<AsyncState>;
-#[deprecated = "AsyncConfigBuilder is useless.  Use ConfigBuilder<AsyncState>"]
-#[doc(hidden)]
-#[derive(Debug, Clone, Default)]
-pub struct AsyncConfigBuilder {}
-
 /// Represents data specific to builder in asynchronous state, with support for async.
 #[derive(Debug, Default, Clone)]
 pub struct AsyncState {

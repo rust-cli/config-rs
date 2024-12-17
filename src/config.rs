@@ -48,40 +48,12 @@ impl Config {
         ConfigBuilder::<DefaultState>::default()
     }
 
-    /// Merge in a configuration property source.
-    #[deprecated(since = "0.12.0", note = "please use 'ConfigBuilder' instead")]
-    pub fn merge<T>(&mut self, source: T) -> Result<&mut Self>
-    where
-        T: 'static,
-        T: Source + Send + Sync,
-    {
-        self.sources.push(Box::new(source));
-
-        #[allow(deprecated)]
-        self.refresh()
-    }
-
-    /// Merge in a configuration property source.
-    #[deprecated(since = "0.12.0", note = "please use 'ConfigBuilder' instead")]
-    pub fn with_merged<T>(mut self, source: T) -> Result<Self>
-    where
-        T: 'static,
-        T: Source + Send + Sync,
-    {
-        self.sources.push(Box::new(source));
-
-        #[allow(deprecated)]
-        self.refresh()?;
-        Ok(self)
-    }
-
     /// Refresh the configuration cache with fresh
     /// data from added sources.
     ///
     /// Configuration is automatically refreshed after a mutation
     /// operation (`set`, `merge`, `set_default`, etc.).
-    #[deprecated(since = "0.12.0", note = "please use 'ConfigBuilder' instead")]
-    pub fn refresh(&mut self) -> Result<&mut Self> {
+    fn refresh(&mut self) -> Result<&mut Self> {
         self.cache = {
             let mut cache: Value = Map::<String, Value>::new().into();
 
@@ -104,18 +76,6 @@ impl Config {
         Ok(self)
     }
 
-    /// Set a default `value` at `key`
-    #[deprecated(since = "0.12.0", note = "please use 'ConfigBuilder' instead")]
-    pub fn set_default<T>(&mut self, key: &str, value: T) -> Result<&mut Self>
-    where
-        T: Into<Value>,
-    {
-        self.defaults.insert(key.parse()?, value.into());
-
-        #[allow(deprecated)]
-        self.refresh()
-    }
-
     /// Set an overwrite
     ///
     /// This function sets an overwrite value.
@@ -124,28 +84,13 @@ impl Config {
     /// # Warning
     ///
     /// Errors if config is frozen
-    #[deprecated(since = "0.12.0", note = "please use 'ConfigBuilder' instead")]
-    pub fn set<T>(&mut self, key: &str, value: T) -> Result<&mut Self>
+    pub(crate) fn set<T>(&mut self, key: &str, value: T) -> Result<&mut Self>
     where
         T: Into<Value>,
     {
         self.overrides.insert(key.parse()?, value.into());
 
-        #[allow(deprecated)]
         self.refresh()
-    }
-
-    #[deprecated(since = "0.12.0", note = "please use 'ConfigBuilder' instead")]
-    pub fn set_once(&mut self, key: &str, value: Value) -> Result<()> {
-        let expr: path::Expression = key.parse()?;
-
-        // Traverse the cache using the path to (possibly) retrieve a value
-        if let Some(ref mut val) = expr.get_mut(&mut self.cache) {
-            **val = value;
-        } else {
-            expr.set(&mut self.cache, value);
-        }
-        Ok(())
     }
 
     fn get_value(&self, key: &str) -> Result<Value> {
@@ -205,11 +150,6 @@ impl Config {
         let mut serializer = ConfigSerializer::default();
         from.serialize(&mut serializer)?;
         Ok(serializer.output)
-    }
-
-    #[deprecated(since = "0.7.0", note = "please use 'try_deserialize' instead")]
-    pub fn deserialize<'de, T: Deserialize<'de>>(self) -> Result<T> {
-        self.try_deserialize()
     }
 }
 

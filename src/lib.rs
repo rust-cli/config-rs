@@ -39,8 +39,6 @@ mod value;
 #[cfg(feature = "convert-case")]
 pub use convert_case::Case;
 
-#[allow(deprecated)]
-pub use crate::builder::AsyncConfigBuilder;
 pub use crate::builder::ConfigBuilder;
 pub use crate::config::Config;
 pub use crate::env::Environment;

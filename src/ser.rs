@@ -45,7 +45,6 @@ impl ConfigSerializer {
         // That would be marginally more performant, but more fiddly.
         let key = self.make_full_key()?;
 
-        #[allow(deprecated)]
         self.output.set(&key, value.into())?;
         Ok(())
     }

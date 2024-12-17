@@ -78,44 +78,6 @@ impl Expression {
         }
     }
 
-    pub(crate) fn get_mut<'a>(&self, root: &'a mut Value) -> Option<&'a mut Value> {
-        match *self {
-            Self::Identifier(ref id) => match root.kind {
-                ValueKind::Table(ref mut map) => map.get_mut(id),
-
-                _ => None,
-            },
-
-            Self::Child(ref expr, ref key) => match expr.get_mut(root) {
-                Some(value) => match value.kind {
-                    ValueKind::Table(ref mut map) => map.get_mut(key),
-
-                    _ => None,
-                },
-
-                _ => None,
-            },
-
-            Self::Subscript(ref expr, index) => match expr.get_mut(root) {
-                Some(value) => match value.kind {
-                    ValueKind::Array(ref mut array) => {
-                        let index = sindex_to_uindex(index, array.len());
-
-                        if index >= array.len() {
-                            None
-                        } else {
-                            Some(&mut array[index])
-                        }
-                    }
-
-                    _ => None,
-                },
-
-                _ => None,
-            },
-        }
-    }
-
     pub(crate) fn get_mut_forcibly<'a>(&self, root: &'a mut Value) -> Option<&'a mut Value> {
         match *self {
             Self::Identifier(ref id) => match root.kind {
