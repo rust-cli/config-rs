@@ -120,7 +120,7 @@ impl Expression {
         match *self {
             Self::Identifier(ref id) => match root.kind {
                 ValueKind::Table(ref mut map) => Some(
-                    map.entry(id.to_lowercase())
+                    map.entry(id.clone())
                         .or_insert_with(|| Value::new(None, ValueKind::Nil)),
                 ),
 
@@ -131,7 +131,7 @@ impl Expression {
                 Some(value) => {
                     if let ValueKind::Table(ref mut map) = value.kind {
                         Some(
-                            map.entry(key.to_lowercase())
+                            map.entry(key.clone())
                                 .or_insert_with(|| Value::new(None, ValueKind::Nil)),
                         )
                     } else {
@@ -139,7 +139,7 @@ impl Expression {
 
                         if let ValueKind::Table(ref mut map) = value.kind {
                             Some(
-                                map.entry(key.to_lowercase())
+                                map.entry(key.clone())
                                     .or_insert_with(|| Value::new(None, ValueKind::Nil)),
                             )
                         } else {
@@ -193,7 +193,7 @@ impl Expression {
                     ValueKind::Table(ref incoming_map) => {
                         // Pull out another table
                         let target = if let ValueKind::Table(ref mut map) = root.kind {
-                            map.entry(id.to_lowercase())
+                            map.entry(id.clone())
                                 .or_insert_with(|| Map::<String, Value>::new().into())
                         } else {
                             unreachable!();
@@ -201,17 +201,17 @@ impl Expression {
 
                         // Continue the deep merge
                         for (key, val) in incoming_map {
-                            Self::Identifier(key.to_lowercase()).set(target, val.clone());
+                            Self::Identifier(key.clone()).set(target, val.clone());
                         }
                     }
 
                     _ => {
                         if let ValueKind::Table(ref mut map) = root.kind {
                             // Just do a simple set
-                            if let Some(existing) = map.get_mut(&id.to_lowercase()) {
+                            if let Some(existing) = map.get_mut(id) {
                                 *existing = value;
                             } else {
-                                map.insert(id.to_lowercase(), value);
+                                map.insert(id.clone(), value);
                             }
                         }
                     }
@@ -224,7 +224,7 @@ impl Expression {
                         // Didn't find a table. Oh well. Make a table and do this anyway
                         *parent = Map::<String, Value>::new().into();
                     }
-                    Self::Identifier(key.to_lowercase()).set(parent, value);
+                    Self::Identifier(key.clone()).set(parent, value);
                 }
             }
 

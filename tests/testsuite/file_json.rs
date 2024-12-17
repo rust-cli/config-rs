@@ -116,27 +116,6 @@ fn test_error_parse() {
 }
 
 #[test]
-fn test_json_vec() {
-    let c = Config::builder()
-        .add_source(File::from_str(
-            r#"
-            {
-              "WASTE": ["example_dir1", "example_dir2"]
-            }
-"#,
-            FileFormat::Json,
-        ))
-        .build()
-        .unwrap();
-
-    let v = c.get_array("WASTE").unwrap();
-    let mut vi = v.into_iter();
-    assert_eq!(vi.next().unwrap().into_string().unwrap(), "example_dir1");
-    assert_eq!(vi.next().unwrap().into_string().unwrap(), "example_dir2");
-    assert!(vi.next().is_none());
-}
-
-#[test]
 fn test_override_uppercase_value_for_struct() {
     #[derive(Debug, Deserialize, PartialEq)]
     struct StructSettings {
@@ -189,7 +168,7 @@ fn test_override_uppercase_value_for_struct() {
     match cap_settings {
         Ok(v) => {
             // this assertion will ensure that the map has only lowercase keys
-            assert_ne!(v.FOO, "FOO should be overridden");
+            assert_eq!(v.FOO, "FOO should be overridden");
             assert_eq!(
                 lower_settings.foo,
                 "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned()
@@ -279,11 +258,12 @@ fn test_override_uppercase_value_for_enums() {
         .add_source(config::Environment::with_prefix("APPS").separator("_"))
         .build()
         .unwrap();
-    let val: EnumSettings = cfg.try_deserialize().unwrap();
 
-    assert_eq!(
-        val,
-        EnumSettings::Bar("I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned())
+    let param = cfg.try_deserialize::<EnumSettings>();
+    assert!(param.is_err());
+    assert_data_eq!(
+        param.unwrap_err().to_string(),
+        str!["enum EnumSettings does not have variant constructor bar"]
     );
 }
 
@@ -309,11 +289,11 @@ fn test_override_lowercase_value_for_enums() {
         .build()
         .unwrap();
 
-    let param: EnumSettings = cfg.try_deserialize().unwrap();
-
-    assert_eq!(
-        param,
-        EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
+    let param = cfg.try_deserialize::<EnumSettings>();
+    assert!(param.is_err());
+    assert_data_eq!(
+        param.unwrap_err().to_string(),
+        str!["enum EnumSettings does not have variant constructor bar"]
     );
 }
 

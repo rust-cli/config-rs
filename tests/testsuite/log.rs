@@ -1,3 +1,5 @@
+use snapbox::{assert_data_eq, str};
+
 use config::*;
 
 #[derive(Debug, Deserialize)]
@@ -38,14 +40,19 @@ fn test_case_sensitivity_json_from_str() {
 
 #[test]
 #[cfg(feature = "json")]
-fn test_load_level_lowercase_succeeding() {
+fn test_load_level_lowercase() {
     let s = r#"{ "log": "error" }"#;
     let c = Config::builder()
         .add_source(File::from_str(s, FileFormat::Json))
         .build()
         .unwrap();
+
     assert_eq!(c.get_string("log").unwrap(), "error");
+
     let s = c.try_deserialize::<Settings>();
-    assert!(s.is_ok(), "Expected Ok(_) for {:?}", s);
-    assert_eq!(s.unwrap().log, log::Level::Error);
+    assert!(s.is_err());
+    assert_data_eq!(
+        s.unwrap_err().to_string(),
+        str!["enum Level does not have variant constructor error"]
+    );
 }

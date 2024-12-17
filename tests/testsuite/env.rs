@@ -1,5 +1,7 @@
-use config::{Config, Environment, Source};
 use serde_derive::Deserialize;
+use snapbox::{assert_data_eq, str};
+
+use config::{Config, Environment, Source};
 
 /// Reminder that tests using env variables need to use different env variable names, since
 /// tests can be run in parallel
@@ -474,11 +476,13 @@ fn test_parse_string_and_list_ignore_list_parse_key_case() {
     // using a struct in an enum here to make serde use `deserialize_any`
     #[derive(Deserialize, Debug)]
     #[serde(tag = "tag")]
+    #[allow(dead_code)]
     enum TestStringEnum {
         String(TestString),
     }
 
     #[derive(Deserialize, Debug)]
+    #[allow(dead_code)]
     struct TestString {
         string_val: String,
         string_list: Vec<String>,
@@ -503,20 +507,13 @@ fn test_parse_string_and_list_ignore_list_parse_key_case() {
                 .build()
                 .unwrap();
 
-            let config: TestStringEnum = config.try_deserialize().unwrap();
+            let res = config.try_deserialize::<TestStringEnum>();
 
-            match config {
-                TestStringEnum::String(TestString {
-                    string_val,
-                    string_list,
-                }) => {
-                    assert_eq!(String::from("test,string"), string_val);
-                    assert_eq!(
-                        vec![String::from("test"), String::from("string")],
-                        string_list
-                    );
-                }
-            }
+            assert!(res.is_err());
+            assert_data_eq!(
+                res.unwrap_err().to_string(),
+                str![[r#"invalid type: string "test,string", expected a sequence"#]]
+            );
         },
     );
 }

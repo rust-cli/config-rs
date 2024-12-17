@@ -121,7 +121,7 @@ rating = 4.5
     match cap_settings {
         Ok(v) => {
             // this assertion will ensure that the map has only lowercase keys
-            assert_ne!(v.FOO, "FOO should be overridden");
+            assert_eq!(v.FOO, "FOO should be overridden");
             assert_eq!(
                 lower_settings.foo,
                 "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned()
@@ -198,11 +198,12 @@ bar = "bar is a lowercase param"
         .add_source(config::Environment::with_prefix("APPS").separator("_"))
         .build()
         .unwrap();
-    let val: EnumSettings = cfg.try_deserialize().unwrap();
 
-    assert_eq!(
-        val,
-        EnumSettings::Bar("I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned())
+    let param = cfg.try_deserialize::<EnumSettings>();
+    assert!(param.is_err());
+    assert_data_eq!(
+        param.unwrap_err().to_string(),
+        str!["enum EnumSettings does not have variant constructor bar"]
     );
 }
 
@@ -226,11 +227,11 @@ bar = "bar is a lowercase param"
         .build()
         .unwrap();
 
-    let param: EnumSettings = cfg.try_deserialize().unwrap();
-
-    assert_eq!(
-        param,
-        EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
+    let param = cfg.try_deserialize::<EnumSettings>();
+    assert!(param.is_err());
+    assert_data_eq!(
+        param.unwrap_err().to_string(),
+        str!["enum EnumSettings does not have variant constructor bar"]
     );
 }
 
