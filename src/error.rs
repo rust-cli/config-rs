@@ -46,7 +46,7 @@ pub enum ConfigError {
     NotFound(String),
 
     /// Configuration path could not be parsed.
-    PathParse(nom::error::ErrorKind),
+    PathParse { cause: Box<dyn Error + Send + Sync> },
 
     /// Configuration could not be parsed from file.
     FileParse {
@@ -187,7 +187,7 @@ impl fmt::Display for ConfigError {
         match *self {
             ConfigError::Frozen => write!(f, "configuration is frozen"),
 
-            ConfigError::PathParse(ref kind) => write!(f, "{}", kind.description()),
+            ConfigError::PathParse { ref cause } => write!(f, "{cause}"),
 
             ConfigError::Message(ref s) => write!(f, "{s}"),
 
