@@ -1,4 +1,3 @@
-#![allow(deprecated)]
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::mpsc::channel;
@@ -12,13 +11,21 @@ use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 fn settings() -> &'static RwLock<Config> {
     static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();
     CONFIG.get_or_init(|| {
-        let mut settings = Config::default();
-        settings
-            .merge(File::with_name("examples/watch/Settings.toml"))
-            .unwrap();
+        let settings = load();
 
         RwLock::new(settings)
     })
+}
+
+fn refresh() {
+    *settings().write().unwrap() = load();
+}
+
+fn load() -> Config {
+    Config::builder()
+        .add_source(File::with_name("examples/watch/Settings.toml"))
+        .build()
+        .unwrap()
 }
 
 fn show() {
@@ -63,7 +70,7 @@ fn watch() -> ! {
                 ..
             })) => {
                 println!(" * Settings.toml written; refreshing configuration ...");
-                settings().write().unwrap().refresh().unwrap();
+                refresh();
                 show();
             }
 
