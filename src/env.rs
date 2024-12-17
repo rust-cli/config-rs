@@ -155,10 +155,10 @@ impl Environment {
     /// To switch the default type back to type Strings you need to provide the keys which should be [`Vec<String>`] using this function.
     pub fn with_list_parse_key(mut self, key: &str) -> Self {
         if self.list_parse_keys.is_none() {
-            self.list_parse_keys = Some(vec![key.to_lowercase()]);
+            self.list_parse_keys = Some(vec![key.into()]);
         } else {
             self.list_parse_keys = self.list_parse_keys.map(|mut keys| {
-                keys.push(key.to_lowercase());
+                keys.push(key.into());
                 keys
             });
         }
@@ -289,9 +289,6 @@ impl Source for Environment {
                     ValueKind::Float(parsed)
                 } else if let Some(separator) = &self.list_separator {
                     if let Some(keys) = &self.list_parse_keys {
-                        #[cfg(feature = "convert-case")]
-                        let key = key.to_lowercase();
-
                         if keys.contains(&key) {
                             let v: Vec<Value> = value
                                 .split(separator)
