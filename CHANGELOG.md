@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Compatibility
+
+- `ConfigError` is no longer exhaustive
+- `ConfigError::Parse`s type changed
+- `FileFormat` is no longer exhaustive
+- Deprecated functions removed
+- Case insensitivity from 0.14.0 was reverted
+
+### Fixes
+
+- Struct fields, variants, and lookup paths with uppercase letters can be used again (regression from 0.14.0)
+
 ## [0.14.1] - 2024-10-23
 
 ### Compatibility
