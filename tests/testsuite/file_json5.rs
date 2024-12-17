@@ -1,42 +1,65 @@
 #![cfg(feature = "json5")]
 
-use std::path::PathBuf;
-
-use config::{Config, File, FileFormat, Map, Value};
+use chrono::{DateTime, TimeZone, Utc};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
+use snapbox::{assert_data_eq, str};
 
-#[derive(Debug, Deserialize)]
-struct Place {
-    name: String,
-    longitude: f64,
-    latitude: f64,
-    favorite: bool,
-    telephone: Option<String>,
-    reviews: u64,
-    creator: Map<String, Value>,
-    rating: Option<f32>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Settings {
-    debug: f64,
-    production: Option<String>,
-    place: Place,
-    #[serde(rename = "arr")]
-    elements: Vec<String>,
-}
-
-fn make() -> Config {
-    Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Json5))
-        .build()
-        .unwrap()
-}
+use config::{Config, File, FileFormat, Map, Value};
 
 #[test]
 fn test_file() {
-    let c = make();
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        debug: f64,
+        production: Option<String>,
+        place: Place,
+        #[serde(rename = "arr")]
+        elements: Vec<String>,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct Place {
+        name: String,
+        longitude: f64,
+        latitude: f64,
+        favorite: bool,
+        telephone: Option<String>,
+        reviews: u64,
+        creator: Map<String, Value>,
+        rating: Option<f32>,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  // c
+  /* c */
+  debug: true,
+  production: false,
+  arr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,],
+  place: {
+    name: 'Torre di Pisa',
+    longitude: 43.7224985,
+    latitude: 10.3970522,
+    favorite: false,
+    reviews: 3866,
+    rating: 4.5,
+    creator: {
+      name: "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost",
+    }
+  },
+  FOO: "FOO should be overridden",
+  bar: "I am bar",
+}
+"#,
+            FileFormat::Json5,
+        ))
+        .build()
+        .unwrap();
 
     // Deserialize the entire file as single struct
     let s: Settings = c.try_deserialize().unwrap();
@@ -75,43 +98,75 @@ fn test_file() {
 #[test]
 fn test_error_parse() {
     let res = Config::builder()
-        .add_source(File::new("tests/Settings-invalid", FileFormat::Json5))
+        .add_source(File::from_str(
+            r#"
+{
+  ok: true
+  error
+}
+"#,
+            FileFormat::Json5,
+        ))
         .build();
 
-    let path_with_extension: PathBuf = ["tests", "Settings-invalid.json5"].iter().collect();
-
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!(
-            " --> 2:7\n  |\n2 |   ok: true\n  |       ^---\n  |\n  = expected null in {}",
-            path_with_extension.display()
-        )
+        str![[r#"
+ --> 3:7
+  |
+3 |   ok: true
+  |       ^---
+  |
+  = expected null
+"#]]
     );
-}
-
-#[derive(Debug, Deserialize, PartialEq)]
-enum EnumSettings {
-    Bar(String),
-}
-
-#[derive(Debug, Deserialize, PartialEq)]
-struct StructSettings {
-    foo: String,
-    bar: String,
-}
-#[derive(Debug, Deserialize, PartialEq)]
-#[allow(non_snake_case)]
-struct CapSettings {
-    FOO: String,
 }
 
 #[test]
 fn test_override_uppercase_value_for_struct() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foo: String,
+        bar: String,
+    }
+
+    #[derive(Debug, Deserialize, PartialEq)]
+    #[allow(non_snake_case)]
+    struct CapSettings {
+        FOO: String,
+    }
+
     std::env::set_var("APP_FOO", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
 
     let cfg = Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Json5))
+        .add_source(File::from_str(
+            r#"
+{
+  // c
+  /* c */
+  debug: true,
+  production: false,
+  arr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,],
+  place: {
+    name: 'Torre di Pisa',
+    longitude: 43.7224985,
+    latitude: 10.3970522,
+    favorite: false,
+    reviews: 3866,
+    rating: 4.5,
+    creator: {
+      name: "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost",
+    }
+  },
+  FOO: "FOO should be overridden",
+  bar: "I am bar",
+}
+"#,
+            FileFormat::Json5,
+        ))
         .add_source(config::Environment::with_prefix("APP").separator("_"))
         .build()
         .unwrap();
@@ -143,10 +198,42 @@ fn test_override_uppercase_value_for_struct() {
 
 #[test]
 fn test_override_lowercase_value_for_struct() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foo: String,
+        bar: String,
+    }
+
     std::env::set_var("config_foo", "I have been overridden_with_lower_case");
 
     let cfg = Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Json5))
+        .add_source(File::from_str(
+            r#"
+{
+  // c
+  /* c */
+  debug: true,
+  production: false,
+  arr: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,],
+  place: {
+    name: 'Torre di Pisa',
+    longitude: 43.7224985,
+    latitude: 10.3970522,
+    favorite: false,
+    reviews: 3866,
+    rating: 4.5,
+    creator: {
+      name: "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost",
+    }
+  },
+  FOO: "FOO should be overridden",
+  bar: "I am bar",
+}
+"#,
+            FileFormat::Json5,
+        ))
         .add_source(config::Environment::with_prefix("config").separator("_"))
         .build()
         .unwrap();
@@ -161,10 +248,22 @@ fn test_override_lowercase_value_for_struct() {
 
 #[test]
 fn test_override_uppercase_value_for_enums() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    enum EnumSettings {
+        Bar(String),
+    }
+
     std::env::set_var("APPS_BAR", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
 
     let cfg = Config::builder()
-        .add_source(File::new("tests/Settings-enum-test", FileFormat::Json5))
+        .add_source(File::from_str(
+            r#"
+{
+    bar: "bar is a lowercase param",
+}
+"#,
+            FileFormat::Json5,
+        ))
         .add_source(config::Environment::with_prefix("APPS").separator("_"))
         .build()
         .unwrap();
@@ -178,10 +277,22 @@ fn test_override_uppercase_value_for_enums() {
 
 #[test]
 fn test_override_lowercase_value_for_enums() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    enum EnumSettings {
+        Bar(String),
+    }
+
     std::env::set_var("test_bar", "I have been overridden_with_lower_case");
 
     let cfg = Config::builder()
-        .add_source(File::new("tests/Settings-enum-test", FileFormat::Json5))
+        .add_source(File::from_str(
+            r#"
+{
+    bar: "bar is a lowercase param",
+}
+"#,
+            FileFormat::Json5,
+        ))
         .add_source(config::Environment::with_prefix("test").separator("_"))
         .build()
         .unwrap();
@@ -192,4 +303,24 @@ fn test_override_lowercase_value_for_enums() {
         param,
         EnumSettings::Bar("I have been overridden_with_lower_case".to_owned())
     );
+}
+
+#[test]
+fn json() {
+    let s = Config::builder()
+        .add_source(File::from_str(
+            r#"
+            {
+                "json_datetime": "2017-05-10T02:14:53Z"
+            }
+            "#,
+            FileFormat::Json5,
+        ))
+        .build()
+        .unwrap();
+
+    let date: String = s.get("json_datetime").unwrap();
+    assert_eq!(&date, "2017-05-10T02:14:53Z");
+    let date: DateTime<Utc> = s.get("json_datetime").unwrap();
+    assert_eq!(date, Utc.with_ymd_and_hms(2017, 5, 10, 2, 14, 53).unwrap());
 }

@@ -1,5 +1,3 @@
-#![cfg(feature = "json")]
-
 use config::*;
 
 #[derive(Debug, Deserialize)]
@@ -7,17 +5,14 @@ struct Settings {
     log: log::Level,
 }
 
-fn config(s: &str) -> Config {
-    Config::builder()
-        .add_source(File::from_str(s, FileFormat::Json))
-        .build()
-        .unwrap()
-}
-
 #[test]
+#[cfg(feature = "json")]
 fn test_load_level_uppercase() {
     let s = r#"{ "log": "ERROR" }"#;
-    let c = config(s);
+    let c = Config::builder()
+        .add_source(File::from_str(s, FileFormat::Json))
+        .build()
+        .unwrap();
     let l = c.get::<log::Level>("log").unwrap();
     assert_eq!(l, log::Level::Error);
 }
@@ -42,9 +37,13 @@ fn test_case_sensitivity_json_from_str() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_load_level_lowercase_succeeding() {
     let s = r#"{ "log": "error" }"#;
-    let c = config(s);
+    let c = Config::builder()
+        .add_source(File::from_str(s, FileFormat::Json))
+        .build()
+        .unwrap();
     assert_eq!(c.get_string("log").unwrap(), "error");
     let s = c.try_deserialize::<Settings>();
     assert!(s.is_ok(), "Expected Ok(_) for {:?}", s);

@@ -1,18 +1,43 @@
-#![cfg(feature = "toml")]
-
 use config::{Config, File, FileFormat, Map};
 
-fn make() -> Config {
-    Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Toml))
-        .add_source(File::new("tests/Settings-production", FileFormat::Toml))
-        .build()
-        .unwrap()
-}
-
 #[test]
+#[cfg(feature = "json")]
 fn test_merge() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "debug": true,
+  "production": false,
+  "place": {
+    "rating": 4.5,
+    "creator": {
+      "name": "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost"
+    }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .add_source(File::from_str(
+            r#"
+{
+  "debug": false,
+  "production": true,
+  "place": {
+    "rating": 4.9,
+    "creator": {
+      "name": "Somebody New"
+    }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     assert_eq!(c.get("debug").ok(), Some(false));
     assert_eq!(c.get("production").ok(), Some(true));

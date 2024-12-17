@@ -1,59 +1,39 @@
-#![cfg(feature = "yaml")]
+use snapbox::{assert_data_eq, str};
 
 use config::{Config, File, FileFormat};
 
 #[test]
+#[cfg(feature = "json")]
 fn test_file_not_required() {
     let res = Config::builder()
-        .add_source(File::new("tests/NoSettings", FileFormat::Yaml).required(false))
+        .add_source(File::new("tests/testsuite/file-nonexistent", FileFormat::Json).required(false))
         .build();
 
     assert!(res.is_ok());
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_file_required_not_found() {
     let res = Config::builder()
-        .add_source(File::new("tests/NoSettings", FileFormat::Yaml))
+        .add_source(File::new(
+            "tests/testsuite/file-nonexistent",
+            FileFormat::Json,
+        ))
         .build();
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        "configuration file \"tests/NoSettings\" not found".to_owned()
-    );
-}
-
-#[test]
-#[cfg(feature = "toml")]
-fn test_file_auto() {
-    let c = Config::builder()
-        .add_source(File::with_name("tests/Settings-production"))
-        .build()
-        .unwrap();
-
-    assert_eq!(c.get("debug").ok(), Some(false));
-    assert_eq!(c.get("production").ok(), Some(true));
-}
-
-#[test]
-fn test_file_auto_not_found() {
-    let res = Config::builder()
-        .add_source(File::with_name("tests/NoSettings"))
-        .build();
-
-    assert!(res.is_err());
-    assert_eq!(
-        res.unwrap_err().to_string(),
-        "configuration file \"tests/NoSettings\" not found".to_owned()
+        str![[r#"configuration file "tests/testsuite/file-nonexistent" not found"#]]
     );
 }
 
 #[test]
 #[cfg(feature = "json")]
-fn test_file_ext() {
+fn test_file_auto() {
     let c = Config::builder()
-        .add_source(File::with_name("tests/Settings.json"))
+        .add_source(File::with_name("tests/testsuite/file-auto"))
         .build()
         .unwrap();
 
@@ -62,10 +42,36 @@ fn test_file_ext() {
 }
 
 #[test]
-#[cfg(feature = "ini")]
+#[cfg(feature = "json")]
+fn test_file_auto_not_found() {
+    let res = Config::builder()
+        .add_source(File::with_name("tests/testsuite/file-nonexistent"))
+        .build();
+
+    assert!(res.is_err());
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str![[r#"configuration file "tests/testsuite/file-nonexistent" not found"#]]
+    );
+}
+
+#[test]
+#[cfg(feature = "json")]
+fn test_file_ext() {
+    let c = Config::builder()
+        .add_source(File::with_name("tests/testsuite/file-ext.json"))
+        .build()
+        .unwrap();
+
+    assert_eq!(c.get("debug").ok(), Some(true));
+    assert_eq!(c.get("production").ok(), Some(false));
+}
+
+#[test]
+#[cfg(feature = "json")]
 fn test_file_second_ext() {
     let c = Config::builder()
-        .add_source(File::with_name("tests/Settings2.default"))
+        .add_source(File::with_name("tests/testsuite/file-second-ext.default"))
         .build()
         .unwrap();
 

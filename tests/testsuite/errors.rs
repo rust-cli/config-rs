@@ -1,50 +1,55 @@
-#![cfg(feature = "toml")]
-
-use std::path::PathBuf;
+use serde_derive::Deserialize;
+use snapbox::{assert_data_eq, str};
 
 use config::{Config, ConfigError, File, FileFormat, Map, Value};
-use serde_derive::Deserialize;
-
-fn make() -> Config {
-    Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Toml))
-        .build()
-        .unwrap()
-}
 
 #[test]
+#[cfg(feature = "json")]
 fn test_error_parse() {
     let res = Config::builder()
-        .add_source(File::new("tests/Settings-invalid", FileFormat::Toml))
+        .add_source(File::from_str(
+            r#"
+{
+  "boolean_s_parse": "fals",
+}
+"#,
+            FileFormat::Json,
+        ))
         .build();
 
     assert!(res.is_err());
-    assert!(res
-        .unwrap_err()
-        .to_string()
-        .contains("TOML parse error at line 2, column 9"));
-}
-
-#[test]
-fn test_error_type() {
-    let c = make();
-
-    let res = c.get::<bool>("boolean_s_parse");
-
-    let path: PathBuf = ["tests", "Settings.toml"].iter().collect();
-
-    assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!(
-            "invalid type: string \"fals\", expected a boolean for key `boolean_s_parse` in {}",
-            path.display()
-        )
+        str!["trailing comma at line 4 column 1"]
     );
 }
 
 #[test]
-#[cfg(unix)]
+#[cfg(feature = "json")]
+fn test_error_type() {
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "boolean_s_parse": "fals"
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.get::<bool>("boolean_s_parse");
+
+    assert!(res.is_err());
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str![[r#"invalid type: string "fals", expected a boolean for key `boolean_s_parse`"#]]
+    );
+}
+
+#[test]
+#[cfg(feature = "json")]
 fn test_error_deser_whole() {
     #[derive(Deserialize, Debug)]
     struct Place {
@@ -58,79 +63,121 @@ fn test_error_deser_whole() {
         place: Place,
     }
 
-    let c = make();
-    let err = c.try_deserialize::<Output>().unwrap_err().to_string();
-    assert_eq!(
-        err,
-        "invalid type: string \"Torre di Pisa\", expected an integer for key `place.name` in tests/Settings.toml",
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "place": {
+    "name": "Torre di Pisa"
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.try_deserialize::<Output>();
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str![[r#"invalid type: string "Torre di Pisa", expected an integer for key `place.name`"#]]
     );
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_error_type_detached() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "boolean_s_parse": "fals"
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     let value = c.get::<Value>("boolean_s_parse").unwrap();
     let res = value.try_deserialize::<bool>();
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        "invalid type: string \"fals\", expected a boolean".to_owned()
+        str![[r#"invalid type: string "fals", expected a boolean"#]]
     );
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_error_type_get_bool() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "boolean_s_parse": "fals"
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     let res = c.get_bool("boolean_s_parse");
 
-    let path: PathBuf = ["tests", "Settings.toml"].iter().collect();
-
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!(
-            "invalid type: string \"fals\", expected a boolean for key `boolean_s_parse` in {}",
-            path.display()
-        )
+        str![[r#"invalid type: string "fals", expected a boolean for key `boolean_s_parse`"#]]
     );
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_error_type_get_table() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "debug": true
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     let res = c.get_table("debug");
 
-    let path: PathBuf = ["tests", "Settings.toml"].iter().collect();
-
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!(
-            "invalid type: boolean `true`, expected a map for key `debug` in {}",
-            path.display()
-        )
+        str!["invalid type: boolean `true`, expected a map for key `debug`"]
     );
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_error_type_get_array() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "debug": true
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     let res = c.get_array("debug");
 
-    let path: PathBuf = ["tests", "Settings.toml"].iter().collect();
-
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!(
-            "invalid type: boolean `true`, expected an array for key `debug` in {}",
-            path.display()
-        )
+        str!["invalid type: boolean `true`, expected an array for key `debug`"]
     );
 }
 
@@ -146,17 +193,14 @@ fn test_error_enum_de() {
 
     let on_v: Value = "on".into();
     let on_d = on_v.try_deserialize::<Diode>();
-    assert_eq!(
+    assert_data_eq!(
         on_d.unwrap_err().to_string(),
-        "enum Diode does not have variant constructor on".to_owned()
+        str!["enum Diode does not have variant constructor on"]
     );
 
     let array_v: Value = vec![100, 100].into();
     let array_d = array_v.try_deserialize::<Diode>();
-    assert_eq!(
-        array_d.unwrap_err().to_string(),
-        "value of enum Diode should be represented by either string or table with exactly one key"
-    );
+    assert_data_eq!(array_d.unwrap_err().to_string(), str!["value of enum Diode should be represented by either string or table with exactly one key"]);
 
     let confused_v: Value = [
         ("Brightness".to_owned(), 100.into()),
@@ -167,13 +211,11 @@ fn test_error_enum_de() {
     .collect::<Map<String, Value>>()
     .into();
     let confused_d = confused_v.try_deserialize::<Diode>();
-    assert_eq!(
-        confused_d.unwrap_err().to_string(),
-        "value of enum Diode should be represented by either string or table with exactly one key"
-    );
+    assert_data_eq!(confused_d.unwrap_err().to_string(), str!["value of enum Diode should be represented by either string or table with exactly one key"]);
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn error_with_path() {
     #[derive(Debug, Deserialize)]
     struct Inner {
@@ -187,12 +229,15 @@ fn error_with_path() {
         inner: Inner,
     }
     const CFG: &str = r#"
-inner:
-    test: ABC
+{
+  "inner": {
+    "test": "ABC"
+  }
+}
 "#;
 
     let e = Config::builder()
-        .add_source(File::from_str(CFG, FileFormat::Yaml))
+        .add_source(File::from_str(CFG, FileFormat::Json))
         .build()
         .unwrap()
         .try_deserialize::<Outer>()
@@ -209,9 +254,10 @@ inner:
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_error_root_not_table() {
     match Config::builder()
-        .add_source(File::from_str(r#"false"#, FileFormat::Json5))
+        .add_source(File::from_str(r#"false"#, FileFormat::Json))
         .build()
     {
         Ok(_) => panic!("Should not merge if root is not a table"),

@@ -2,7 +2,6 @@
 extern crate serde_derive;
 
 pub mod async_builder;
-pub mod datetime;
 pub mod defaults;
 pub mod empty;
 pub mod env;
