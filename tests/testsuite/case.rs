@@ -33,6 +33,31 @@ fn respect_field_case() {
 
 #[test]
 #[cfg(feature = "json")]
+fn respect_renamed_field() {
+    #[derive(Deserialize, Debug)]
+    #[allow(dead_code)]
+    struct MyConfig {
+        #[serde(rename = "FooBar")]
+        foo_bar: String,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "FooBar": "Hello, world!"
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    c.try_deserialize::<MyConfig>().unwrap_err();
+}
+
+#[test]
+#[cfg(feature = "json")]
 fn respect_path_case() {
     let c = Config::builder()
         .add_source(File::from_str(
