@@ -17,9 +17,28 @@ impl FromStr for Expression {
     type Err = ConfigError;
 
     fn from_str(s: &str) -> Result<Self> {
-        parser::from_str(s).map_err(ConfigError::PathParse)
+        parser::from_str(s).map_err(|e| ConfigError::PathParse {
+            cause: Box::new(ParseError::new(e)),
+        })
     }
 }
+
+#[derive(Debug)]
+struct ParseError(String);
+
+impl ParseError {
+    fn new(inner: winnow::error::ContextError) -> Self {
+        Self(inner.to_string())
+    }
+}
+
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl std::error::Error for ParseError {}
 
 fn sindex_to_uindex(index: isize, len: usize) -> usize {
     if index >= 0 {
