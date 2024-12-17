@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use chrono::{DateTime, TimeZone, Utc};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
+use snapbox::{assert_data_eq, str};
 
 use config::{Config, File, FileFormat, Map, Value};
 
@@ -105,9 +106,9 @@ error false
         .build();
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        "simple key expect ':' at byte 22 line 4 column 1",
+        str!["simple key expect ':' at byte 22 line 4 column 1"]
     );
 }
 

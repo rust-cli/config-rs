@@ -1,3 +1,5 @@
+use snapbox::{assert_data_eq, str};
+
 use config::{Config, File, FileFormat};
 
 #[test]
@@ -21,9 +23,9 @@ fn test_file_required_not_found() {
         .build();
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        "configuration file \"tests/testsuite/file-nonexistent\" not found".to_owned()
+        str![[r#"configuration file "tests/testsuite/file-nonexistent" not found"#]]
     );
 }
 
@@ -47,9 +49,9 @@ fn test_file_auto_not_found() {
         .build();
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        "configuration file \"tests/testsuite/file-nonexistent\" not found".to_owned()
+        str![[r#"configuration file "tests/testsuite/file-nonexistent" not found"#]]
     );
 }
 

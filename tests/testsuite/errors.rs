@@ -1,5 +1,7 @@
-use config::{Config, ConfigError, File, FileFormat, Map, Value};
 use serde_derive::Deserialize;
+use snapbox::{assert_data_eq, str};
+
+use config::{Config, ConfigError, File, FileFormat, Map, Value};
 
 #[test]
 #[cfg(feature = "json")]
@@ -16,8 +18,10 @@ fn test_error_parse() {
         .build();
 
     assert!(res.is_err());
-    let err = res.unwrap_err();
-    assert_eq!(err.to_string(), "trailing comma at line 4 column 1");
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str!["trailing comma at line 4 column 1"]
+    );
 }
 
 #[test]
@@ -38,9 +42,9 @@ fn test_error_type() {
     let res = c.get::<bool>("boolean_s_parse");
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!("invalid type: string \"fals\", expected a boolean for key `boolean_s_parse`",)
+        str![[r#"invalid type: string "fals", expected a boolean for key `boolean_s_parse`"#]]
     );
 }
 
@@ -73,10 +77,10 @@ fn test_error_deser_whole() {
         .build()
         .unwrap();
 
-    let err = c.try_deserialize::<Output>().unwrap_err().to_string();
-    assert_eq!(
-        err,
-        "invalid type: string \"Torre di Pisa\", expected an integer for key `place.name`",
+    let res = c.try_deserialize::<Output>();
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str![[r#"invalid type: string "Torre di Pisa", expected an integer for key `place.name`"#]]
     );
 }
 
@@ -99,9 +103,9 @@ fn test_error_type_detached() {
     let res = value.try_deserialize::<bool>();
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        "invalid type: string \"fals\", expected a boolean".to_owned()
+        str![[r#"invalid type: string "fals", expected a boolean"#]]
     );
 }
 
@@ -123,9 +127,9 @@ fn test_error_type_get_bool() {
     let res = c.get_bool("boolean_s_parse");
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!("invalid type: string \"fals\", expected a boolean for key `boolean_s_parse`",)
+        str![[r#"invalid type: string "fals", expected a boolean for key `boolean_s_parse`"#]]
     );
 }
 
@@ -147,9 +151,9 @@ fn test_error_type_get_table() {
     let res = c.get_table("debug");
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!("invalid type: boolean `true`, expected a map for key `debug`",)
+        str!["invalid type: boolean `true`, expected a map for key `debug`"]
     );
 }
 
@@ -171,9 +175,9 @@ fn test_error_type_get_array() {
     let res = c.get_array("debug");
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!("invalid type: boolean `true`, expected an array for key `debug`",)
+        str!["invalid type: boolean `true`, expected an array for key `debug`"]
     );
 }
 
@@ -189,17 +193,14 @@ fn test_error_enum_de() {
 
     let on_v: Value = "on".into();
     let on_d = on_v.try_deserialize::<Diode>();
-    assert_eq!(
+    assert_data_eq!(
         on_d.unwrap_err().to_string(),
-        "enum Diode does not have variant constructor on".to_owned()
+        str!["enum Diode does not have variant constructor on"]
     );
 
     let array_v: Value = vec![100, 100].into();
     let array_d = array_v.try_deserialize::<Diode>();
-    assert_eq!(
-        array_d.unwrap_err().to_string(),
-        "value of enum Diode should be represented by either string or table with exactly one key"
-    );
+    assert_data_eq!(array_d.unwrap_err().to_string(), str!["value of enum Diode should be represented by either string or table with exactly one key"]);
 
     let confused_v: Value = [
         ("Brightness".to_owned(), 100.into()),
@@ -210,10 +211,7 @@ fn test_error_enum_de() {
     .collect::<Map<String, Value>>()
     .into();
     let confused_d = confused_v.try_deserialize::<Diode>();
-    assert_eq!(
-        confused_d.unwrap_err().to_string(),
-        "value of enum Diode should be represented by either string or table with exactly one key"
-    );
+    assert_data_eq!(confused_d.unwrap_err().to_string(), str!["value of enum Diode should be represented by either string or table with exactly one key"]);
 }
 
 #[test]

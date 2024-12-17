@@ -3,6 +3,7 @@
 use chrono::{DateTime, TimeZone, Utc};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
+use snapbox::{assert_data_eq, str};
 
 use config::{Config, File, FileFormat, Map, Value};
 
@@ -109,9 +110,16 @@ fn test_error_parse() {
         .build();
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!(" --> 3:7\n  |\n3 |   ok: true\n  |       ^---\n  |\n  = expected null",)
+        str![[r#"
+ --> 3:7
+  |
+3 |   ok: true
+  |       ^---
+  |
+  = expected null
+"#]]
     );
 }
 

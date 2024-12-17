@@ -1,8 +1,10 @@
 use std::collections::HashSet;
 
-use config::{Config, File, FileFormat, Map, Value};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
+use snapbox::{assert_data_eq, str};
+
+use config::{Config, File, FileFormat, Map, Value};
 
 #[test]
 #[cfg(feature = "json")]
@@ -14,9 +16,9 @@ fn test_not_found() {
     let res = c.get::<bool>("not_found");
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        "configuration property \"not_found\" not found".to_owned()
+        str![[r#"configuration property "not_found" not found"#]]
     );
 }
 

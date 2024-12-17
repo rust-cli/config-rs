@@ -2,6 +2,7 @@
 
 use chrono::{DateTime, TimeZone, Utc};
 use serde_derive::Deserialize;
+use snapbox::{assert_data_eq, str};
 
 use config::{Config, File, FileFormat};
 
@@ -72,9 +73,9 @@ error
         .build();
 
     assert!(res.is_err());
-    assert_eq!(
+    assert_data_eq!(
         res.unwrap_err().to_string(),
-        format!(r#"4:1 expecting "[Some('='), Some(':')]" but found EOF."#,)
+        str![[r#"4:1 expecting "[Some('='), Some(':')]" but found EOF."#]]
     );
 }
 
