@@ -1,39 +1,16 @@
-#![cfg(feature = "toml")]
-
 use std::collections::HashSet;
 
 use config::{Config, File, FileFormat, Map, Value};
 use float_cmp::ApproxEqUlps;
 use serde_derive::Deserialize;
 
-#[derive(Debug, Deserialize)]
-struct Place {
-    name: String,
-    longitude: f64,
-    latitude: f64,
-    favorite: bool,
-    telephone: Option<String>,
-    reviews: u64,
-    rating: Option<f32>,
-}
-
-#[derive(Debug, Deserialize)]
-struct Settings {
-    debug: f64,
-    production: Option<String>,
-    place: Place,
-}
-
-fn make() -> Config {
-    Config::builder()
-        .add_source(File::new("tests/Settings", FileFormat::Toml))
-        .build()
-        .unwrap()
-}
-
 #[test]
+#[cfg(feature = "json")]
 fn test_not_found() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str("{}", FileFormat::Json))
+        .build()
+        .unwrap();
     let res = c.get::<bool>("not_found");
 
     assert!(res.is_err());
@@ -44,16 +21,42 @@ fn test_not_found() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_scalar() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+    "debug": true,
+    "production": false
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     assert_eq!(c.get("debug").ok(), Some(true));
     assert_eq!(c.get("production").ok(), Some(false));
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_scalar_type_loose() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+    "debug": true,
+    "debug_s": "true",
+    "production": false,
+    "production_s": "false"
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     assert_eq!(c.get("debug").ok(), Some(true));
     assert_eq!(c.get("debug").ok(), Some("true".to_owned()));
@@ -77,8 +80,24 @@ fn test_scalar_type_loose() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_get_scalar_path() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "place": {
+    "favorite": false,
+    "creator": {
+      "name": "John Smith"
+    }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     assert_eq!(c.get("place.favorite").ok(), Some(false));
     assert_eq!(
@@ -88,8 +107,23 @@ fn test_get_scalar_path() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_get_scalar_path_subscript() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "arr": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "items": [
+    { "name": "1" },
+    { "name": "2" }
+  ]
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     assert_eq!(c.get("arr[2]").ok(), Some(3));
     assert_eq!(c.get("items[0].name").ok(), Some("1".to_owned()));
@@ -99,8 +133,33 @@ fn test_get_scalar_path_subscript() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_map() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "place": {
+    "number": 1,
+    "name": "Torre di Pisa",
+    "longitude": 43.7224985,
+    "latitude": 10.3970522,
+    "favorite": false,
+    "reviews": 3866,
+    "rating": 4.5,
+    "creator": {
+      "name": "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost"
+    }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
     let m: Map<String, Value> = c.get("place").unwrap();
 
     assert_eq!(m.len(), 8);
@@ -112,8 +171,33 @@ fn test_map() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_map_str() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "place": {
+    "number": 1,
+    "name": "Torre di Pisa",
+    "longitude": 43.7224985,
+    "latitude": 10.3970522,
+    "favorite": false,
+    "reviews": 3866,
+    "rating": 4.5,
+    "creator": {
+      "name": "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost"
+    }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
     let m: Map<String, String> = c.get("place.creator").unwrap();
 
     if cfg!(feature = "preserve_order") {
@@ -132,13 +216,38 @@ fn test_map_str() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_map_struct() {
     #[derive(Debug, Deserialize)]
     struct Settings {
         place: Map<String, Value>,
     }
 
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "place": {
+    "number": 1,
+    "name": "Torre di Pisa",
+    "longitude": 43.7224985,
+    "latitude": 10.3970522,
+    "favorite": false,
+    "reviews": 3866,
+    "rating": 4.5,
+    "creator": {
+      "name": "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost"
+    }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
     let s: Settings = c.try_deserialize().unwrap();
 
     assert_eq!(s.place.len(), 8);
@@ -150,8 +259,52 @@ fn test_map_struct() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_file_struct() {
-    let c = make();
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        debug: f64,
+        production: Option<String>,
+        place: Place,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct Place {
+        name: String,
+        longitude: f64,
+        latitude: f64,
+        favorite: bool,
+        telephone: Option<String>,
+        reviews: u64,
+        rating: Option<f32>,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "debug": true,
+  "production": false,
+  "place": {
+    "number": 1,
+    "name": "Torre di Pisa",
+    "longitude": 43.7224985,
+    "latitude": 10.3970522,
+    "favorite": false,
+    "reviews": 3866,
+    "rating": 4.5,
+    "creator": {
+      "name": "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost"
+    }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     // Deserialize the entire file as single struct
     let s: Settings = c.try_deserialize().unwrap();
@@ -168,8 +321,43 @@ fn test_file_struct() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_scalar_struct() {
-    let c = make();
+    #[derive(Debug, Deserialize)]
+    struct Place {
+        name: String,
+        longitude: f64,
+        latitude: f64,
+        favorite: bool,
+        telephone: Option<String>,
+        reviews: u64,
+        rating: Option<f32>,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "place": {
+    "number": 1,
+    "name": "Torre di Pisa",
+    "longitude": 43.7224985,
+    "latitude": 10.3970522,
+    "favorite": false,
+    "reviews": 3866,
+    "rating": 4.5,
+    "creator": {
+      "name": "John Smith",
+      "username": "jsmith",
+      "email": "jsmith@localhost"
+    }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
     // Deserialize a scalar struct that has lots of different
     // data types
@@ -185,8 +373,20 @@ fn test_scalar_struct() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_array_scalar() {
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "arr": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
     let arr: Vec<i64> = c.get("arr").unwrap();
 
     assert_eq!(arr.len(), 10);
@@ -194,6 +394,7 @@ fn test_array_scalar() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_struct_array() {
     #[derive(Debug, Deserialize)]
     struct Settings {
@@ -201,7 +402,18 @@ fn test_struct_array() {
         elements: Vec<String>,
     }
 
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "arr": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
     let s: Settings = c.try_deserialize().unwrap();
 
     assert_eq!(s.elements.len(), 10);
@@ -209,21 +421,47 @@ fn test_struct_array() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_enum() {
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        diodes: Map<String, Diode>,
+    }
+
     #[derive(Debug, Deserialize, PartialEq, Eq)]
     #[serde(rename_all = "lowercase")]
     enum Diode {
         Off,
         Brightness(i32),
         Blinking(i32, i32),
-        Pattern { name: String, inifinite: bool },
+        Pattern { name: String, infinite: bool },
     }
-    #[derive(Debug, Deserialize)]
-    struct Settings {
-        diodes: Map<String, Diode>,
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "diodes": {
+    "green": "off",
+    "red": {
+      "brightness": 100
+    },
+    "blue": {
+      "blinking": [300, 700]
+    },
+    "white": {
+      "pattern": {
+        "name": "christmas",
+        "infinite": true
+      }
     }
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
-    let c = make();
     let s: Settings = c.try_deserialize().unwrap();
 
     assert_eq!(s.diodes["green"], Diode::Off);
@@ -233,13 +471,21 @@ fn test_enum() {
         s.diodes["white"],
         Diode::Pattern {
             name: "christmas".into(),
-            inifinite: true,
+            infinite: true,
         }
     );
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_enum_key() {
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        proton: Map<Quark, usize>,
+        // Just to make sure that set keys work too.
+        quarks: HashSet<Quark>,
+    }
+
     #[derive(Debug, Deserialize, PartialEq, Eq, Hash)]
     #[serde(rename_all = "lowercase")]
     enum Quark {
@@ -251,14 +497,22 @@ fn test_enum_key() {
         Top,
     }
 
-    #[derive(Debug, Deserialize)]
-    struct Settings {
-        proton: Map<Quark, usize>,
-        // Just to make sure that set keys work too.
-        quarks: HashSet<Quark>,
-    }
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "quarks": ["up", "down", "strange", "charm", "bottom", "top"],
+  "proton": {
+    "up": 2,
+    "down": 1
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
 
-    let c = make();
     let s: Settings = c.try_deserialize().unwrap();
 
     assert_eq!(s.proton[&Quark::Up], 2);
@@ -266,13 +520,31 @@ fn test_enum_key() {
 }
 
 #[test]
+#[cfg(feature = "json")]
 fn test_int_key() {
     #[derive(Debug, Deserialize, PartialEq, Eq)]
     struct Settings {
         divisors: Map<u32, u32>,
     }
 
-    let c = make();
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "quarks": ["up", "down", "strange", "charm", "bottom", "top"],
+  "divisors": {
+    "1": 1,
+    "2": 2,
+    "4": 3,
+    "5": 2
+  }
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
     let s: Settings = c.try_deserialize().unwrap();
     assert_eq!(s.divisors[&4], 3);
     assert_eq!(s.divisors.len(), 4);
