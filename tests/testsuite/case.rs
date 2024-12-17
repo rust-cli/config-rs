@@ -74,5 +74,5 @@ fn respect_path_case() {
         .build()
         .unwrap();
 
-    c.get_string("Student[0].Name").unwrap_err();
+    c.get_string("Student[0].Name").unwrap();
 }
