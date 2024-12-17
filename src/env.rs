@@ -91,11 +91,6 @@ pub struct Environment {
 }
 
 impl Environment {
-    #[deprecated(since = "0.12.0", note = "please use 'Environment::default' instead")]
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     /// Optional prefix that will limit access to the environment to only keys that
     /// begin with the defined prefix.
     ///
