@@ -60,10 +60,10 @@ fn abs_index(index: isize, len: usize) -> Result<usize, usize> {
 impl Expression {
     pub(crate) fn get(self, root: &Value) -> Option<&Value> {
         match self {
-            Self::Identifier(id) => {
+            Self::Identifier(key) => {
                 match root.kind {
                     // `x` access on a table is equivalent to: map[x]
-                    ValueKind::Table(ref map) => map.get(&id),
+                    ValueKind::Table(ref map) => map.get(&key),
 
                     // all other variants return None
                     _ => None,
@@ -103,13 +103,13 @@ impl Expression {
 
     pub(crate) fn get_mut_forcibly<'a>(&self, root: &'a mut Value) -> &'a mut Value {
         match *self {
-            Self::Identifier(ref id) => {
+            Self::Identifier(ref key) => {
                 if !matches!(root.kind, ValueKind::Table(_)) {
                     *root = Map::<String, Value>::new().into();
                 }
 
                 if let ValueKind::Table(ref mut map) = root.kind {
-                    map.entry(id.clone())
+                    map.entry(key.clone())
                         .or_insert_with(|| Value::new(None, ValueKind::Nil))
                 } else {
                     unreachable!()
