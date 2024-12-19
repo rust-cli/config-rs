@@ -63,6 +63,7 @@ fn test_set_scalar_path() {
 
 #[test]
 #[cfg(feature = "json")]
+#[should_panic]
 fn test_set_arr_path() {
     let config = Config::builder()
         .set_override("present[0].name", "Ivan")
@@ -78,6 +79,10 @@ fn test_set_arr_path() {
         .set_override("reverse[-1]", "Bob")
         .unwrap()
         .set_override("reverse[-2]", "Alice")
+        .unwrap()
+        .set_override("empty[-1]", "Bob")
+        .unwrap()
+        .set_override("empty[-2]", "Alice")
         .unwrap()
         .add_source(File::from_str(
             r#"
@@ -97,7 +102,8 @@ fn test_set_arr_path() {
     {
       "name": "l2"
     }
-  ]
+  ],
+  "empty": []
 }
 "#,
             FileFormat::Json,
@@ -115,6 +121,8 @@ fn test_set_arr_path() {
     assert_eq!(config.get("present[2]").ok(), Some("George".to_owned()));
     assert_eq!(config.get("reverse[1]").ok(), Some("Bob".to_owned()));
     assert_eq!(config.get("reverse[0]").ok(), Some("Alice".to_owned()));
+    assert_eq!(config.get("empty[1]").ok(), Some("Bob".to_owned()));
+    assert_eq!(config.get("empty[0]").ok(), Some("Alice".to_owned()));
 }
 
 #[test]
