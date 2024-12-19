@@ -17,6 +17,7 @@ use winnow::token::any;
 use winnow::token::take_while;
 
 use crate::path::Expression;
+use crate::path::Postfix;
 
 pub(crate) fn from_str(input: &str) -> Result<Expression, ParseError<&str, ContextError>> {
     path.parse(input)
@@ -24,33 +25,22 @@ pub(crate) fn from_str(input: &str) -> Result<Expression, ParseError<&str, Conte
 
 fn path(i: &mut &str) -> PResult<Expression> {
     let root = ident.parse_next(i)?;
-    let expr = repeat(0.., postfix)
-        .fold(
-            || root.clone(),
-            |prev, cur| match cur {
-                Child::Key(k) => Expression::Child(Box::new(prev), k),
-                Child::Index(k) => Expression::Subscript(Box::new(prev), k),
-            },
-        )
-        .parse_next(i)?;
+    let postfix = repeat(0.., postfix).parse_next(i)?;
+    let expr = Expression { root, postfix };
     Ok(expr)
 }
 
-fn ident(i: &mut &str) -> PResult<Expression> {
-    raw_ident.map(Expression::Identifier).parse_next(i)
-}
-
-fn postfix(i: &mut &str) -> PResult<Child> {
+fn postfix(i: &mut &str) -> PResult<Postfix> {
     dispatch! {any;
         '[' => cut_err(
             seq!(
-                integer.map(Child::Index),
+                integer.map(Postfix::Index),
                 _: ']'.context(StrContext::Expected(StrContextValue::CharLiteral(']'))),
             )
                 .map(|(i,)| i)
                 .context(StrContext::Label("subscript"))
         ),
-        '.' => cut_err(raw_ident.map(Child::Key)),
+        '.' => cut_err(ident.map(Postfix::Key)),
         _ => cut_err(
             fail
                 .context(StrContext::Label("postfix"))
@@ -61,14 +51,9 @@ fn postfix(i: &mut &str) -> PResult<Child> {
     .parse_next(i)
 }
 
-enum Child {
-    Key(String),
-    Index(isize),
-}
-
-fn raw_ident(i: &mut &str) -> PResult<String> {
+fn ident(i: &mut &str) -> PResult<String> {
     take_while(1.., ('a'..='z', 'A'..='Z', '0'..='9', '_', '-'))
-        .map(ToString::to_string)
+        .map(ToOwned::to_owned)
         .context(StrContext::Label("identifier"))
         .context(StrContext::Expected(StrContextValue::Description(
             "ASCII alphanumeric",
@@ -93,53 +78,115 @@ fn integer(i: &mut &str) -> PResult<isize> {
 
 #[cfg(test)]
 mod test {
+    use snapbox::prelude::*;
     use snapbox::{assert_data_eq, str};
 
-    use super::Expression::*;
     use super::*;
 
     #[test]
     fn test_id() {
         let parsed: Expression = from_str("abcd").unwrap();
-        assert_eq!(parsed, Identifier("abcd".into()));
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Expression {
+    root: "abcd",
+    postfix: [],
+}
+
+"#]]
+        );
     }
 
     #[test]
     fn test_id_dash() {
         let parsed: Expression = from_str("abcd-efgh").unwrap();
-        assert_eq!(parsed, Identifier("abcd-efgh".into()));
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Expression {
+    root: "abcd-efgh",
+    postfix: [],
+}
+
+"#]]
+        );
     }
 
     #[test]
     fn test_child() {
         let parsed: Expression = from_str("abcd.efgh").unwrap();
-        let expected = Child(Box::new(Identifier("abcd".into())), "efgh".into());
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Expression {
+    root: "abcd",
+    postfix: [
+        Key(
+            "efgh",
+        ),
+    ],
+}
 
-        assert_eq!(parsed, expected);
-
-        let parsed: Expression = from_str("abcd.efgh.ijkl").unwrap();
-        let expected = Child(
-            Box::new(Child(Box::new(Identifier("abcd".into())), "efgh".into())),
-            "ijkl".into(),
+"#]]
         );
 
-        assert_eq!(parsed, expected);
+        let parsed: Expression = from_str("abcd.efgh.ijkl").unwrap();
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Expression {
+    root: "abcd",
+    postfix: [
+        Key(
+            "efgh",
+        ),
+        Key(
+            "ijkl",
+        ),
+    ],
+}
+
+"#]]
+        );
     }
 
     #[test]
     fn test_subscript() {
         let parsed: Expression = from_str("abcd[12]").unwrap();
-        let expected = Subscript(Box::new(Identifier("abcd".into())), 12);
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Expression {
+    root: "abcd",
+    postfix: [
+        Index(
+            12,
+        ),
+    ],
+}
 
-        assert_eq!(parsed, expected);
+"#]]
+        );
     }
 
     #[test]
     fn test_subscript_neg() {
         let parsed: Expression = from_str("abcd[-1]").unwrap();
-        let expected = Subscript(Box::new(Identifier("abcd".into())), -1);
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Expression {
+    root: "abcd",
+    postfix: [
+        Index(
+            -1,
+        ),
+    ],
+}
 
-        assert_eq!(parsed, expected);
+"#]]
+        );
     }
 
     #[test]
