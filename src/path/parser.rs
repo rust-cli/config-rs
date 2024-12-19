@@ -93,53 +93,105 @@ fn integer(i: &mut &str) -> PResult<isize> {
 
 #[cfg(test)]
 mod test {
+    use snapbox::prelude::*;
     use snapbox::{assert_data_eq, str};
 
-    use super::Expression::*;
     use super::*;
 
     #[test]
     fn test_id() {
         let parsed: Expression = from_str("abcd").unwrap();
-        assert_eq!(parsed, Identifier("abcd".into()));
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Identifier(
+    "abcd",
+)
+
+"#]]
+        );
     }
 
     #[test]
     fn test_id_dash() {
         let parsed: Expression = from_str("abcd-efgh").unwrap();
-        assert_eq!(parsed, Identifier("abcd-efgh".into()));
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Identifier(
+    "abcd-efgh",
+)
+
+"#]]
+        );
     }
 
     #[test]
     fn test_child() {
         let parsed: Expression = from_str("abcd.efgh").unwrap();
-        let expected = Child(Box::new(Identifier("abcd".into())), "efgh".into());
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Child(
+    Identifier(
+        "abcd",
+    ),
+    "efgh",
+)
 
-        assert_eq!(parsed, expected);
-
-        let parsed: Expression = from_str("abcd.efgh.ijkl").unwrap();
-        let expected = Child(
-            Box::new(Child(Box::new(Identifier("abcd".into())), "efgh".into())),
-            "ijkl".into(),
+"#]]
         );
 
-        assert_eq!(parsed, expected);
+        let parsed: Expression = from_str("abcd.efgh.ijkl").unwrap();
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Child(
+    Child(
+        Identifier(
+            "abcd",
+        ),
+        "efgh",
+    ),
+    "ijkl",
+)
+
+"#]]
+        );
     }
 
     #[test]
     fn test_subscript() {
         let parsed: Expression = from_str("abcd[12]").unwrap();
-        let expected = Subscript(Box::new(Identifier("abcd".into())), 12);
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Subscript(
+    Identifier(
+        "abcd",
+    ),
+    12,
+)
 
-        assert_eq!(parsed, expected);
+"#]]
+        );
     }
 
     #[test]
     fn test_subscript_neg() {
         let parsed: Expression = from_str("abcd[-1]").unwrap();
-        let expected = Subscript(Box::new(Identifier("abcd".into())), -1);
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Subscript(
+    Identifier(
+        "abcd",
+    ),
+    -1,
+)
 
-        assert_eq!(parsed, expected);
+"#]]
+        );
     }
 
     #[test]
