@@ -75,6 +75,10 @@ fn test_set_arr_path() {
         .unwrap()
         .set_override("present[2]", "George")
         .unwrap()
+        .set_override("reverse[-1]", "Bob")
+        .unwrap()
+        .set_override("reverse[-2]", "Alice")
+        .unwrap()
         .add_source(File::from_str(
             r#"
 {
@@ -84,6 +88,14 @@ fn test_set_arr_path() {
     },
     {
       "name": "2"
+    }
+  ],
+  "reverse": [
+    {
+      "name": "l1"
+    },
+    {
+      "name": "l2"
     }
   ]
 }
@@ -101,6 +113,8 @@ fn test_set_arr_path() {
     assert_eq!(config.get("absent[0].things[1].value").ok(), Some(42));
     assert_eq!(config.get("absent[1]").ok(), Some(0));
     assert_eq!(config.get("present[2]").ok(), Some("George".to_owned()));
+    assert_eq!(config.get("reverse[1]").ok(), Some("Bob".to_owned()));
+    assert_eq!(config.get("reverse[0]").ok(), Some("Alice".to_owned()));
 }
 
 #[test]
