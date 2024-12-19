@@ -82,12 +82,7 @@ impl Expression {
                 Some(value) => match value.kind {
                     ValueKind::Array(ref array) => {
                         let index = abs_index(index, array.len())?;
-
-                        if index >= array.len() {
-                            None
-                        } else {
-                            Some(&array[index])
-                        }
+                        array.get(index)
                     }
 
                     _ => None,
