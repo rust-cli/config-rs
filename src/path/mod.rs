@@ -145,13 +145,23 @@ impl Expression {
 
                     match value.kind {
                         ValueKind::Array(ref mut array) => {
-                            let index = abs_index(index, array.len()).ok()?;
+                            let uindex = match abs_index(index, array.len()) {
+                                Ok(uindex) => {
+                                    if uindex >= array.len() {
+                                        array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
+                                    }
+                                    uindex
+                                }
+                                Err(insertion) => {
+                                    array.splice(
+                                        0..0,
+                                        (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
+                                    );
+                                    0
+                                }
+                            };
 
-                            if index >= array.len() {
-                                array.resize(index + 1, Value::new(None, ValueKind::Nil));
-                            }
-
-                            Some(&mut array[index])
+                            Some(&mut array[uindex])
                         }
 
                         _ => None,
