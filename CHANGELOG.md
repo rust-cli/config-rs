@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- Don't crash on `get(arr[-1])` on empty arrays
+- Don't crash on `set_override(arr[-1])` on empty arrays
+
 ## [0.15.0] - 2024-12-17
 
 ### Compatibility
