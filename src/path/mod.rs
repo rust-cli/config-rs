@@ -208,6 +208,8 @@ impl Expression {
                             } else {
                                 map.insert(id.clone(), value);
                             }
+                        } else {
+                            unreachable!();
                         }
                     }
                 }
@@ -247,6 +249,8 @@ impl Expression {
                         };
 
                         array[uindex] = value;
+                    } else {
+                        unreachable!()
                     }
                 }
             }
