@@ -101,7 +101,7 @@ impl Expression {
         }
     }
 
-    pub(crate) fn get_mut_forcibly<'a>(&self, root: &'a mut Value) -> Option<&'a mut Value> {
+    pub(crate) fn get_mut_forcibly<'a>(&self, root: &'a mut Value) -> &'a mut Value {
         match *self {
             Self::Identifier(ref id) => {
                 if !matches!(root.kind, ValueKind::Table(_)) {
@@ -109,64 +109,55 @@ impl Expression {
                 }
 
                 if let ValueKind::Table(ref mut map) = root.kind {
-                    Some(
-                        map.entry(id.clone())
-                            .or_insert_with(|| Value::new(None, ValueKind::Nil)),
-                    )
+                    map.entry(id.clone())
+                        .or_insert_with(|| Value::new(None, ValueKind::Nil))
                 } else {
                     unreachable!()
                 }
             }
 
-            Self::Child(ref expr, ref key) => match expr.get_mut_forcibly(root) {
-                Some(value) => {
-                    if !matches!(value.kind, ValueKind::Table(_)) {
-                        *value = Map::<String, Value>::new().into();
-                    }
-
-                    if let ValueKind::Table(ref mut map) = value.kind {
-                        Some(
-                            map.entry(key.clone())
-                                .or_insert_with(|| Value::new(None, ValueKind::Nil)),
-                        )
-                    } else {
-                        unreachable!()
-                    }
+            Self::Child(ref expr, ref key) => {
+                let value = expr.get_mut_forcibly(root);
+                if !matches!(value.kind, ValueKind::Table(_)) {
+                    *value = Map::<String, Value>::new().into();
                 }
 
-                _ => None,
-            },
-
-            Self::Subscript(ref expr, index) => match expr.get_mut_forcibly(root) {
-                Some(value) => {
-                    if !matches!(value.kind, ValueKind::Array(_)) {
-                        *value = Vec::<Value>::new().into();
-                    }
-
-                    if let ValueKind::Array(ref mut array) = value.kind {
-                        let uindex = match abs_index(index, array.len()) {
-                            Ok(uindex) => {
-                                if uindex >= array.len() {
-                                    array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
-                                }
-                                uindex
-                            }
-                            Err(insertion) => {
-                                array.splice(
-                                    0..0,
-                                    (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
-                                );
-                                0
-                            }
-                        };
-
-                        Some(&mut array[uindex])
-                    } else {
-                        unreachable!()
-                    }
+                if let ValueKind::Table(ref mut map) = value.kind {
+                    map.entry(key.clone())
+                        .or_insert_with(|| Value::new(None, ValueKind::Nil))
+                } else {
+                    unreachable!()
                 }
-                _ => None,
-            },
+            }
+
+            Self::Subscript(ref expr, index) => {
+                let value = expr.get_mut_forcibly(root);
+                if !matches!(value.kind, ValueKind::Array(_)) {
+                    *value = Vec::<Value>::new().into();
+                }
+
+                if let ValueKind::Array(ref mut array) = value.kind {
+                    let uindex = match abs_index(index, array.len()) {
+                        Ok(uindex) => {
+                            if uindex >= array.len() {
+                                array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
+                            }
+                            uindex
+                        }
+                        Err(insertion) => {
+                            array.splice(
+                                0..0,
+                                (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
+                            );
+                            0
+                        }
+                    };
+
+                    &mut array[uindex]
+                } else {
+                    unreachable!()
+                }
+            }
         }
     }
 
@@ -210,42 +201,40 @@ impl Expression {
             }
 
             Self::Child(ref expr, ref key) => {
-                if let Some(parent) = expr.get_mut_forcibly(root) {
-                    if !matches!(parent.kind, ValueKind::Table(_)) {
-                        // Didn't find a table. Oh well. Make a table and do this anyway
-                        *parent = Map::<String, Value>::new().into();
-                    }
-                    Self::Identifier(key.clone()).set(parent, value);
+                let parent = expr.get_mut_forcibly(root);
+                if !matches!(parent.kind, ValueKind::Table(_)) {
+                    // Didn't find a table. Oh well. Make a table and do this anyway
+                    *parent = Map::<String, Value>::new().into();
                 }
+                Self::Identifier(key.clone()).set(parent, value);
             }
 
             Self::Subscript(ref expr, index) => {
-                if let Some(parent) = expr.get_mut_forcibly(root) {
-                    if !matches!(parent.kind, ValueKind::Array(_)) {
-                        *parent = Vec::<Value>::new().into();
-                    }
+                let parent = expr.get_mut_forcibly(root);
+                if !matches!(parent.kind, ValueKind::Array(_)) {
+                    *parent = Vec::<Value>::new().into();
+                }
 
-                    if let ValueKind::Array(ref mut array) = parent.kind {
-                        let uindex = match abs_index(index, array.len()) {
-                            Ok(uindex) => {
-                                if uindex >= array.len() {
-                                    array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
-                                }
-                                uindex
+                if let ValueKind::Array(ref mut array) = parent.kind {
+                    let uindex = match abs_index(index, array.len()) {
+                        Ok(uindex) => {
+                            if uindex >= array.len() {
+                                array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
                             }
-                            Err(insertion) => {
-                                array.splice(
-                                    0..0,
-                                    (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
-                                );
-                                0
-                            }
-                        };
+                            uindex
+                        }
+                        Err(insertion) => {
+                            array.splice(
+                                0..0,
+                                (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
+                            );
+                            0
+                        }
+                    };
 
-                        array[uindex] = value;
-                    } else {
-                        unreachable!()
-                    }
+                    array[uindex] = value;
+                } else {
+                    unreachable!()
                 }
             }
         }
