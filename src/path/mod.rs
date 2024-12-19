@@ -72,8 +72,8 @@ impl Expression {
 
             Self::Child(expr, key) => {
                 match expr.get(root) {
-                    Some(value) => {
-                        match value.kind {
+                    Some(child) => {
+                        match child.kind {
                             // Access on a table is identical to Identifier, it just forwards
                             ValueKind::Table(ref map) => map.get(&key),
 
@@ -87,7 +87,7 @@ impl Expression {
             }
 
             Self::Subscript(expr, index) => match expr.get(root) {
-                Some(value) => match value.kind {
+                Some(child) => match child.kind {
                     ValueKind::Array(ref array) => {
                         let index = abs_index(index, array.len()).ok()?;
                         array.get(index)
@@ -117,12 +117,12 @@ impl Expression {
             }
 
             Self::Child(ref expr, ref key) => {
-                let value = expr.get_mut_forcibly(root);
-                if !matches!(value.kind, ValueKind::Table(_)) {
-                    *value = Map::<String, Value>::new().into();
+                let child = expr.get_mut_forcibly(root);
+                if !matches!(child.kind, ValueKind::Table(_)) {
+                    *child = Map::<String, Value>::new().into();
                 }
 
-                if let ValueKind::Table(ref mut map) = value.kind {
+                if let ValueKind::Table(ref mut map) = child.kind {
                     map.entry(key.clone())
                         .or_insert_with(|| Value::new(None, ValueKind::Nil))
                 } else {
@@ -131,12 +131,12 @@ impl Expression {
             }
 
             Self::Subscript(ref expr, index) => {
-                let value = expr.get_mut_forcibly(root);
-                if !matches!(value.kind, ValueKind::Array(_)) {
-                    *value = Vec::<Value>::new().into();
+                let child = expr.get_mut_forcibly(root);
+                if !matches!(child.kind, ValueKind::Array(_)) {
+                    *child = Vec::<Value>::new().into();
                 }
 
-                if let ValueKind::Array(ref mut array) = value.kind {
+                if let ValueKind::Array(ref mut array) = child.kind {
                     let uindex = match abs_index(index, array.len()) {
                         Ok(uindex) => {
                             if uindex >= array.len() {
