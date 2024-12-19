@@ -162,77 +162,17 @@ impl Expression {
     }
 
     pub(crate) fn set(&self, root: &mut Value, value: Value) {
-        match *self {
-            Self::Identifier(ref id) => {
-                // Ensure that root is a table
-                if !matches!(root.kind, ValueKind::Table(_)) {
-                    *root = Map::<String, Value>::new().into();
-                }
-
-                if let ValueKind::Table(ref mut map) = root.kind {
-                    match value.kind {
-                        ValueKind::Table(ref incoming_map) => {
-                            // Pull out another table
-                            let target = map
-                                .entry(id.clone())
-                                .or_insert_with(|| Map::<String, Value>::new().into());
-
-                            // Continue the deep merge
-                            for (key, val) in incoming_map {
-                                Self::Identifier(key.clone()).set(target, val.clone());
-                            }
-                        }
-
-                        _ => {
-                            // Just do a simple set
-                            if let Some(existing) = map.get_mut(id) {
-                                *existing = value;
-                            } else {
-                                map.insert(id.clone(), value);
-                            }
-                        }
-                    }
-                } else {
-                    unreachable!();
+        let parent = self.get_mut_forcibly(root);
+        match value.kind {
+            ValueKind::Table(ref incoming_map) => {
+                // Continue the deep merge
+                for (key, val) in incoming_map {
+                    Self::root(key.clone()).set(parent, val.clone());
                 }
             }
 
-            Self::Child(ref expr, ref key) => {
-                let parent = expr.get_mut_forcibly(root);
-                if !matches!(parent.kind, ValueKind::Table(_)) {
-                    // Didn't find a table. Oh well. Make a table and do this anyway
-                    *parent = Map::<String, Value>::new().into();
-                }
-                Self::Identifier(key.clone()).set(parent, value);
-            }
-
-            Self::Subscript(ref expr, index) => {
-                let parent = expr.get_mut_forcibly(root);
-                if !matches!(parent.kind, ValueKind::Array(_)) {
-                    *parent = Vec::<Value>::new().into();
-                }
-
-                if let ValueKind::Array(ref mut array) = parent.kind {
-                    let uindex = match abs_index(index, array.len()) {
-                        Ok(uindex) => {
-                            if uindex >= array.len() {
-                                array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
-                            }
-                            uindex
-                        }
-                        Err(insertion) => {
-                            array.splice(
-                                0..0,
-                                (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
-                            );
-                            0
-                        }
-                    };
-
-                    array[uindex] = value;
-                } else {
-                    unreachable!()
-                }
+            _ => {
+                *parent = value;
             }
         }
     }
