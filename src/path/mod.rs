@@ -142,28 +142,26 @@ impl Expression {
                         *value = Vec::<Value>::new().into();
                     }
 
-                    match value.kind {
-                        ValueKind::Array(ref mut array) => {
-                            let uindex = match abs_index(index, array.len()) {
-                                Ok(uindex) => {
-                                    if uindex >= array.len() {
-                                        array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
-                                    }
-                                    uindex
+                    if let ValueKind::Array(ref mut array) = value.kind {
+                        let uindex = match abs_index(index, array.len()) {
+                            Ok(uindex) => {
+                                if uindex >= array.len() {
+                                    array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
                                 }
-                                Err(insertion) => {
-                                    array.splice(
-                                        0..0,
-                                        (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
-                                    );
-                                    0
-                                }
-                            };
+                                uindex
+                            }
+                            Err(insertion) => {
+                                array.splice(
+                                    0..0,
+                                    (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
+                                );
+                                0
+                            }
+                        };
 
-                            Some(&mut array[uindex])
-                        }
-
-                        _ => unreachable!(),
+                        Some(&mut array[uindex])
+                    } else {
+                        unreachable!()
                     }
                 }
                 _ => None,
