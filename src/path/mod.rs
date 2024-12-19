@@ -13,6 +13,12 @@ pub(crate) enum Expression {
     Subscript(Box<Self>, isize),
 }
 
+impl Expression {
+    pub(crate) fn root(root: String) -> Self {
+        Expression::Identifier(root)
+    }
+}
+
 impl FromStr for Expression {
     type Err = ConfigError;
 
