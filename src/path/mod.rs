@@ -40,11 +40,11 @@ impl std::fmt::Display for ParseError {
 
 impl std::error::Error for ParseError {}
 
-fn sindex_to_uindex(index: isize, len: usize) -> usize {
+fn sindex_to_uindex(index: isize, len: usize) -> Option<usize> {
     if index >= 0 {
-        index as usize
+        Some(index as usize)
     } else {
-        len - index.unsigned_abs()
+        len.checked_sub(index.unsigned_abs())
     }
 }
 
@@ -80,7 +80,7 @@ impl Expression {
             Self::Subscript(expr, index) => match expr.get(root) {
                 Some(value) => match value.kind {
                     ValueKind::Array(ref array) => {
-                        let index = sindex_to_uindex(index, array.len());
+                        let index = sindex_to_uindex(index, array.len())?;
 
                         if index >= array.len() {
                             None
@@ -141,7 +141,7 @@ impl Expression {
 
                     match value.kind {
                         ValueKind::Array(ref mut array) => {
-                            let index = sindex_to_uindex(index, array.len());
+                            let index = sindex_to_uindex(index, array.len())?;
 
                             if index >= array.len() {
                                 array.resize(index + 1, Value::new(None, ValueKind::Nil));
@@ -216,7 +216,7 @@ impl Expression {
                     }
 
                     if let ValueKind::Array(ref mut array) = parent.kind {
-                        let uindex = sindex_to_uindex(index, array.len());
+                        let uindex = sindex_to_uindex(index, array.len()).unwrap();
                         if uindex >= array.len() {
                             array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
                         }
