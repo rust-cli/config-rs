@@ -17,6 +17,7 @@ use winnow::token::any;
 use winnow::token::take_while;
 
 use crate::path::Expression;
+use crate::path::Postfix;
 
 pub(crate) fn from_str(input: &str) -> Result<Expression, ParseError<&str, ContextError>> {
     path.parse(input)
@@ -24,33 +25,22 @@ pub(crate) fn from_str(input: &str) -> Result<Expression, ParseError<&str, Conte
 
 fn path(i: &mut &str) -> PResult<Expression> {
     let root = ident.parse_next(i)?;
-    let expr = repeat(0.., postfix)
-        .fold(
-            || root.clone(),
-            |prev, cur| match cur {
-                Child::Key(k) => Expression::Child(Box::new(prev), k),
-                Child::Index(k) => Expression::Subscript(Box::new(prev), k),
-            },
-        )
-        .parse_next(i)?;
+    let postfix = repeat(0.., postfix).parse_next(i)?;
+    let expr = Expression { root, postfix };
     Ok(expr)
 }
 
-fn ident(i: &mut &str) -> PResult<Expression> {
-    raw_ident.map(Expression::Identifier).parse_next(i)
-}
-
-fn postfix(i: &mut &str) -> PResult<Child> {
+fn postfix(i: &mut &str) -> PResult<Postfix> {
     dispatch! {any;
         '[' => cut_err(
             seq!(
-                integer.map(Child::Index),
+                integer.map(Postfix::Index),
                 _: ']'.context(StrContext::Expected(StrContextValue::CharLiteral(']'))),
             )
                 .map(|(i,)| i)
                 .context(StrContext::Label("subscript"))
         ),
-        '.' => cut_err(raw_ident.map(Child::Key)),
+        '.' => cut_err(ident.map(Postfix::Key)),
         _ => cut_err(
             fail
                 .context(StrContext::Label("postfix"))
@@ -61,14 +51,9 @@ fn postfix(i: &mut &str) -> PResult<Child> {
     .parse_next(i)
 }
 
-enum Child {
-    Key(String),
-    Index(isize),
-}
-
-fn raw_ident(i: &mut &str) -> PResult<String> {
+fn ident(i: &mut &str) -> PResult<String> {
     take_while(1.., ('a'..='z', 'A'..='Z', '0'..='9', '_', '-'))
-        .map(ToString::to_string)
+        .map(ToOwned::to_owned)
         .context(StrContext::Label("identifier"))
         .context(StrContext::Expected(StrContextValue::Description(
             "ASCII alphanumeric",
@@ -104,9 +89,10 @@ mod test {
         assert_data_eq!(
             parsed.to_debug(),
             str![[r#"
-Identifier(
-    "abcd",
-)
+Expression {
+    root: "abcd",
+    postfix: [],
+}
 
 "#]]
         );
@@ -118,9 +104,10 @@ Identifier(
         assert_data_eq!(
             parsed.to_debug(),
             str![[r#"
-Identifier(
-    "abcd-efgh",
-)
+Expression {
+    root: "abcd-efgh",
+    postfix: [],
+}
 
 "#]]
         );
@@ -132,12 +119,14 @@ Identifier(
         assert_data_eq!(
             parsed.to_debug(),
             str![[r#"
-Child(
-    Identifier(
-        "abcd",
-    ),
-    "efgh",
-)
+Expression {
+    root: "abcd",
+    postfix: [
+        Key(
+            "efgh",
+        ),
+    ],
+}
 
 "#]]
         );
@@ -146,15 +135,17 @@ Child(
         assert_data_eq!(
             parsed.to_debug(),
             str![[r#"
-Child(
-    Child(
-        Identifier(
-            "abcd",
+Expression {
+    root: "abcd",
+    postfix: [
+        Key(
+            "efgh",
         ),
-        "efgh",
-    ),
-    "ijkl",
-)
+        Key(
+            "ijkl",
+        ),
+    ],
+}
 
 "#]]
         );
@@ -166,12 +157,14 @@ Child(
         assert_data_eq!(
             parsed.to_debug(),
             str![[r#"
-Subscript(
-    Identifier(
-        "abcd",
-    ),
-    12,
-)
+Expression {
+    root: "abcd",
+    postfix: [
+        Index(
+            12,
+        ),
+    ],
+}
 
 "#]]
         );
@@ -183,12 +176,14 @@ Subscript(
         assert_data_eq!(
             parsed.to_debug(),
             str![[r#"
-Subscript(
-    Identifier(
-        "abcd",
-    ),
-    -1,
-)
+Expression {
+    root: "abcd",
+    postfix: [
+        Index(
+            -1,
+        ),
+    ],
+}
 
 "#]]
         );

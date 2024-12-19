@@ -7,15 +7,17 @@ use crate::value::{Value, ValueKind};
 mod parser;
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
-pub(crate) enum Expression {
-    Identifier(String),
-    Child(Box<Self>, String),
-    Subscript(Box<Self>, isize),
+pub(crate) struct Expression {
+    root: String,
+    postfix: Vec<Postfix>,
 }
 
 impl Expression {
     pub(crate) fn root(root: String) -> Self {
-        Expression::Identifier(root)
+        Self {
+            root,
+            postfix: Vec::new(),
+        }
     }
 }
 
@@ -27,6 +29,12 @@ impl FromStr for Expression {
             cause: Box::new(ParseError::new(e)),
         })
     }
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Hash)]
+enum Postfix {
+    Key(String),
+    Index(isize),
 }
 
 #[derive(Debug)]
@@ -59,105 +67,83 @@ fn abs_index(index: isize, len: usize) -> Result<usize, usize> {
 
 impl Expression {
     pub(crate) fn get(self, root: &Value) -> Option<&Value> {
-        match self {
-            Self::Identifier(key) => {
-                match root.kind {
-                    // `x` access on a table is equivalent to: map[x]
-                    ValueKind::Table(ref map) => map.get(&key),
-
-                    // all other variants return None
-                    _ => None,
+        let ValueKind::Table(map) = &root.kind else {
+            return None;
+        };
+        let mut child = map.get(&self.root)?;
+        for postfix in &self.postfix {
+            match postfix {
+                Postfix::Key(key) => {
+                    let ValueKind::Table(map) = &child.kind else {
+                        return None;
+                    };
+                    child = map.get(key)?;
+                }
+                Postfix::Index(rel_index) => {
+                    let ValueKind::Array(array) = &child.kind else {
+                        return None;
+                    };
+                    let index = abs_index(*rel_index, array.len()).ok()?;
+                    child = array.get(index)?;
                 }
             }
-
-            Self::Child(expr, key) => {
-                match expr.get(root) {
-                    Some(child) => {
-                        match child.kind {
-                            // Access on a table is identical to Identifier, it just forwards
-                            ValueKind::Table(ref map) => map.get(&key),
-
-                            // all other variants return None
-                            _ => None,
-                        }
-                    }
-
-                    _ => None,
-                }
-            }
-
-            Self::Subscript(expr, index) => match expr.get(root) {
-                Some(child) => match child.kind {
-                    ValueKind::Array(ref array) => {
-                        let index = abs_index(index, array.len()).ok()?;
-                        array.get(index)
-                    }
-
-                    _ => None,
-                },
-
-                _ => None,
-            },
         }
+        Some(child)
     }
 
     pub(crate) fn get_mut_forcibly<'a>(&self, root: &'a mut Value) -> &'a mut Value {
-        match *self {
-            Self::Identifier(ref key) => {
-                if !matches!(root.kind, ValueKind::Table(_)) {
-                    *root = Map::<String, Value>::new().into();
+        if !matches!(root.kind, ValueKind::Table(_)) {
+            *root = Map::<String, Value>::new().into();
+        }
+        let ValueKind::Table(map) = &mut root.kind else {
+            unreachable!()
+        };
+        let mut child = map
+            .entry(self.root.clone())
+            .or_insert_with(|| Value::new(None, ValueKind::Nil));
+        for postfix in &self.postfix {
+            match postfix {
+                Postfix::Key(key) => {
+                    if !matches!(child.kind, ValueKind::Table(_)) {
+                        *child = Map::<String, Value>::new().into();
+                    }
+                    let ValueKind::Table(ref mut map) = child.kind else {
+                        unreachable!()
+                    };
+
+                    child = map
+                        .entry(key.clone())
+                        .or_insert_with(|| Value::new(None, ValueKind::Nil));
                 }
-                let ValueKind::Table(ref mut map) = root.kind else {
-                    unreachable!()
-                };
+                Postfix::Index(rel_index) => {
+                    if !matches!(child.kind, ValueKind::Array(_)) {
+                        *child = Vec::<Value>::new().into();
+                    }
+                    let ValueKind::Array(ref mut array) = child.kind else {
+                        unreachable!()
+                    };
 
-                map.entry(key.clone())
-                    .or_insert_with(|| Value::new(None, ValueKind::Nil))
-            }
-
-            Self::Child(ref expr, ref key) => {
-                let child = expr.get_mut_forcibly(root);
-
-                if !matches!(child.kind, ValueKind::Table(_)) {
-                    *child = Map::<String, Value>::new().into();
-                }
-                let ValueKind::Table(ref mut map) = child.kind else {
-                    unreachable!()
-                };
-
-                map.entry(key.clone())
-                    .or_insert_with(|| Value::new(None, ValueKind::Nil))
-            }
-
-            Self::Subscript(ref expr, index) => {
-                let child = expr.get_mut_forcibly(root);
-
-                if !matches!(child.kind, ValueKind::Array(_)) {
-                    *child = Vec::<Value>::new().into();
-                }
-                let ValueKind::Array(ref mut array) = child.kind else {
-                    unreachable!()
-                };
-
-                let uindex = match abs_index(index, array.len()) {
-                    Ok(uindex) => {
-                        if uindex >= array.len() {
-                            array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
+                    let uindex = match abs_index(*rel_index, array.len()) {
+                        Ok(uindex) => {
+                            if uindex >= array.len() {
+                                array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
+                            }
+                            uindex
                         }
-                        uindex
-                    }
-                    Err(insertion) => {
-                        array.splice(
-                            0..0,
-                            (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
-                        );
-                        0
-                    }
-                };
+                        Err(insertion) => {
+                            array.splice(
+                                0..0,
+                                (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
+                            );
+                            0
+                        }
+                    };
 
-                &mut array[uindex]
+                    child = &mut array[uindex];
+                }
             }
         }
+        child
     }
 
     pub(crate) fn set(&self, root: &mut Value, value: Value) {
