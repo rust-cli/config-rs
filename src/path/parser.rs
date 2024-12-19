@@ -117,4 +117,34 @@ mod test {
 
         assert_eq!(parsed, expected);
     }
+
+    #[test]
+    fn test_invalid_identifier() {
+        let err = from_str("!").unwrap_err();
+        assert_eq!("", err.to_string());
+    }
+
+    #[test]
+    fn test_invalid_child() {
+        let err = from_str("a..").unwrap_err();
+        assert_eq!("", err.to_string());
+    }
+
+    #[test]
+    fn test_invalid_subscript() {
+        let err = from_str("a[b]").unwrap_err();
+        assert_eq!("", err.to_string());
+    }
+
+    #[test]
+    fn test_incomplete_subscript() {
+        let err = from_str("a[0").unwrap_err();
+        assert_eq!("", err.to_string());
+    }
+
+    #[test]
+    fn test_invalid_postfix() {
+        let err = from_str("a!b").unwrap_err();
+        assert_eq!("", err.to_string());
+    }
 }
