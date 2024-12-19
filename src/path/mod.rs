@@ -138,9 +138,8 @@ impl Expression {
 
             Self::Subscript(ref expr, index) => match expr.get_mut_forcibly(root) {
                 Some(value) => {
-                    match value.kind {
-                        ValueKind::Array(_) => (),
-                        _ => *value = Vec::<Value>::new().into(),
+                    if !matches!(value.kind, ValueKind::Array(_)) {
+                        *value = Vec::<Value>::new().into();
                     }
 
                     match value.kind {
@@ -176,12 +175,8 @@ impl Expression {
         match *self {
             Self::Identifier(ref id) => {
                 // Ensure that root is a table
-                match root.kind {
-                    ValueKind::Table(_) => {}
-
-                    _ => {
-                        *root = Map::<String, Value>::new().into();
-                    }
+                if !matches!(root.kind, ValueKind::Table(_)) {
+                    *root = Map::<String, Value>::new().into();
                 }
 
                 match value.kind {
