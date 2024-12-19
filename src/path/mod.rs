@@ -114,22 +114,17 @@ impl Expression {
 
             Self::Child(ref expr, ref key) => match expr.get_mut_forcibly(root) {
                 Some(value) => {
+                    if !matches!(value.kind, ValueKind::Table(_)) {
+                        *value = Map::<String, Value>::new().into();
+                    }
+
                     if let ValueKind::Table(ref mut map) = value.kind {
                         Some(
                             map.entry(key.clone())
                                 .or_insert_with(|| Value::new(None, ValueKind::Nil)),
                         )
                     } else {
-                        *value = Map::<String, Value>::new().into();
-
-                        if let ValueKind::Table(ref mut map) = value.kind {
-                            Some(
-                                map.entry(key.clone())
-                                    .or_insert_with(|| Value::new(None, ValueKind::Nil)),
-                            )
-                        } else {
-                            unreachable!();
-                        }
+                        unreachable!()
                     }
                 }
 
