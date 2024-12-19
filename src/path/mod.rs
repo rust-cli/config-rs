@@ -103,14 +103,20 @@ impl Expression {
 
     pub(crate) fn get_mut_forcibly<'a>(&self, root: &'a mut Value) -> Option<&'a mut Value> {
         match *self {
-            Self::Identifier(ref id) => match root.kind {
-                ValueKind::Table(ref mut map) => Some(
-                    map.entry(id.clone())
-                        .or_insert_with(|| Value::new(None, ValueKind::Nil)),
-                ),
+            Self::Identifier(ref id) => {
+                if !matches!(root.kind, ValueKind::Table(_)) {
+                    *root = Map::<String, Value>::new().into();
+                }
 
-                _ => None,
-            },
+                if let ValueKind::Table(ref mut map) = root.kind {
+                    Some(
+                        map.entry(id.clone())
+                            .or_insert_with(|| Value::new(None, ValueKind::Nil)),
+                    )
+                } else {
+                    unreachable!()
+                }
+            }
 
             Self::Child(ref expr, ref key) => match expr.get_mut_forcibly(root) {
                 Some(value) => {
