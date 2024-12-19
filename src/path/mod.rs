@@ -164,7 +164,7 @@ impl Expression {
                             Some(&mut array[uindex])
                         }
 
-                        _ => None,
+                        _ => unreachable!(),
                     }
                 }
                 _ => None,
