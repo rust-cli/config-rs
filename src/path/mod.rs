@@ -40,7 +40,8 @@ impl std::fmt::Display for ParseError {
 
 impl std::error::Error for ParseError {}
 
-fn sindex_to_uindex(index: isize, len: usize) -> Option<usize> {
+/// Convert a relative index into an absolute index
+fn abs_index(index: isize, len: usize) -> Option<usize> {
     if index >= 0 {
         Some(index as usize)
     } else {
@@ -80,7 +81,7 @@ impl Expression {
             Self::Subscript(expr, index) => match expr.get(root) {
                 Some(value) => match value.kind {
                     ValueKind::Array(ref array) => {
-                        let index = sindex_to_uindex(index, array.len())?;
+                        let index = abs_index(index, array.len())?;
 
                         if index >= array.len() {
                             None
@@ -141,7 +142,7 @@ impl Expression {
 
                     match value.kind {
                         ValueKind::Array(ref mut array) => {
-                            let index = sindex_to_uindex(index, array.len())?;
+                            let index = abs_index(index, array.len())?;
 
                             if index >= array.len() {
                                 array.resize(index + 1, Value::new(None, ValueKind::Nil));
@@ -216,7 +217,7 @@ impl Expression {
                     }
 
                     if let ValueKind::Array(ref mut array) = parent.kind {
-                        let uindex = sindex_to_uindex(index, array.len()).unwrap();
+                        let uindex = abs_index(index, array.len()).unwrap();
                         if uindex >= array.len() {
                             array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
                         }
