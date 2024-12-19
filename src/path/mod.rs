@@ -169,34 +169,31 @@ impl Expression {
                     *root = Map::<String, Value>::new().into();
                 }
 
-                match value.kind {
-                    ValueKind::Table(ref incoming_map) => {
-                        // Pull out another table
-                        let target = if let ValueKind::Table(ref mut map) = root.kind {
-                            map.entry(id.clone())
-                                .or_insert_with(|| Map::<String, Value>::new().into())
-                        } else {
-                            unreachable!();
-                        };
+                if let ValueKind::Table(ref mut map) = root.kind {
+                    match value.kind {
+                        ValueKind::Table(ref incoming_map) => {
+                            // Pull out another table
+                            let target = map
+                                .entry(id.clone())
+                                .or_insert_with(|| Map::<String, Value>::new().into());
 
-                        // Continue the deep merge
-                        for (key, val) in incoming_map {
-                            Self::Identifier(key.clone()).set(target, val.clone());
+                            // Continue the deep merge
+                            for (key, val) in incoming_map {
+                                Self::Identifier(key.clone()).set(target, val.clone());
+                            }
                         }
-                    }
 
-                    _ => {
-                        if let ValueKind::Table(ref mut map) = root.kind {
+                        _ => {
                             // Just do a simple set
                             if let Some(existing) = map.get_mut(id) {
                                 *existing = value;
                             } else {
                                 map.insert(id.clone(), value);
                             }
-                        } else {
-                            unreachable!();
                         }
                     }
+                } else {
+                    unreachable!();
                 }
             }
 
