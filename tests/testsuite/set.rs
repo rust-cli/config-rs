@@ -63,7 +63,6 @@ fn test_set_scalar_path() {
 
 #[test]
 #[cfg(feature = "json")]
-#[should_panic]
 fn test_set_arr_path() {
     let config = Config::builder()
         .set_override("present[0].name", "Ivan")
