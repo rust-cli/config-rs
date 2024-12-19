@@ -65,27 +65,44 @@ fn test_set_scalar_path() {
 #[cfg(feature = "json")]
 fn test_set_arr_path() {
     let config = Config::builder()
-        .set_override("items[0].name", "Ivan")
+        .set_override("present[0].name", "Ivan")
         .unwrap()
-        .set_override("data[0].things[1].name", "foo")
+        .set_override("absent[0].things[1].name", "foo")
         .unwrap()
-        .set_override("data[0].things[1].value", 42)
+        .set_override("absent[0].things[1].value", 42)
         .unwrap()
-        .set_override("data[1]", 0)
+        .set_override("absent[1]", 0)
         .unwrap()
-        .set_override("items[2]", "George")
+        .set_override("present[2]", "George")
+        .unwrap()
+        .set_override("reverse[-1]", "Bob")
+        .unwrap()
+        .set_override("reverse[-2]", "Alice")
+        .unwrap()
+        .set_override("empty[-1]", "Bob")
+        .unwrap()
+        .set_override("empty[-2]", "Alice")
         .unwrap()
         .add_source(File::from_str(
             r#"
 {
-  "items": [
+  "present": [
     {
       "name": "1"
     },
     {
       "name": "2"
     }
-  ]
+  ],
+  "reverse": [
+    {
+      "name": "l1"
+    },
+    {
+      "name": "l2"
+    }
+  ],
+  "empty": []
 }
 "#,
             FileFormat::Json,
@@ -93,14 +110,18 @@ fn test_set_arr_path() {
         .build()
         .unwrap();
 
-    assert_eq!(config.get("items[0].name").ok(), Some("Ivan".to_owned()));
+    assert_eq!(config.get("present[0].name").ok(), Some("Ivan".to_owned()));
     assert_eq!(
-        config.get("data[0].things[1].name").ok(),
+        config.get("absent[0].things[1].name").ok(),
         Some("foo".to_owned())
     );
-    assert_eq!(config.get("data[0].things[1].value").ok(), Some(42));
-    assert_eq!(config.get("data[1]").ok(), Some(0));
-    assert_eq!(config.get("items[2]").ok(), Some("George".to_owned()));
+    assert_eq!(config.get("absent[0].things[1].value").ok(), Some(42));
+    assert_eq!(config.get("absent[1]").ok(), Some(0));
+    assert_eq!(config.get("present[2]").ok(), Some("George".to_owned()));
+    assert_eq!(config.get("reverse[1]").ok(), Some("Bob".to_owned()));
+    assert_eq!(config.get("reverse[0]").ok(), Some("Alice".to_owned()));
+    assert_eq!(config.get("empty[1]").ok(), Some("Bob".to_owned()));
+    assert_eq!(config.get("empty[0]").ok(), Some("Alice".to_owned()));
 }
 
 #[test]

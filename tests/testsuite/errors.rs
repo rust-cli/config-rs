@@ -5,6 +5,52 @@ use config::{Config, ConfigError, File, FileFormat, Map, Value};
 
 #[test]
 #[cfg(feature = "json")]
+fn test_error_path_index_bounds() {
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "arr": [1]
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.get::<usize>("arr[2]");
+    assert!(res.is_err());
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str![[r#"configuration property "arr[2]" not found"#]]
+    );
+}
+
+#[test]
+#[cfg(feature = "json")]
+fn test_error_path_index_negative_bounds() {
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "arr": []
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.get::<usize>("arr[-1]");
+    assert!(res.is_err());
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str![[r#"configuration property "arr[-1]" not found"#]]
+    );
+}
+
+#[test]
+#[cfg(feature = "json")]
 fn test_error_parse() {
     let res = Config::builder()
         .add_source(File::from_str(

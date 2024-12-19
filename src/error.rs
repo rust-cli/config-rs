@@ -174,7 +174,7 @@ impl ConfigError {
 }
 
 /// Alias for a `Result` with the error type set to `ConfigError`.
-pub(crate) type Result<T> = result::Result<T, ConfigError>;
+pub(crate) type Result<T, E = ConfigError> = result::Result<T, E>;
 
 // Forward Debug to Display for readable panic! messages
 impl fmt::Debug for ConfigError {

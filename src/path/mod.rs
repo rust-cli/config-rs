@@ -40,11 +40,14 @@ impl std::fmt::Display for ParseError {
 
 impl std::error::Error for ParseError {}
 
-fn sindex_to_uindex(index: isize, len: usize) -> usize {
+/// Convert a relative index into an absolute index
+fn abs_index(index: isize, len: usize) -> Result<usize, usize> {
     if index >= 0 {
-        index as usize
+        Ok(index as usize)
+    } else if let Some(index) = len.checked_sub(index.unsigned_abs()) {
+        Ok(index)
     } else {
-        len - index.unsigned_abs()
+        Err((len as isize + index).unsigned_abs())
     }
 }
 
@@ -80,13 +83,8 @@ impl Expression {
             Self::Subscript(expr, index) => match expr.get(root) {
                 Some(value) => match value.kind {
                     ValueKind::Array(ref array) => {
-                        let index = sindex_to_uindex(index, array.len());
-
-                        if index >= array.len() {
-                            None
-                        } else {
-                            Some(&array[index])
-                        }
+                        let index = abs_index(index, array.len()).ok()?;
+                        array.get(index)
                     }
 
                     _ => None,
@@ -141,7 +139,7 @@ impl Expression {
 
                     match value.kind {
                         ValueKind::Array(ref mut array) => {
-                            let index = sindex_to_uindex(index, array.len());
+                            let index = abs_index(index, array.len()).ok()?;
 
                             if index >= array.len() {
                                 array.resize(index + 1, Value::new(None, ValueKind::Nil));
@@ -216,10 +214,21 @@ impl Expression {
                     }
 
                     if let ValueKind::Array(ref mut array) = parent.kind {
-                        let uindex = sindex_to_uindex(index, array.len());
-                        if uindex >= array.len() {
-                            array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
-                        }
+                        let uindex = match abs_index(index, array.len()) {
+                            Ok(uindex) => {
+                                if uindex >= array.len() {
+                                    array.resize(uindex + 1, Value::new(None, ValueKind::Nil));
+                                }
+                                uindex
+                            }
+                            Err(insertion) => {
+                                array.splice(
+                                    0..0,
+                                    (0..insertion).map(|_| Value::new(None, ValueKind::Nil)),
+                                );
+                                0
+                            }
+                        };
 
                         array[uindex] = value;
                     }
