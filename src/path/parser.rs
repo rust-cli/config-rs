@@ -9,6 +9,7 @@ use winnow::combinator::opt;
 use winnow::combinator::repeat;
 use winnow::combinator::seq;
 use winnow::error::ContextError;
+use winnow::error::ParseError;
 use winnow::error::StrContext;
 use winnow::error::StrContextValue;
 use winnow::prelude::*;
@@ -17,9 +18,8 @@ use winnow::token::take_while;
 
 use crate::path::Expression;
 
-pub(crate) fn from_str(mut input: &str) -> Result<Expression, ContextError> {
-    let input = &mut input;
-    path.parse(input).map_err(|e| e.into_inner())
+pub(crate) fn from_str(input: &str) -> Result<Expression, ParseError<&str, ContextError>> {
+    path.parse(input)
 }
 
 fn path(i: &mut &str) -> PResult<Expression> {
@@ -93,6 +93,8 @@ fn integer(i: &mut &str) -> PResult<isize> {
 
 #[cfg(test)]
 mod test {
+    use snapbox::{assert_data_eq, str};
+
     use super::Expression::*;
     use super::*;
 
@@ -143,36 +145,70 @@ mod test {
     #[test]
     fn test_invalid_identifier() {
         let err = from_str("!").unwrap_err();
-        assert_eq!(
-            "invalid identifier\nexpected ASCII alphanumeric, `_`, `-`",
-            err.to_string()
+        assert_data_eq!(
+            err.to_string(),
+            str![[r#"
+!
+^
+invalid identifier
+expected ASCII alphanumeric, `_`, `-`
+"#]]
         );
     }
 
     #[test]
     fn test_invalid_child() {
         let err = from_str("a..").unwrap_err();
-        assert_eq!(
-            "invalid identifier\nexpected ASCII alphanumeric, `_`, `-`",
-            err.to_string()
+        assert_data_eq!(
+            err.to_string(),
+            str![[r#"
+a..
+  ^
+invalid identifier
+expected ASCII alphanumeric, `_`, `-`
+"#]]
         );
     }
 
     #[test]
     fn test_invalid_subscript() {
         let err = from_str("a[b]").unwrap_err();
-        assert_eq!("invalid subscript\nexpected integer", err.to_string());
+        assert_data_eq!(
+            err.to_string(),
+            str![[r#"
+a[b]
+  ^
+invalid subscript
+expected integer
+"#]]
+        );
     }
 
     #[test]
     fn test_incomplete_subscript() {
         let err = from_str("a[0").unwrap_err();
-        assert_eq!("invalid subscript\nexpected `]`", err.to_string());
+        assert_data_eq!(
+            err.to_string(),
+            str![[r#"
+a[0
+   ^
+invalid subscript
+expected `]`
+"#]]
+        );
     }
 
     #[test]
     fn test_invalid_postfix() {
         let err = from_str("a!b").unwrap_err();
-        assert_eq!("invalid postfix\nexpected `[`, `.`", err.to_string());
+        assert_data_eq!(
+            err.to_string(),
+            str![[r#"
+a!b
+  ^
+invalid postfix
+expected `[`, `.`
+"#]]
+        );
     }
 }

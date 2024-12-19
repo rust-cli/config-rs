@@ -27,7 +27,7 @@ impl FromStr for Expression {
 struct ParseError(String);
 
 impl ParseError {
-    fn new(inner: winnow::error::ContextError) -> Self {
+    fn new(inner: winnow::error::ParseError<&str, winnow::error::ContextError>) -> Self {
         Self(inner.to_string())
     }
 }
