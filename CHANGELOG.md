@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.1] - 2024-12-19
+
 ### Fixes
 
 - Don't crash on `get(arr[-1])` on empty arrays
@@ -504,6 +506,7 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.0...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.1...HEAD
+[0.15.1]: https://github.com/rust-cli/config-rs/compare/v0.15.0...v0.15.1
 [0.15.0]: https://github.com/rust-cli/config-rs/compare/v0.14.1...v0.15.0
 [0.14.1]: https://github.com/rust-cli/config-rs/compare/0.14.0...v0.14.1
