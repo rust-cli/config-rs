@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- Provide an error message on path parsing errors (regression from 0.15.0)
+- Improve quality of path parsing error messages
+
 ## [0.15.1] - 2024-12-19
 
 ### Fixes
