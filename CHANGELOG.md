@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Performance
+
+- Reduce TOML build times
+
 ## [0.15.3] - 2024-12-19
 
 ### Internal
