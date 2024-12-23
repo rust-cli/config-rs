@@ -34,9 +34,9 @@ pub struct Environment {
 
     /// Optional directive to translate collected keys into a form that matches what serializers
     /// that the configuration would expect. For example if you have the `kebab-case` attribute
-    /// for your serde config types, you may want to pass `Case::Kebab` here.
+    /// for your serde config types, you may want to pass `ConversionStrategy::All(Case::Kebab)` here.
     #[cfg(feature = "convert-case")]
-    convert_case: Option<Case>,
+    convert_case: Option<ConversionStrategy>,
 
     /// Optional character sequence that separates each env value into a vector. only works when `try_parsing` is set to true
     /// Once set, you cannot have type String on the same environment, unless you set `list_parse_keys`.
@@ -90,6 +90,15 @@ pub struct Environment {
     source: Option<Map<String, String>>,
 }
 
+/// Strategy to translate collected keys into a form that matches what serializers
+/// that the configuration would expect.
+#[cfg(feature = "convert-case")]
+#[derive(Clone, Debug)]
+enum ConversionStrategy {
+    /// Apply the conversion to all collected keys
+    All(Case),
+}
+
 impl Environment {
     /// Optional prefix that will limit access to the environment to only keys that
     /// begin with the defined prefix.
@@ -118,7 +127,7 @@ impl Environment {
 
     #[cfg(feature = "convert-case")]
     pub fn convert_case(mut self, tt: Case) -> Self {
-        self.convert_case = Some(tt);
+        self.convert_case = Some(ConversionStrategy::All(tt));
         self
     }
 
@@ -270,7 +279,7 @@ impl Source for Environment {
             }
 
             #[cfg(feature = "convert-case")]
-            if let Some(convert_case) = convert_case {
+            if let Some(ConversionStrategy::All(convert_case)) = convert_case {
                 key = key.to_case(*convert_case);
             }
 
