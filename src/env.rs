@@ -97,6 +97,8 @@ pub struct Environment {
 enum ConversionStrategy {
     /// Apply the conversion to all collected keys
     All(Case),
+    /// Exclude the specified keys from conversion
+    Exclude(Case, Vec<String>),
 }
 
 impl Environment {
@@ -128,6 +130,12 @@ impl Environment {
     #[cfg(feature = "convert-case")]
     pub fn convert_case(mut self, tt: Case) -> Self {
         self.convert_case = Some(ConversionStrategy::All(tt));
+        self
+    }
+
+    #[cfg(feature = "convert-case")]
+    pub fn convert_case_exclude_keys(mut self, tt: Case, keys: Vec<String>) -> Self {
+        self.convert_case = Some(ConversionStrategy::Exclude(tt, keys));
         self
     }
 
@@ -279,8 +287,15 @@ impl Source for Environment {
             }
 
             #[cfg(feature = "convert-case")]
-            if let Some(ConversionStrategy::All(convert_case)) = convert_case {
-                key = key.to_case(*convert_case);
+            if let Some(strategy) = convert_case {
+                match strategy {
+                    ConversionStrategy::All(convert_case) => key = key.to_case(*convert_case),
+                    ConversionStrategy::Exclude(convert_case, keys) => {
+                        if !keys.contains(&key) {
+                            key = key.to_case(*convert_case);
+                        }
+                    }
+                }
             }
 
             let value = if self.try_parsing {
