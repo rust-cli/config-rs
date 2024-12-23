@@ -602,6 +602,33 @@ fn test_parse_kebab_case_with_exclude_keys() {
 }
 
 #[test]
+#[cfg(feature = "convert-case")]
+fn test_parse_kebab_case_for_keys() {
+    use config::Case;
+    #[derive(Deserialize, Debug)]
+    struct TestConfig {
+        value_a: String,
+        #[serde(rename = "value-b")]
+        value_b: String,
+    }
+
+    temp_env::with_vars(
+        vec![("VALUE_A", Some("value1")), ("VALUE_B", Some("value2"))],
+        || {
+            let environment = Environment::default()
+                .convert_case_for_keys(Case::Kebab, vec!["value_b".to_owned()]);
+
+            let config = Config::builder().add_source(environment).build().unwrap();
+
+            let config: TestConfig = config.try_deserialize().unwrap();
+
+            assert_eq!(config.value_a, "value1");
+            assert_eq!(config.value_b, "value2");
+        },
+    );
+}
+
+#[test]
 fn test_parse_string() {
     // using a struct in an enum here to make serde use `deserialize_any`
     #[derive(Deserialize, Debug)]

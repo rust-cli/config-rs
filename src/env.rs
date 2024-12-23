@@ -99,6 +99,8 @@ enum ConversionStrategy {
     All(Case),
     /// Exclude the specified keys from conversion
     Exclude(Case, Vec<String>),
+    /// Only convert the specified keys
+    Only(Case, Vec<String>),
 }
 
 impl Environment {
@@ -136,6 +138,12 @@ impl Environment {
     #[cfg(feature = "convert-case")]
     pub fn convert_case_exclude_keys(mut self, tt: Case, keys: Vec<String>) -> Self {
         self.convert_case = Some(ConversionStrategy::Exclude(tt, keys));
+        self
+    }
+
+    #[cfg(feature = "convert-case")]
+    pub fn convert_case_for_keys(mut self, tt: Case, keys: Vec<String>) -> Self {
+        self.convert_case = Some(ConversionStrategy::Only(tt, keys));
         self
     }
 
@@ -292,6 +300,11 @@ impl Source for Environment {
                     ConversionStrategy::All(convert_case) => key = key.to_case(*convert_case),
                     ConversionStrategy::Exclude(convert_case, keys) => {
                         if !keys.contains(&key) {
+                            key = key.to_case(*convert_case);
+                        }
+                    }
+                    ConversionStrategy::Only(convert_case, keys) => {
+                        if keys.contains(&key) {
                             key = key.to_case(*convert_case);
                         }
                     }
