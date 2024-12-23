@@ -136,14 +136,28 @@ impl Environment {
     }
 
     #[cfg(feature = "convert-case")]
-    pub fn convert_case_exclude_keys(mut self, tt: Case, keys: Vec<String>) -> Self {
-        self.convert_case = Some(ConversionStrategy::Exclude(tt, keys));
+    pub fn convert_case_exclude_keys(
+        mut self,
+        tt: Case,
+        keys: impl IntoIterator<Item = impl Into<String>>,
+    ) -> Self {
+        self.convert_case = Some(ConversionStrategy::Exclude(
+            tt,
+            keys.into_iter().map(|k| k.into()).collect(),
+        ));
         self
     }
 
     #[cfg(feature = "convert-case")]
-    pub fn convert_case_for_keys(mut self, tt: Case, keys: Vec<String>) -> Self {
-        self.convert_case = Some(ConversionStrategy::Only(tt, keys));
+    pub fn convert_case_for_keys(
+        mut self,
+        tt: Case,
+        keys: impl IntoIterator<Item = impl Into<String>>,
+    ) -> Self {
+        self.convert_case = Some(ConversionStrategy::Only(
+            tt,
+            keys.into_iter().map(|k| k.into()).collect(),
+        ));
         self
     }
 

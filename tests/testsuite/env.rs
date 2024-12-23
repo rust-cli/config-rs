@@ -588,8 +588,8 @@ fn test_parse_kebab_case_with_exclude_keys() {
     temp_env::with_vars(
         vec![("VALUE_A", Some("value1")), ("VALUE_B", Some("value2"))],
         || {
-            let environment = Environment::default()
-                .convert_case_exclude_keys(Case::Kebab, vec!["value_a".to_owned()]);
+            let environment =
+                Environment::default().convert_case_exclude_keys(Case::Kebab, ["value_a"]);
 
             let config = Config::builder().add_source(environment).build().unwrap();
 
@@ -615,8 +615,8 @@ fn test_parse_kebab_case_for_keys() {
     temp_env::with_vars(
         vec![("VALUE_A", Some("value1")), ("VALUE_B", Some("value2"))],
         || {
-            let environment = Environment::default()
-                .convert_case_for_keys(Case::Kebab, vec!["value_b".to_owned()]);
+            let environment =
+                Environment::default().convert_case_for_keys(Case::Kebab, ["value_b"]);
 
             let config = Config::builder().add_source(environment).build().unwrap();
 
