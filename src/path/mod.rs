@@ -150,12 +150,16 @@ impl Expression {
         let parent = self.get_mut_forcibly(root);
         match value.kind {
             ValueKind::Table(ref incoming_map) => {
+                // If the parent is nil, treat it as an empty table
+                if matches!(parent.kind, ValueKind::Nil) {
+                    *parent = Map::<String, Value>::new().into();
+                }
+
                 // Continue the deep merge
                 for (key, val) in incoming_map {
                     Self::root(key.clone()).set(parent, val.clone());
                 }
             }
-
             _ => {
                 *parent = value;
             }

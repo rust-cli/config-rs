@@ -112,10 +112,17 @@ fn test_merge_empty_maps() {
         .unwrap();
     let res = cfg.try_deserialize::<Settings>();
     assert_data_eq!(
-        res.unwrap_err().to_string(),
-        str![
-            "invalid type: unit value, expected struct Profile for key `profile.missing_to_empty`"
-        ]
+        res.unwrap().to_debug(),
+        str![[r#"
+Settings {
+    profile: {
+        "missing_to_empty": Profile {
+            name: None,
+        },
+    },
+}
+
+"#]]
     );
 
     // * missing_to_non_empty: no key -> map with k/v
@@ -158,8 +165,17 @@ Settings {
         .unwrap();
     let res = cfg.try_deserialize::<Settings>();
     assert_data_eq!(
-        res.unwrap_err().to_string(),
-        str!["invalid type: unit value, expected struct Profile for key `profile.empty_to_empty`"]
+        res.unwrap().to_debug(),
+        str![[r#"
+Settings {
+    profile: {
+        "empty_to_empty": Profile {
+            name: None,
+        },
+    },
+}
+
+"#]]
     );
 
     // * empty_to_non_empty: empty map -> map with k/v
@@ -266,8 +282,17 @@ Settings {
         .unwrap();
     let res = cfg.try_deserialize::<Settings>();
     assert_data_eq!(
-        res.unwrap_err().to_string(),
-        str!["invalid type: unit value, expected struct Profile for key `profile.null_to_empty`"]
+        res.unwrap().to_debug(),
+        str![[r#"
+Settings {
+    profile: {
+        "null_to_empty": Profile {
+            name: None,
+        },
+    },
+}
+
+"#]]
     );
 
     // * null_to_non_empty: null -> map with k/v
