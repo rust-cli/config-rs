@@ -2,7 +2,7 @@ mod format;
 pub(crate) mod source;
 
 use std::fmt::Debug;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use self::source::FileSource;
 use crate::error::{ConfigError, Result};
@@ -76,22 +76,15 @@ impl File<FileSourceFile, FileFormat> {
     }
 }
 
-impl<'a> From<&'a Path> for File<FileSourceFile, FileFormat> {
-    fn from(path: &'a Path) -> Self {
+impl<T> From<T> for File<FileSourceFile, FileFormat>
+where
+    T: Into<PathBuf>,
+{
+    fn from(path: T) -> Self {
         Self {
             format: None,
             required: true,
-            source: FileSourceFile::new(path.to_path_buf()),
-        }
-    }
-}
-
-impl From<PathBuf> for File<FileSourceFile, FileFormat> {
-    fn from(path: PathBuf) -> Self {
-        Self {
-            format: None,
-            required: true,
-            source: FileSourceFile::new(path),
+            source: FileSourceFile::new(path.into()),
         }
     }
 }
