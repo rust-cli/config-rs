@@ -316,3 +316,39 @@ fn test_error_root_not_table() {
         },
     }
 }
+
+#[test]
+#[cfg(feature = "json")]
+fn test_json_error_with_path() {
+    #[derive(Debug, Deserialize)]
+    struct InnerSettings {
+        #[allow(dead_code)]
+        value: u32,
+        #[allow(dead_code)]
+        value2: u32,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        #[allow(dead_code)]
+        inner: InnerSettings,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+    "inner": { "value": 42 }
+}
+        "#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let with_path = c.clone().try_deserialize::<Settings>();
+    assert_data_eq!(
+        with_path.unwrap_err().to_string(),
+        str!["missing field `value2`"]
+    );
+}
