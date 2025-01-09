@@ -112,6 +112,33 @@ fn test_get_invalid_type() {
 
 #[test]
 #[cfg(feature = "json")]
+fn test_get_missing_field() {
+    #[derive(Debug, Deserialize)]
+    struct InnerSettings {
+        #[allow(dead_code)]
+        value: u32,
+        #[allow(dead_code)]
+        value2: u32,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+    "inner": { "value": 42 }
+}
+        "#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.get::<InnerSettings>("inner");
+    assert_data_eq!(res.unwrap_err().to_string(), str!["missing field `value2`"]);
+}
+
+#[test]
+#[cfg(feature = "json")]
 fn test_get_bool_invalid_type() {
     let c = Config::builder()
         .add_source(File::from_str(
@@ -283,4 +310,37 @@ fn test_deserialize_invalid_type() {
     } else {
         panic!("Wrong error {:?}", e);
     }
+}
+
+#[test]
+#[cfg(feature = "json")]
+fn test_deserialize_missing_field() {
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        #[allow(dead_code)]
+        inner: InnerSettings,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct InnerSettings {
+        #[allow(dead_code)]
+        value: u32,
+        #[allow(dead_code)]
+        value2: u32,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+    "inner": { "value": 42 }
+}
+        "#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.try_deserialize::<Settings>();
+    assert_data_eq!(res.unwrap_err().to_string(), str!["missing field `value2`"]);
 }
