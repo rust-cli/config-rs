@@ -135,6 +135,7 @@ indexmap = { version = "2.2", features = ["serde"], optional = true }
 convert_case = { version = "0.6", optional = true }
 pathdiff = "0.2"
 winnow = "0.6.20"
+serde_path_to_error = "0.1"
 
 [dev-dependencies]
 serde_derive = "1.0"

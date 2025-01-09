@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use serde::de::Deserialize;
 use serde::ser::Serialize;
+use serde_path_to_error::{Deserializer, Track};
 
 use crate::builder::{ConfigBuilder, DefaultState};
 use crate::error::{ConfigError, Result};
@@ -142,7 +143,20 @@ impl Config {
 
     /// Attempt to deserialize the entire configuration into the requested type.
     pub fn try_deserialize<'de, T: Deserialize<'de>>(self) -> Result<T> {
-        T::deserialize(self)
+        let mut track = Track::new();
+        match T::deserialize(Deserializer::new(self, &mut track)) {
+            Ok(t) => Ok(t),
+            Err(ConfigError::Message(e)) => {
+                let path = track.path();
+                if path.iter().count() == 0 {
+                    return Err(ConfigError::Message(e));
+                }
+                Err(ConfigError::Message(format!(
+                    "failed reading field `{path}`: {e}"
+                )))
+            }
+            Err(err) => Err(err),
+        }
     }
 
     /// Attempt to serialize the entire configuration from the given type.

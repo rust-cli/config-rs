@@ -341,7 +341,7 @@ fn test_json_error_with_path() {
     "inner": { "value": 42 }
 }
         "#,
-            FileFormat::Json,
+            FileFormat::Json5,
         ))
         .build()
         .unwrap();
@@ -349,6 +349,6 @@ fn test_json_error_with_path() {
     let with_path = c.clone().try_deserialize::<Settings>();
     assert_data_eq!(
         with_path.unwrap_err().to_string(),
-        str!["missing field `value2`"]
+        str!["failed reading field `inner`: missing field `value2`"]
     );
 }

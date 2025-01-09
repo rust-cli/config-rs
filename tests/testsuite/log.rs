@@ -53,6 +53,6 @@ fn test_load_level_lowercase() {
     assert!(s.is_err());
     assert_data_eq!(
         s.unwrap_err().to_string(),
-        str!["enum Level does not have variant constructor error"]
+        str!["failed reading field `log`: enum Level does not have variant constructor error"]
     );
 }
