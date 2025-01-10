@@ -83,6 +83,11 @@ pub enum ConfigError {
         /// Error being extended with a path
         error: Box<ConfigError>,
 
+        /// The URI that references the source that the value came from.
+        /// Example: `/path/to/config.json` or `Environment` or `etcd://localhost`
+        // TODO: Why is this called Origin but FileParse has a uri field?
+        origin: Option<String>,
+
         /// The key in the configuration hash of this value (if available where the
         /// error is generated).
         key: Option<String>,
@@ -140,13 +145,15 @@ impl ConfigError {
                 key: Some(key.into()),
             },
 
-            Self::At { error, .. } => Self::At {
+            Self::At { origin, error, .. } => Self::At {
                 error,
+                origin,
                 key: Some(key.into()),
             },
 
             other => Self::At {
                 error: Box::new(other),
+                origin: None,
                 key: Some(key.into()),
             },
         }
@@ -175,13 +182,15 @@ impl ConfigError {
                 expected,
                 key: Some(concat(key)),
             },
-            Self::At { error, key } => Self::At {
+            Self::At { error, origin, key } => Self::At {
                 error,
+                origin,
                 key: Some(concat(key)),
             },
             Self::NotFound(key) => Self::NotFound(concat(Some(key))),
             other => Self::At {
                 error: Box::new(other),
+                origin: None,
                 key: Some(concat(None)),
             },
         }
@@ -242,11 +251,19 @@ impl fmt::Display for ConfigError {
                 Ok(())
             }
 
-            ConfigError::At { ref error, ref key } => {
+            ConfigError::At {
+                ref error,
+                ref origin,
+                ref key,
+            } => {
                 write!(f, "{error}")?;
 
                 if let Some(ref key) = *key {
                     write!(f, " for key `{key}`")?;
+                }
+
+                if let Some(ref origin) = *origin {
+                    write!(f, " in {origin}")?;
                 }
 
                 Ok(())
