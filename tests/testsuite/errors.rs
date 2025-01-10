@@ -5,7 +5,7 @@ use config::{Config, ConfigError, File, FileFormat, Map, Value};
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_path_index_bounds() {
+fn test_path_index_bounds() {
     let c = Config::builder()
         .add_source(File::from_str(
             r#"
@@ -28,7 +28,7 @@ fn test_error_path_index_bounds() {
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_path_index_negative_bounds() {
+fn test_path_index_negative_bounds() {
     let c = Config::builder()
         .add_source(File::from_str(
             r#"
@@ -51,7 +51,7 @@ fn test_error_path_index_negative_bounds() {
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_parse() {
+fn test_parse() {
     let res = Config::builder()
         .add_source(File::from_str(
             r#"
@@ -72,7 +72,23 @@ fn test_error_parse() {
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_type() {
+fn test_root_not_table() {
+    let e = Config::builder()
+        .add_source(File::from_str(r#"false"#, FileFormat::Json))
+        .build()
+        .unwrap_err();
+    match e {
+        ConfigError::FileParse { cause, .. } => assert_eq!(
+            "invalid type: boolean `false`, expected a map",
+            format!("{cause}")
+        ),
+        _ => panic!("Wrong error: {:?}", e),
+    }
+}
+
+#[test]
+#[cfg(feature = "json")]
+fn test_get_invalid_type() {
     let c = Config::builder()
         .add_source(File::from_str(
             r#"
@@ -96,68 +112,85 @@ fn test_error_type() {
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_deser_whole() {
-    #[derive(Deserialize, Debug)]
-    struct Place {
-        #[allow(dead_code)]
-        name: usize, // is actually s string
-    }
-
-    #[derive(Deserialize, Debug)]
-    struct Output {
-        #[allow(dead_code)]
-        place: Place,
-    }
-
+fn test_get_invalid_type_file() {
     let c = Config::builder()
-        .add_source(File::from_str(
-            r#"
-{
-  "place": {
-    "name": "Torre di Pisa"
-  }
-}
-"#,
+        .add_source(File::new(
+            "tests/testsuite/get-invalid-type.json",
             FileFormat::Json,
         ))
         .build()
         .unwrap();
 
-    let res = c.try_deserialize::<Output>();
-    assert_data_eq!(
-        res.unwrap_err().to_string(),
-        str![[r#"invalid type: string "Torre di Pisa", expected an integer for key `place.name`"#]]
-    );
-}
-
-#[test]
-#[cfg(feature = "json")]
-fn test_error_type_detached() {
-    let c = Config::builder()
-        .add_source(File::from_str(
-            r#"
-{
-  "boolean_s_parse": "fals"
-}
-"#,
-            FileFormat::Json,
-        ))
-        .build()
-        .unwrap();
-
-    let value = c.get::<Value>("boolean_s_parse").unwrap();
-    let res = value.try_deserialize::<bool>();
+    let res = c.get::<bool>("boolean_s_parse");
 
     assert!(res.is_err());
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str![[r#"invalid type: string "fals", expected a boolean"#]]
+        str![[
+            r#"invalid type: string "fals", expected a boolean for key `boolean_s_parse` in tests/testsuite/get-invalid-type.json"#
+        ]]
     );
 }
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_type_get_bool() {
+fn test_get_missing_field() {
+    #[derive(Debug, Deserialize)]
+    struct InnerSettings {
+        #[allow(dead_code)]
+        value: u32,
+        #[allow(dead_code)]
+        value2: u32,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+    "inner": { "value": 42 }
+}
+        "#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.get::<InnerSettings>("inner");
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str!["missing field `value2` for key `inner`"]
+    );
+}
+
+#[test]
+#[cfg(feature = "json")]
+fn test_get_missing_field_file() {
+    #[derive(Debug, Deserialize)]
+    struct InnerSettings {
+        #[allow(dead_code)]
+        value: u32,
+        #[allow(dead_code)]
+        value2: u32,
+    }
+
+    let c = Config::builder()
+        .add_source(File::new(
+            "tests/testsuite/get-missing-field.json",
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.get::<InnerSettings>("inner");
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str!["missing field `value2` for key `inner`"]
+    );
+}
+
+#[test]
+#[cfg(feature = "json")]
+fn test_get_bool_invalid_type() {
     let c = Config::builder()
         .add_source(File::from_str(
             r#"
@@ -181,7 +214,7 @@ fn test_error_type_get_bool() {
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_type_get_table() {
+fn test_get_table_invalid_type() {
     let c = Config::builder()
         .add_source(File::from_str(
             r#"
@@ -205,7 +238,7 @@ fn test_error_type_get_table() {
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_type_get_array() {
+fn test_get_array_invalid_type() {
     let c = Config::builder()
         .add_source(File::from_str(
             r#"
@@ -228,7 +261,32 @@ fn test_error_type_get_array() {
 }
 
 #[test]
-fn test_error_enum_de() {
+#[cfg(feature = "json")]
+fn test_value_deserialize_invalid_type() {
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+  "boolean_s_parse": "fals"
+}
+"#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let value = c.get::<Value>("boolean_s_parse").unwrap();
+    let res = value.try_deserialize::<bool>();
+
+    assert!(res.is_err());
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str![[r#"invalid type: string "fals", expected a boolean"#]]
+    );
+}
+
+#[test]
+fn test_value_deserialize_enum() {
     #[derive(Debug, Deserialize, PartialEq, Eq)]
     enum Diode {
         Off,
@@ -262,38 +320,44 @@ fn test_error_enum_de() {
 
 #[test]
 #[cfg(feature = "json")]
-fn error_with_path() {
-    #[derive(Debug, Deserialize)]
-    struct Inner {
+fn test_deserialize_invalid_type() {
+    #[derive(Deserialize, Debug)]
+    struct Place {
         #[allow(dead_code)]
-        test: i32,
+        name: usize, // is actually s string
     }
 
-    #[derive(Debug, Deserialize)]
-    struct Outer {
+    #[derive(Deserialize, Debug)]
+    struct Output {
         #[allow(dead_code)]
-        inner: Inner,
+        place: Place,
     }
-    const CFG: &str = r#"
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
 {
-  "inner": {
-    "test": "ABC"
+  "place": {
+    "name": "Torre di Pisa"
   }
 }
-"#;
-
-    let e = Config::builder()
-        .add_source(File::from_str(CFG, FileFormat::Json))
+"#,
+            FileFormat::Json,
+        ))
         .build()
-        .unwrap()
-        .try_deserialize::<Outer>()
-        .unwrap_err();
+        .unwrap();
 
+    let res = c.try_deserialize::<Output>();
+    let e = res.unwrap_err();
+    assert_data_eq!(
+        e.to_string(),
+        str![[r#"invalid type: string "Torre di Pisa", expected an integer for key `place.name`"#]]
+    );
     if let ConfigError::Type {
         key: Some(path), ..
     } = e
     {
-        assert_eq!(path, "inner.test");
+        assert_eq!(path, "place.name");
     } else {
         panic!("Wrong error {:?}", e);
     }
@@ -301,18 +365,109 @@ fn error_with_path() {
 
 #[test]
 #[cfg(feature = "json")]
-fn test_error_root_not_table() {
-    match Config::builder()
-        .add_source(File::from_str(r#"false"#, FileFormat::Json))
-        .build()
-    {
-        Ok(_) => panic!("Should not merge if root is not a table"),
-        Err(e) => match e {
-            ConfigError::FileParse { cause, .. } => assert_eq!(
-                "invalid type: boolean `false`, expected a map",
-                format!("{cause}")
-            ),
-            _ => panic!("Wrong error: {:?}", e),
-        },
+fn test_deserialize_invalid_type_file() {
+    #[derive(Deserialize, Debug)]
+    struct Place {
+        #[allow(dead_code)]
+        name: usize, // is actually s string
     }
+
+    #[derive(Deserialize, Debug)]
+    struct Output {
+        #[allow(dead_code)]
+        place: Place,
+    }
+
+    let c = Config::builder()
+        .add_source(File::new(
+            "tests/testsuite/deserialize-invalid-type.json",
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.try_deserialize::<Output>();
+    let e = res.unwrap_err();
+    assert_data_eq!(
+        e.to_string(),
+        str![[
+            r#"invalid type: string "Torre di Pisa", expected an integer for key `place.name` in tests/testsuite/deserialize-invalid-type.json"#
+        ]]
+    );
+    if let ConfigError::Type {
+        key: Some(path), ..
+    } = e
+    {
+        assert_eq!(path, "place.name");
+    } else {
+        panic!("Wrong error {:?}", e);
+    }
+}
+
+#[test]
+#[cfg(feature = "json")]
+fn test_deserialize_missing_field() {
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        #[allow(dead_code)]
+        inner: InnerSettings,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct InnerSettings {
+        #[allow(dead_code)]
+        value: u32,
+        #[allow(dead_code)]
+        value2: u32,
+    }
+
+    let c = Config::builder()
+        .add_source(File::from_str(
+            r#"
+{
+    "inner": { "value": 42 }
+}
+        "#,
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.try_deserialize::<Settings>();
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str!["missing field `value2` for key `inner`"]
+    );
+}
+
+#[test]
+#[cfg(feature = "json")]
+fn test_deserialize_missing_field_file() {
+    #[derive(Debug, Deserialize)]
+    struct Settings {
+        #[allow(dead_code)]
+        inner: InnerSettings,
+    }
+
+    #[derive(Debug, Deserialize)]
+    struct InnerSettings {
+        #[allow(dead_code)]
+        value: u32,
+        #[allow(dead_code)]
+        value2: u32,
+    }
+
+    let c = Config::builder()
+        .add_source(File::new(
+            "tests/testsuite/deserialize-missing-field.json",
+            FileFormat::Json,
+        ))
+        .build()
+        .unwrap();
+
+    let res = c.try_deserialize::<Settings>();
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str!["missing field `value2` for key `inner`"]
+    );
 }
