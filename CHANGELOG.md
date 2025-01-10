@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- Include the `key` on all serde errors
+
+### Performance
+
+- Don't clone when merging sources
+
 ## [0.15.4] - 2024-12-20
 
 ### Performance
