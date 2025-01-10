@@ -20,20 +20,20 @@ pub trait Source: Debug {
     /// Collects all configuration properties to a provided cache.
     fn collect_to(&self, cache: &mut Value) -> Result<()> {
         self.collect()?
-            .iter()
+            .into_iter()
             .for_each(|(key, val)| set_value(cache, key, val));
 
         Ok(())
     }
 }
 
-fn set_value(cache: &mut Value, key: &str, value: &Value) {
-    match path::Expression::from_str(key) {
+fn set_value(cache: &mut Value, key: String, value: Value) {
+    match path::Expression::from_str(key.as_str()) {
         // Set using the path
-        Ok(expr) => expr.set(cache, value.clone()),
+        Ok(expr) => expr.set(cache, value),
 
         // Set directly anyway
-        _ => path::Expression::root(key.to_owned()).set(cache, value.clone()),
+        _ => path::Expression::root(key).set(cache, value),
     }
 }
 
@@ -64,7 +64,7 @@ pub trait AsyncSource: Debug + Sync {
     async fn collect_to(&self, cache: &mut Value) -> Result<()> {
         self.collect()
             .await?
-            .iter()
+            .into_iter()
             .for_each(|(key, val)| set_value(cache, key, val));
 
         Ok(())
