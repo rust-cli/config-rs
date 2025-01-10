@@ -79,6 +79,16 @@ pub enum ConfigError {
     },
 
     /// Custom message
+    At {
+        /// Error being extended with a path
+        error: Box<ConfigError>,
+
+        /// The key in the configuration hash of this value (if available where the
+        /// error is generated).
+        key: Option<String>,
+    },
+
+    /// Custom message
     Message(String),
 
     /// Unadorned error from a foreign origin.
@@ -130,7 +140,15 @@ impl ConfigError {
                 key: Some(key.into()),
             },
 
-            _ => self,
+            Self::At { error, .. } => Self::At {
+                error,
+                key: Some(key.into()),
+            },
+
+            other => Self::At {
+                error: Box::new(other),
+                key: Some(key.into()),
+            },
         }
     }
 
@@ -157,8 +175,15 @@ impl ConfigError {
                 expected,
                 key: Some(concat(key)),
             },
+            Self::At { error, key } => Self::At {
+                error,
+                key: Some(concat(key)),
+            },
             Self::NotFound(key) => Self::NotFound(concat(Some(key))),
-            _ => self,
+            other => Self::At {
+                error: Box::new(other),
+                key: Some(concat(None)),
+            },
         }
     }
 
@@ -212,6 +237,16 @@ impl fmt::Display for ConfigError {
 
                 if let Some(ref origin) = *origin {
                     write!(f, " in {origin}")?;
+                }
+
+                Ok(())
+            }
+
+            ConfigError::At { ref error, ref key } => {
+                write!(f, "{error}")?;
+
+                if let Some(ref key) = *key {
+                    write!(f, " for key `{key}`")?;
                 }
 
                 Ok(())

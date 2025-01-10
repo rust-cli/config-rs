@@ -134,7 +134,10 @@ fn test_get_missing_field() {
         .unwrap();
 
     let res = c.get::<InnerSettings>("inner");
-    assert_data_eq!(res.unwrap_err().to_string(), str!["missing field `value2`"]);
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str!["missing field `value2` for key `inner`"]
+    );
 }
 
 #[test]
@@ -342,5 +345,8 @@ fn test_deserialize_missing_field() {
         .unwrap();
 
     let res = c.try_deserialize::<Settings>();
-    assert_data_eq!(res.unwrap_err().to_string(), str!["missing field `value2`"]);
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str!["missing field `value2` for key `inner`"]
+    );
 }
