@@ -338,8 +338,17 @@ Settings {
         .unwrap();
     let res = cfg.try_deserialize::<Settings>();
     assert_data_eq!(
-        res.unwrap_err().to_string(),
-        str!["invalid type: integer `42`, expected struct Profile for key `profile.int_to_empty`"]
+        res.unwrap().to_debug(),
+        str![[r#"
+Settings {
+    profile: {
+        "int_to_empty": Profile {
+            name: None,
+        },
+    },
+}
+
+"#]]
     );
 
     // * int_to_non_empty: int -> map with k/v
