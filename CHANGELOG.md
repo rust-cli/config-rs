@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.6] - 2025-01-14
+
 ### Fixes
 
 - Fix regression from 0.15.3 with reading a table from an empty config
@@ -539,7 +541,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.5...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.6...HEAD
+[0.15.6]: https://github.com/rust-cli/config-rs/compare/v0.15.5...v0.15.6
 [0.15.5]: https://github.com/rust-cli/config-rs/compare/v0.15.4...v0.15.5
 [0.15.4]: https://github.com/rust-cli/config-rs/compare/v0.15.3...v0.15.4
 [0.15.3]: https://github.com/rust-cli/config-rs/compare/v0.15.2...v0.15.3
