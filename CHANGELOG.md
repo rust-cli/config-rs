@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- Fix regression from 0.15.3 with reading a table from an empty config
+
 ## [0.15.5] - 2025-01-10
 
 ### Fixes
