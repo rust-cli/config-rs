@@ -134,7 +134,7 @@ json5_rs = { version = "0.4", optional = true, package = "json5" }
 indexmap = { version = "2.2", features = ["serde"], optional = true }
 convert_case = { version = "0.6", optional = true }
 pathdiff = "0.2"
-winnow = "0.6.20"
+winnow = "0.6.26"
 
 [dev-dependencies]
 serde_derive = "1.0"
