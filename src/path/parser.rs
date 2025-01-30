@@ -23,14 +23,14 @@ pub(crate) fn from_str(input: &str) -> Result<Expression, ParseError<&str, Conte
     path.parse(input)
 }
 
-fn path(i: &mut &str) -> PResult<Expression> {
+fn path(i: &mut &str) -> ModalResult<Expression> {
     let root = ident.parse_next(i)?;
     let postfix = repeat(0.., postfix).parse_next(i)?;
     let expr = Expression { root, postfix };
     Ok(expr)
 }
 
-fn postfix(i: &mut &str) -> PResult<Postfix> {
+fn postfix(i: &mut &str) -> ModalResult<Postfix> {
     dispatch! {any;
         '[' => cut_err(
             seq!(
@@ -51,7 +51,7 @@ fn postfix(i: &mut &str) -> PResult<Postfix> {
     .parse_next(i)
 }
 
-fn ident(i: &mut &str) -> PResult<String> {
+fn ident(i: &mut &str) -> ModalResult<String> {
     take_while(1.., ('a'..='z', 'A'..='Z', '0'..='9', '_', '-'))
         .map(ToOwned::to_owned)
         .context(StrContext::Label("identifier"))
@@ -63,7 +63,7 @@ fn ident(i: &mut &str) -> PResult<String> {
         .parse_next(i)
 }
 
-fn integer(i: &mut &str) -> PResult<isize> {
+fn integer(i: &mut &str) -> ModalResult<isize> {
     seq!(
         _: space0,
         (opt('-'), digit1).take().try_map(FromStr::from_str),
