@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.7] - 2025-01-30
+
 ### Internal
 
 - Update a dependency
@@ -545,7 +547,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.6...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.7...HEAD
+[0.15.7]: https://github.com/rust-cli/config-rs/compare/v0.15.6...v0.15.7
 [0.15.6]: https://github.com/rust-cli/config-rs/compare/v0.15.5...v0.15.6
 [0.15.5]: https://github.com/rust-cli/config-rs/compare/v0.15.4...v0.15.5
 [0.15.4]: https://github.com/rust-cli/config-rs/compare/v0.15.3...v0.15.4
