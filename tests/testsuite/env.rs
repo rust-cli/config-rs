@@ -1,3 +1,5 @@
+use std::ffi;
+
 use serde_derive::Deserialize;
 use snapbox::{assert_data_eq, str};
 
@@ -720,4 +722,50 @@ fn test_parse_uint_default() {
 
     let config: TestUint = config.try_deserialize().unwrap();
     assert_eq!(config.int_val, 42);
+}
+
+#[test]
+fn test_non_utf8() {
+    // make a non-utf8 OsString
+    fn make_os_string(prefix: &str) -> ffi::OsString {
+        let mut res = ffi::OsString::from(prefix);
+        #[cfg(unix)]
+        let suffix = {
+            use std::os::unix::ffi::OsStringExt;
+            ffi::OsString::from_vec(vec![0x80, 0xFF, 0xFE, 0xFD]) // random non-utf8 bytes
+        };
+        #[cfg(windows)]
+        let suffix = {
+            use std::os::windows::ffi::OsStringExt;
+            ffi::OsString::from_wide(&[0xD800]) // unpaired surrogate code point
+        };
+        res.push(suffix);
+        res
+    }
+
+    temp_env::with_vars(
+        vec![
+            (
+                make_os_string("utf8_INVALID-1"),
+                Some(make_os_string("value")),
+            ),
+            (make_os_string("utf8_INVALID-2"), Some("value".into())),
+            ("utf8_VALID".into(), Some("value".into())),
+            ("DIFFERENT_PREFIX".into(), Some(make_os_string("value"))),
+        ],
+        || {
+            let environment = Environment::with_prefix("utf8");
+            assert!(environment.collect().unwrap().contains_key("valid"));
+        },
+    );
+
+    temp_env::with_vars(
+        vec![("utf8_BAD_VALUE", Some(make_os_string("value")))],
+        || {
+            let environment = Environment::default();
+            let error_msg = environment.collect().unwrap_err().to_string();
+            assert!(error_msg.contains("key utf8_bad_value has value"));
+            assert!(error_msg.contains("that cannot be converted to UTF-8"));
+        },
+    );
 }

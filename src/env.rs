@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, ffi};
 
 #[cfg(feature = "convert-case")]
 use convert_case::{Case, Casing};
@@ -7,6 +7,7 @@ use crate::error::Result;
 use crate::map::Map;
 use crate::source::Source;
 use crate::value::{Value, ValueKind};
+use crate::ConfigError;
 
 /// An environment source collects a dictionary of environment variables values into a hierarchical
 /// config Value type. We have to be aware how the config tree is created from the environment
@@ -243,10 +244,10 @@ impl Source for Environment {
             .as_ref()
             .map(|prefix| format!("{prefix}{prefix_separator}").to_lowercase());
 
-        let collector = |(key, value): (String, String)| {
+        let mut collector = |key: String, value: ffi::OsString| -> Result<()> {
             // Treat empty environment variables as unset
             if self.ignore_empty && value.is_empty() {
-                return;
+                return Ok(());
             }
 
             let mut key = key.to_lowercase();
@@ -260,7 +261,7 @@ impl Source for Environment {
                     }
                 } else {
                     // Skip this key
-                    return;
+                    return Ok(());
                 }
             }
 
@@ -273,6 +274,15 @@ impl Source for Environment {
             if let Some(convert_case) = convert_case {
                 key = key.to_case(*convert_case);
             }
+
+            let value = match value.into_string() {
+                Ok(value) => value,
+                Err(value) => {
+                    return Err(ConfigError::Message(format!(
+                        "key {key} has value {value:?} that cannot be converted to UTF-8",
+                    )))
+                }
+            };
 
             let value = if self.try_parsing {
                 // convert to lowercase because bool parsing expects all lowercase
@@ -308,11 +318,25 @@ impl Source for Environment {
             };
 
             m.insert(key, Value::new(Some(&uri), value));
+
+            Ok(())
         };
 
         match &self.source {
-            Some(source) => source.clone().into_iter().for_each(collector),
-            None => env::vars().for_each(collector),
+            Some(source) => {
+                for (key, value) in source.clone() {
+                    collector(key, value.into())?;
+                }
+            }
+            None => {
+                for (key, value) in env::vars_os() {
+                    // skip keys that cannot be converted to UTF-8
+                    let Ok(key) = key.into_string() else {
+                        continue;
+                    };
+                    collector(key, value)?;
+                }
+            }
         }
 
         Ok(m)
