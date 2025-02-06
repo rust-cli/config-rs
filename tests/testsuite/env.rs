@@ -751,7 +751,6 @@ mod unicode_tests {
     }
 
     #[test]
-    #[should_panic(expected = r#"`Result::unwrap()` on an `Err` value: "\xFF""#)]
     fn test_invalid_unicode_key_ignored() {
         temp_env::with_vars(
             vec![
@@ -767,7 +766,6 @@ mod unicode_tests {
     }
 
     #[test]
-    #[should_panic(expected = r#"`Result::unwrap()` on an `Err` value: "\xFF""#)]
     fn test_invalid_unicode_value_filtered() {
         temp_env::with_vars(
             vec![
@@ -787,12 +785,21 @@ mod unicode_tests {
     }
 
     #[test]
-    #[should_panic(expected = r#"`Result::unwrap()` on an `Err` value: "\xFF""#)]
     fn test_invalid_unicode_value_not_filtered() {
         temp_env::with_vars(
             vec![("invalid_value1", Some(make_invalid_unicode_os_string()))],
             || {
-                Environment::default().collect().unwrap();
+                let result = Environment::default().collect();
+
+                #[cfg(unix)]
+                let expected =
+                    str![[r#"env variable "invalid_value1" contains non-Unicode data: "/xFF""#]];
+                #[cfg(windows)]
+                let expected = str![[
+                    r#"env variable "invalid_value1" contains non-Unicode data: "/u{d800}""#
+                ]];
+
+                assert_data_eq!(result.unwrap_err().to_string(), expected);
             },
         );
     }
