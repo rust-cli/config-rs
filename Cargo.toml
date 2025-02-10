@@ -87,7 +87,7 @@ zero_sized_map_values = "warn"
 
 [package]
 name = "config"
-version = "0.15.7"
+version = "0.15.8"
 description = "Layered configuration system for Rust applications."
 categories = ["config"]
 keywords = ["config", "configuration", "settings", "env", "environment"]

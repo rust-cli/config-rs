@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.8] - 2025-02-10
+
 ### Fix
 
 - Don't panic on non-unicode env variable names and values
@@ -551,7 +553,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.7...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.8...HEAD
+[0.15.8]: https://github.com/rust-cli/config-rs/compare/v0.15.7...v0.15.8
 [0.15.7]: https://github.com/rust-cli/config-rs/compare/v0.15.6...v0.15.7
 [0.15.6]: https://github.com/rust-cli/config-rs/compare/v0.15.5...v0.15.6
 [0.15.5]: https://github.com/rust-cli/config-rs/compare/v0.15.4...v0.15.5
