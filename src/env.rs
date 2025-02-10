@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsString;
 
 #[cfg(feature = "convert-case")]
 use convert_case::{Case, Casing};
@@ -7,6 +8,7 @@ use crate::error::Result;
 use crate::map::Map;
 use crate::source::Source;
 use crate::value::{Value, ValueKind};
+use crate::ConfigError;
 
 /// An environment source collects a dictionary of environment variables values into a hierarchical
 /// config Value type. We have to be aware how the config tree is created from the environment
@@ -243,10 +245,16 @@ impl Source for Environment {
             .as_ref()
             .map(|prefix| format!("{prefix}{prefix_separator}").to_lowercase());
 
-        let collector = |(key, value): (String, String)| {
+        let collector = |(key, value): (OsString, OsString)| {
+            let key = match key.into_string() {
+                Ok(key) => key,
+                // Key is not valid unicode, skip it
+                Err(_) => return Ok(()),
+            };
+
             // Treat empty environment variables as unset
             if self.ignore_empty && value.is_empty() {
-                return;
+                return Ok(());
             }
 
             let mut key = key.to_lowercase();
@@ -260,9 +268,17 @@ impl Source for Environment {
                     }
                 } else {
                     // Skip this key
-                    return;
+                    return Ok(());
                 }
             }
+
+            // At this point, we don't know if the key is required or not.
+            // Therefore if the value is not a valid unicode string, we error out.
+            let value = value.into_string().map_err(|os_string| {
+                ConfigError::Message(format!(
+                    "env variable {key:?} contains non-Unicode data: {os_string:?}"
+                ))
+            })?;
 
             // If separator is given replace with `.`
             if !separator.is_empty() {
@@ -308,12 +324,18 @@ impl Source for Environment {
             };
 
             m.insert(key, Value::new(Some(&uri), value));
+
+            Ok(())
         };
 
         match &self.source {
-            Some(source) => source.clone().into_iter().for_each(collector),
-            None => env::vars().for_each(collector),
-        }
+            Some(source) => source
+                .clone()
+                .into_iter()
+                .map(|(key, value)| (key.into(), value.into()))
+                .try_for_each(collector),
+            None => env::vars_os().try_for_each(collector),
+        }?;
 
         Ok(m)
     }

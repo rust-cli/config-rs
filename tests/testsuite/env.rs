@@ -721,3 +721,86 @@ fn test_parse_uint_default() {
     let config: TestUint = config.try_deserialize().unwrap();
     assert_eq!(config.int_val, 42);
 }
+
+#[cfg(any(unix, windows))]
+#[cfg(test)]
+mod unicode_tests {
+    use std::ffi::OsString;
+
+    use super::*;
+
+    fn make_invalid_unicode_os_string() -> OsString {
+        let string = {
+            #[cfg(unix)]
+            {
+                use std::os::unix::ffi::OsStringExt;
+
+                OsString::from_vec(vec![0xff])
+            }
+            #[cfg(windows)]
+            {
+                use std::os::windows::ffi::OsStringExt;
+
+                OsString::from_wide(&[0xd800]) // unpaired high surrogate
+            }
+        };
+
+        assert!(string.to_str().is_none());
+
+        string
+    }
+
+    #[test]
+    fn test_invalid_unicode_key_ignored() {
+        temp_env::with_vars(
+            vec![
+                (make_invalid_unicode_os_string(), Some("abc")),
+                ("A_B_C".into(), Some("abc")),
+            ],
+            || {
+                let vars = Environment::default().collect().unwrap();
+
+                assert!(vars.contains_key("a_b_c"));
+            },
+        );
+    }
+
+    #[test]
+    fn test_invalid_unicode_value_filtered() {
+        temp_env::with_vars(
+            vec![
+                ("invalid_value1", Some(make_invalid_unicode_os_string())),
+                ("valid_value2", Some("valid".into())),
+            ],
+            || {
+                let vars = Environment::with_prefix("valid")
+                    .keep_prefix(true)
+                    .collect()
+                    .unwrap();
+
+                assert!(!vars.contains_key("invalid_value1"));
+                assert!(vars.contains_key("valid_value2"));
+            },
+        );
+    }
+
+    #[test]
+    fn test_invalid_unicode_value_not_filtered() {
+        temp_env::with_vars(
+            vec![("invalid_value1", Some(make_invalid_unicode_os_string()))],
+            || {
+                let result = Environment::default().collect();
+
+                #[cfg(unix)]
+                let expected =
+                    str![[r#"env variable "invalid_value1" contains non-Unicode data: "/xFF""#]];
+                #[cfg(windows)]
+                let expected = str![[
+                    r#"env variable "invalid_value1" contains non-Unicode data: "/u{d800}""#
+                ]];
+
+                assert_data_eq!(result.unwrap_err().to_string(), expected);
+            },
+        );
+    }
+}
