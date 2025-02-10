@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fix
+
+- Don't panic on non-unicode env variable names and values
+
 ## [0.15.7] - 2025-01-30
 
 ### Internal
