@@ -67,11 +67,11 @@ where
 impl File<FileSourceFile, FileFormat> {
     /// Given the basename of a file, will attempt to locate a file by setting its
     /// extension to a registered format.
-    pub fn with_name(name: &str) -> Self {
+    pub fn with_name(base_name: &str) -> Self {
         Self {
             format: None,
             required: true,
-            source: FileSourceFile::new(name.into()),
+            source: FileSourceFile::new(base_name.into()),
         }
     }
 }
