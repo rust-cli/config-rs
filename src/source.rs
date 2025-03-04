@@ -13,8 +13,8 @@ use crate::value::{Value, ValueKind};
 pub trait Source: Debug {
     fn clone_into_box(&self) -> Box<dyn Source + Send + Sync>;
 
-    /// Collect all configuration properties available from this source and return
-    /// a Map.
+    /// Collect all configuration properties available from this source into
+    /// a [`Map`].
     fn collect(&self) -> Result<Map<String, Value>>;
 
     /// Collects all configuration properties to a provided cache.
