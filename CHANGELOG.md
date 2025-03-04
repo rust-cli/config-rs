@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Compatibility
+
+- Upgrade to `yaml-rust2` 0.10
+
+### Documentation
+
+- Provided more jumping off points in the documentation
+
 ## [0.15.8] - 2025-02-10
 
 ### Fix
