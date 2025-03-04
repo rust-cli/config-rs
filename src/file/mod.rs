@@ -15,6 +15,14 @@ pub use self::format::FileFormat;
 pub use self::source::file::FileSourceFile;
 pub use self::source::string::FileSourceString;
 
+/// An extension of [`Format`] trait.
+///
+/// Associates format with file extensions, therefore linking storage-agnostic notion of format to a file system.
+pub trait FileStoredFormat: Format {
+    /// Returns a vector of file extensions, for instance `[yml, yaml]`.
+    fn file_extensions(&self) -> &'static [&'static str];
+}
+
 /// A configuration source backed up by a file.
 ///
 /// It supports optional automatic file format discovery.
@@ -28,14 +36,6 @@ pub struct File<T, F> {
 
     /// A required File will error if it cannot be found
     required: bool,
-}
-
-/// An extension of [`Format`] trait.
-///
-/// Associates format with file extensions, therefore linking storage-agnostic notion of format to a file system.
-pub trait FileStoredFormat: Format {
-    /// Returns a vector of file extensions, for instance `[yml, yaml]`.
-    fn file_extensions(&self) -> &'static [&'static str];
 }
 
 impl<F> File<FileSourceString, F>
