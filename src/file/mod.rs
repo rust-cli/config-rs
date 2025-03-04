@@ -76,6 +76,23 @@ impl File<FileSourceFile, FileFormat> {
     }
 }
 
+impl<T, F> File<T, F>
+where
+    F: FileStoredFormat + 'static,
+    T: FileSource<F>,
+{
+    pub fn format(mut self, format: F) -> Self {
+        self.format = Some(format);
+        self
+    }
+
+    /// Set required to false to make a file optional when building the config.
+    pub fn required(mut self, required: bool) -> Self {
+        self.required = required;
+        self
+    }
+}
+
 impl<'a> From<&'a Path> for File<FileSourceFile, FileFormat> {
     fn from(path: &'a Path) -> Self {
         Self {
@@ -93,23 +110,6 @@ impl From<PathBuf> for File<FileSourceFile, FileFormat> {
             required: true,
             source: FileSourceFile::new(path),
         }
-    }
-}
-
-impl<T, F> File<T, F>
-where
-    F: FileStoredFormat + 'static,
-    T: FileSource<F>,
-{
-    pub fn format(mut self, format: F) -> Self {
-        self.format = Some(format);
-        self
-    }
-
-    /// Set required to false to make a file optional when building the config.
-    pub fn required(mut self, required: bool) -> Self {
-        self.required = required;
-        self
     }
 }
 
