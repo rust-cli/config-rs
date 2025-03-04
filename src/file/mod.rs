@@ -15,6 +15,14 @@ pub use self::format::FileFormat;
 pub use self::source::file::FileSourceFile;
 pub use self::source::string::FileSourceString;
 
+/// An extension of [`Format`] trait.
+///
+/// Associates format with file extensions, therefore linking storage-agnostic notion of format to a file system.
+pub trait FileStoredFormat: Format {
+    /// Returns a vector of file extensions, for instance `[yml, yaml]`.
+    fn file_extensions(&self) -> &'static [&'static str];
+}
+
 /// A configuration source backed up by a file.
 ///
 /// It supports optional automatic file format discovery.
@@ -28,14 +36,6 @@ pub struct File<T, F> {
 
     /// A required File will error if it cannot be found
     required: bool,
-}
-
-/// An extension of [`Format`] trait.
-///
-/// Associates format with file extensions, therefore linking storage-agnostic notion of format to a file system.
-pub trait FileStoredFormat: Format {
-    /// Returns a vector of file extensions, for instance `[yml, yaml]`.
-    fn file_extensions(&self) -> &'static [&'static str];
 }
 
 impl<F> File<FileSourceString, F>
@@ -67,12 +67,29 @@ where
 impl File<FileSourceFile, FileFormat> {
     /// Given the basename of a file, will attempt to locate a file by setting its
     /// extension to a registered format.
-    pub fn with_name(name: &str) -> Self {
+    pub fn with_name(base_name: &str) -> Self {
         Self {
             format: None,
             required: true,
-            source: FileSourceFile::new(name.into()),
+            source: FileSourceFile::new(base_name.into()),
         }
+    }
+}
+
+impl<T, F> File<T, F>
+where
+    F: FileStoredFormat + 'static,
+    T: FileSource<F>,
+{
+    pub fn format(mut self, format: F) -> Self {
+        self.format = Some(format);
+        self
+    }
+
+    /// Set required to false to make a file optional when building the config.
+    pub fn required(mut self, required: bool) -> Self {
+        self.required = required;
+        self
     }
 }
 
@@ -93,23 +110,6 @@ impl From<PathBuf> for File<FileSourceFile, FileFormat> {
             required: true,
             source: FileSourceFile::new(path),
         }
-    }
-}
-
-impl<T, F> File<T, F>
-where
-    F: FileStoredFormat + 'static,
-    T: FileSource<F>,
-{
-    pub fn format(mut self, format: F) -> Self {
-        self.format = Some(format);
-        self
-    }
-
-    /// Set required to false to make a file optional when building the config.
-    pub fn required(mut self, required: bool) -> Self {
-        self.required = required;
-        self
     }
 }
 

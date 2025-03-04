@@ -11,8 +11,9 @@ use crate::ser::ConfigSerializer;
 use crate::source::Source;
 use crate::value::{Table, Value};
 
-/// A prioritized configuration repository. It maintains a set of
-/// configuration sources, fetches values to populate those, and provides
+/// A prioritized configuration repository.
+///
+/// It maintains a set of configuration sources, fetches values to populate those, and provides
 /// them according to the source's priority.
 #[derive(Clone, Debug)]
 pub struct Config {

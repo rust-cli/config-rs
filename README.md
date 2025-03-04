@@ -28,11 +28,6 @@ values back to the configuration file(s)!
 
 ## Usage
 
-```toml
-[dependencies]
-config = "0.14.0"
-```
-
 ### Feature flags
 
  - `ini` - Adds support for reading INI files

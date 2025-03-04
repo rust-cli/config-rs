@@ -1,21 +1,29 @@
-//! Config organizes hierarchical or layered configurations for Rust applications.
+//! [`Config`] organizes hierarchical or layered configurations for Rust applications.
 //!
-//! Config lets you set a set of default parameters and then extend them via merging in
+//! [`Config`] lets you set a set of [default parameters][ConfigBuilder::set_default] and then extend them via merging in
 //! configuration from a variety of sources:
 //!
-//!  - Environment variables
-//!  - String literals in well-known formats
-//!  - Another Config instance
-//!  - Files: TOML, JSON, YAML, INI, RON, JSON5 and custom ones defined with Format trait
-//!  - Manual, programmatic override (via a `.set` method on the Config instance)
+//!  - [Environment variables][Environment]
+//!  - [String literals][FileSourceString] in [well-known formats][FileFormat]
+//!  - Another [`Config`] instance
+//!  - [Files][FileSourceFile] in [well known formats][FileFormat] and custom ones defined with [`Format`] trait
+//!  - Manual, programmatic [overrides][ConfigBuilder::set_override]
 //!
-//! Additionally, Config supports:
+//! Additionally, [`Config`] supports:
 //!
 //!  - Live watching and re-reading of configuration files
 //!  - Deep access into the merged configuration via a path syntax
 //!  - Deserialization via `serde` of the configuration or any subset defined via a path
 //!
-//! See the [examples](https://github.com/mehcode/config-rs/tree/master/examples) for
+//! # Example
+//!
+//! ```rust
+//! # #[cfg(feature = "toml")] {
+#![doc = include_str!("../examples/simple/main.rs")]
+//! # }
+//! ```
+//!
+//! See more [examples](https://github.com/mehcode/config-rs/tree/master/examples) for
 //! general usage information.
 
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]

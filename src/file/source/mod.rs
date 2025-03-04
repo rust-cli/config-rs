@@ -6,7 +6,7 @@ use std::fmt::Debug;
 
 use crate::{file::FileStoredFormat, Format};
 
-/// Describes where the file is sourced
+/// Describes where the [`File`][super::File] is sourced
 pub trait FileSource<T>: Debug + Clone
 where
     T: Format + FileStoredFormat,

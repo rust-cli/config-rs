@@ -125,9 +125,8 @@ enum SourceType {
 impl BuilderState for DefaultState {}
 impl BuilderState for AsyncState {}
 
+/// Operations allowed in any state
 impl<St: BuilderState> ConfigBuilder<St> {
-    // operations allowed in any state
-
     /// Set a default `value` at `key`
     ///
     /// This value can be overwritten by any [`Source`], [`AsyncSource`] or override.
@@ -183,9 +182,8 @@ impl<St: BuilderState> ConfigBuilder<St> {
     }
 }
 
+/// Operations allowed in sync state
 impl ConfigBuilder<DefaultState> {
-    // operations allowed in sync state
-
     /// Registers new [`Source`] in this builder.
     ///
     /// Calling this method does not invoke any I/O. [`Source`] is only saved in internal register for later use.
@@ -273,9 +271,8 @@ impl ConfigBuilder<DefaultState> {
     }
 }
 
+/// Operations allowed in async state
 impl ConfigBuilder<AsyncState> {
-    // operations allowed in async state
-
     /// Registers new [`Source`] in this builder.
     ///
     /// Calling this method does not invoke any I/O. [`Source`] is only saved in internal register for later use.
