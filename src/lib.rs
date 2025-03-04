@@ -15,7 +15,15 @@
 //!  - Deep access into the merged configuration via a path syntax
 //!  - Deserialization via `serde` of the configuration or any subset defined via a path
 //!
-//! See the [examples](https://github.com/mehcode/config-rs/tree/master/examples) for
+//! # Example
+//!
+//! ```rust
+//! # #[cfg(feature = "toml")] {
+#![doc = include_str!("../examples/simple/main.rs")]
+//! # }
+//! ```
+//!
+//! See more [examples](https://github.com/mehcode/config-rs/tree/master/examples) for
 //! general usage information.
 
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
