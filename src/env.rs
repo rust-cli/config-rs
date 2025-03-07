@@ -151,14 +151,8 @@ impl Environment {
     /// Once `list_separator` is set, the type for string is [`Vec<String>`].
     /// To switch the default type back to type Strings you need to provide the keys which should be [`Vec<String>`] using this function.
     pub fn with_list_parse_key(mut self, key: &str) -> Self {
-        if self.list_parse_keys.is_none() {
-            self.list_parse_keys = Some(vec![key.into()]);
-        } else {
-            self.list_parse_keys = self.list_parse_keys.map(|mut keys| {
-                keys.push(key.into());
-                keys
-            });
-        }
+        let keys = self.list_parse_keys.get_or_insert_with(Vec::new);
+        keys.push(key.into());
         self
     }
 
