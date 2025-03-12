@@ -358,3 +358,22 @@ inner_vec:
         str!["Cannot parse Array([Integer(1), Integer(2)]) because it is an unsupported hash key type"]
     );
 }
+
+#[test]
+fn test_yaml_parsing_bool_hash_fails() {
+    let result = Config::builder()
+        .add_source(File::from_str(
+            r#"
+inner_bool:
+    true: "bool true"
+    false: "bool false"
+"#,
+            FileFormat::Yaml,
+        ))
+        .build();
+    assert!(result.is_err());
+    assert_data_eq!(
+        result.unwrap_err().to_string(),
+        str!["Cannot parse Boolean(true) because it is an unsupported hash key type"]
+    );
+}
