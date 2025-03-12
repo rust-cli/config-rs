@@ -360,8 +360,13 @@ inner_vec:
 }
 
 #[test]
-fn test_yaml_parsing_bool_hash_fails() {
-    let result = Config::builder()
+fn test_yaml_parsing_bool_hash() {
+    #[derive(Debug, Deserialize)]
+    struct TestStruct {
+        inner_bool: HashMap<bool, String>,
+    }
+
+    let config = Config::builder()
         .add_source(File::from_str(
             r#"
 inner_bool:
@@ -370,10 +375,10 @@ inner_bool:
 "#,
             FileFormat::Yaml,
         ))
-        .build();
-    assert!(result.is_err());
-    assert_data_eq!(
-        result.unwrap_err().to_string(),
-        str!["Cannot parse Boolean(true) because it is an unsupported hash key type"]
-    );
+        .build()
+        .unwrap()
+        .try_deserialize::<TestStruct>()
+        .unwrap();
+    assert_eq!(config.inner_bool.get(&true).unwrap(), "bool true");
+    assert_eq!(config.inner_bool.get(&false).unwrap(), "bool false");
 }
