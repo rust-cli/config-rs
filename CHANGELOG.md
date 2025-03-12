@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Features
+
+- Deserialize YAML boolean keys as strings
+
+### Fixes
+
+- Don't panic on non-string YAML keys
+
 ## [0.15.9] - 2025-03-04
 
 ### Compatibility
