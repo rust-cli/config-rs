@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Features
+
+- Deserialize YAML real keys as strings
+
 ## [0.15.10] - 2025-03-12
 
 ### Features
