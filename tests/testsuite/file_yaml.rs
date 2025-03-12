@@ -382,3 +382,22 @@ inner_bool:
     assert_eq!(config.inner_bool.get(&true).unwrap(), "bool true");
     assert_eq!(config.inner_bool.get(&false).unwrap(), "bool false");
 }
+
+#[test]
+fn test_yaml_parsing_float_hash() {
+    let result = Config::builder()
+        .add_source(File::from_str(
+            r#"
+inner_float:
+    0.1: "float 0.1"
+    0.2: "float 0.2"
+"#,
+            FileFormat::Yaml,
+        ))
+        .build();
+    assert!(result.is_err());
+    assert_data_eq!(
+        result.unwrap_err().to_string(),
+        str!["Cannot parse Real(\"0.1\") because it is an unsupported hash key type"]
+    );
+}
