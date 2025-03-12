@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.10] - 2025-03-12
+
 ### Features
 
 - Deserialize YAML boolean keys as strings
@@ -571,7 +573,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.9...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.10...HEAD
+[0.15.10]: https://github.com/rust-cli/config-rs/compare/v0.15.9...v0.15.10
 [0.15.9]: https://github.com/rust-cli/config-rs/compare/v0.15.8...v0.15.9
 [0.15.8]: https://github.com/rust-cli/config-rs/compare/v0.15.7...v0.15.8
 [0.15.7]: https://github.com/rust-cli/config-rs/compare/v0.15.6...v0.15.7
