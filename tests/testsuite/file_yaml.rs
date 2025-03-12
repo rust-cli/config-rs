@@ -340,8 +340,9 @@ fn yaml() {
 }
 
 #[test]
-#[should_panic]
-fn test_yaml_parsing_unsupported_hash() {
+/// We only support certain types as keys to a yaml hash, this test ensures
+/// we communicate that to the user effectively.
+fn test_yaml_parsing_unsupported_hash_has_useful_error_message() {
     let result = Config::builder()
         .add_source(File::from_str(
             r#"
@@ -352,4 +353,8 @@ inner_vec:
         ))
         .build();
     assert!(result.is_err());
+    assert_data_eq!(
+        result.unwrap_err().to_string(),
+        str!["Cannot parse Array([Integer(1), Integer(2)]) because it is an unsupported hash key type"]
+    );
 }

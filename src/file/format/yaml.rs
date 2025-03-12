@@ -50,7 +50,7 @@ fn from_yaml_value(
                 match key {
                     yaml::Yaml::String(k) => m.insert(k.to_owned(), from_yaml_value(uri, value)?),
                     yaml::Yaml::Integer(k) => m.insert(k.to_string(), from_yaml_value(uri, value)?),
-                    _ => unreachable!(),
+                    other => Err(Box::new(UnsupportedHashKeyError(format!("{other:?}"))))?,
                 };
             }
             Ok(Value::new(uri, ValueKind::Table(m)))
@@ -101,5 +101,24 @@ impl fmt::Display for FloatParsingError {
 impl Error for FloatParsingError {
     fn description(&self) -> &str {
         "Floating point number parsing failed"
+    }
+}
+
+#[derive(Debug, Clone)]
+struct UnsupportedHashKeyError(String);
+
+impl fmt::Display for UnsupportedHashKeyError {
+    fn fmt(&self, format: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            format,
+            "Cannot parse {} because it is an unsupported hash key type",
+            self.0
+        )
+    }
+}
+
+impl Error for UnsupportedHashKeyError {
+    fn description(&self) -> &str {
+        "Unsupported yaml hash key found"
     }
 }
