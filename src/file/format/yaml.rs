@@ -51,6 +51,7 @@ fn from_yaml_value(
                     yaml::Yaml::String(k) => m.insert(k.to_owned(), from_yaml_value(uri, value)?),
                     yaml::Yaml::Integer(k) => m.insert(k.to_string(), from_yaml_value(uri, value)?),
                     yaml::Yaml::Boolean(k) => m.insert(k.to_string(), from_yaml_value(uri, value)?),
+                    yaml::Yaml::Real(k) => m.insert(k.to_owned(), from_yaml_value(uri, value)?),
                     other => Err(Box::new(UnsupportedHashKeyError(format!("{other:?}"))))?,
                 };
             }

@@ -382,3 +382,27 @@ inner_bool:
     assert_eq!(config.inner_bool.get(&true).unwrap(), "bool true");
     assert_eq!(config.inner_bool.get(&false).unwrap(), "bool false");
 }
+
+#[test]
+fn test_yaml_parsing_float_hash() {
+    #[derive(Debug, Deserialize)]
+    struct TestStruct {
+        inner_float: HashMap<String, String>,
+    }
+
+    let config = Config::builder()
+        .add_source(File::from_str(
+            r#"
+inner_float:
+    0.1: "float 0.1"
+    0.2: "float 0.2"
+"#,
+            FileFormat::Yaml,
+        ))
+        .build()
+        .unwrap()
+        .try_deserialize::<TestStruct>()
+        .unwrap();
+    assert_eq!(config.inner_float.get("0.1").unwrap(), "float 0.1");
+    assert_eq!(config.inner_float.get("0.2").unwrap(), "float 0.2");
+}
