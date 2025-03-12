@@ -338,3 +338,47 @@ fn yaml() {
     let date: DateTime<Utc> = s.get("yaml_datetime").unwrap();
     assert_eq!(date, Utc.with_ymd_and_hms(2017, 6, 12, 10, 58, 30).unwrap());
 }
+
+#[test]
+/// We only support certain types as keys to a yaml hash, this test ensures
+/// we communicate that to the user effectively.
+fn test_yaml_parsing_unsupported_hash_has_useful_error_message() {
+    let result = Config::builder()
+        .add_source(File::from_str(
+            r#"
+inner_vec:
+    [1, 2]: "unsupported"
+"#,
+            FileFormat::Yaml,
+        ))
+        .build();
+    assert!(result.is_err());
+    assert_data_eq!(
+        result.unwrap_err().to_string(),
+        str!["Cannot parse Array([Integer(1), Integer(2)]) because it is an unsupported hash key type"]
+    );
+}
+
+#[test]
+fn test_yaml_parsing_bool_hash() {
+    #[derive(Debug, Deserialize)]
+    struct TestStruct {
+        inner_bool: HashMap<bool, String>,
+    }
+
+    let config = Config::builder()
+        .add_source(File::from_str(
+            r#"
+inner_bool:
+    true: "bool true"
+    false: "bool false"
+"#,
+            FileFormat::Yaml,
+        ))
+        .build()
+        .unwrap()
+        .try_deserialize::<TestStruct>()
+        .unwrap();
+    assert_eq!(config.inner_bool.get(&true).unwrap(), "bool true");
+    assert_eq!(config.inner_bool.get(&false).unwrap(), "bool false");
+}
