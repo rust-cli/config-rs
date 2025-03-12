@@ -385,7 +385,12 @@ inner_bool:
 
 #[test]
 fn test_yaml_parsing_float_hash() {
-    let result = Config::builder()
+    #[derive(Debug, Deserialize)]
+    struct TestStruct {
+        inner_float: HashMap<String, String>,
+    }
+
+    let config = Config::builder()
         .add_source(File::from_str(
             r#"
 inner_float:
@@ -394,10 +399,10 @@ inner_float:
 "#,
             FileFormat::Yaml,
         ))
-        .build();
-    assert!(result.is_err());
-    assert_data_eq!(
-        result.unwrap_err().to_string(),
-        str!["Cannot parse Real(\"0.1\") because it is an unsupported hash key type"]
-    );
+        .build()
+        .unwrap()
+        .try_deserialize::<TestStruct>()
+        .unwrap();
+    assert_eq!(config.inner_float.get("0.1").unwrap(), "float 0.1");
+    assert_eq!(config.inner_float.get("0.2").unwrap(), "float 0.2");
 }
