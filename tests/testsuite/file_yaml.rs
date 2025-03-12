@@ -338,3 +338,18 @@ fn yaml() {
     let date: DateTime<Utc> = s.get("yaml_datetime").unwrap();
     assert_eq!(date, Utc.with_ymd_and_hms(2017, 6, 12, 10, 58, 30).unwrap());
 }
+
+#[test]
+#[should_panic]
+fn test_yaml_parsing_unsupported_hash() {
+    let result = Config::builder()
+        .add_source(File::from_str(
+            r#"
+inner_vec:
+    [1, 2]: "unsupported"
+"#,
+            FileFormat::Yaml,
+        ))
+        .build();
+    assert!(result.is_err());
+}
