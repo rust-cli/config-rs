@@ -1,57 +1,159 @@
-[package]
-name = "config"
-version = "0.13.1"
-description = "Layered configuration system for Rust applications."
-homepage = "https://github.com/mehcode/config-rs"
-repository = "https://github.com/mehcode/config-rs"
-readme = "README.md"
-keywords = ["config", "configuration", "settings", "env", "environment"]
-authors = ["Ryan Leckey <leckey.ryan@gmail.com>"]
-categories = ["config"]
+[workspace]
+resolver = "2"
+
+[workspace.package]
+repository = "https://github.com/rust-cli/config-rs"
 license = "MIT OR Apache-2.0"
 edition = "2018"
+rust-version = "1.75.0"  # MSRV
+include = [
+  "build.rs",
+  "src/**/*",
+  "Cargo.toml",
+  "Cargo.lock",
+  "LICENSE*",
+  "README.md",
+  "benches/**/*",
+  "examples/**/*"
+]
 
-[badges]
-maintenance = { status = "actively-developed" }
+[workspace.lints.rust]
+rust_2018_idioms = { level = "warn", priority = -1 }
+unreachable_pub = "warn"
+unsafe_op_in_unsafe_fn = "warn"
+unused_lifetimes = "warn"
+unused_macro_rules = "warn"
+unused_qualifications = "warn"
+
+[workspace.lints.clippy]
+bool_assert_comparison = "allow"
+branches_sharing_code = "allow"
+checked_conversions = "warn"
+collapsible_else_if = "allow"
+create_dir = "warn"
+dbg_macro = "warn"
+debug_assert_with_mut_call = "warn"
+doc_markdown = "warn"
+empty_enum = "warn"
+enum_glob_use = "warn"
+expl_impl_clone_on_copy = "warn"
+explicit_deref_methods = "warn"
+explicit_into_iter_loop = "warn"
+fallible_impl_from = "warn"
+filter_map_next = "warn"
+flat_map_option = "warn"
+float_cmp_const = "warn"
+fn_params_excessive_bools = "warn"
+from_iter_instead_of_collect = "warn"
+if_same_then_else = "allow"
+implicit_clone = "warn"
+imprecise_flops = "warn"
+inconsistent_struct_constructor = "warn"
+inefficient_to_string = "warn"
+infinite_loop = "warn"
+invalid_upcast_comparisons = "warn"
+large_digit_groups = "warn"
+large_stack_arrays = "warn"
+large_types_passed_by_value = "warn"
+let_and_return = "allow"  # sometimes good to name what you are returning
+linkedlist = "warn"
+lossy_float_literal = "warn"
+macro_use_imports = "warn"
+mem_forget = "warn"
+mutex_integer = "warn"
+needless_continue = "warn"
+needless_for_each = "warn"
+negative_feature_names = "warn"
+path_buf_push_overwrite = "warn"
+ptr_as_ptr = "warn"
+rc_mutex = "warn"
+redundant_feature_names = "warn"
+ref_option_ref = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+same_functions_in_if_condition = "warn"
+self_named_module_files = "warn"
+semicolon_if_nothing_returned = "warn"
+str_to_string = "warn"
+string_add = "warn"
+string_add_assign = "warn"
+string_lit_as_bytes = "warn"
+string_to_string = "warn"
+todo = "warn"
+trait_duplication_in_bounds = "warn"
+uninlined_format_args = "warn"
+verbose_file_reads = "warn"
+wildcard_imports = "warn"
+zero_sized_map_values = "warn"
+
+[package]
+name = "config"
+version = "0.15.11"
+description = "Layered configuration system for Rust applications."
+categories = ["config"]
+keywords = ["config", "configuration", "settings", "env", "environment"]
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+include.workspace = true
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
+
+[package.metadata.release]
+pre-release-replacements = [
+  {file="CHANGELOG.md", search="Unreleased", replace="{{version}}", min=1},
+  {file="CHANGELOG.md", search="\\.\\.\\.HEAD", replace="...{{tag_name}}", exactly=1},
+  {file="CHANGELOG.md", search="ReleaseDate", replace="{{date}}", min=1},
+  {file="CHANGELOG.md", search="<!-- next-header -->", replace="<!-- next-header -->\n## [Unreleased] - ReleaseDate\n", exactly=1},
+  {file="CHANGELOG.md", search="<!-- next-url -->", replace="<!-- next-url -->\n[Unreleased]: https://github.com/rust-cli/config-rs/compare/{{tag_name}}...HEAD", exactly=1},
+]
 
 [features]
 default = ["toml", "json", "yaml", "ini", "ron", "json5", "convert-case", "async"]
 json = ["serde_json"]
-yaml = ["yaml-rust"]
+yaml = ["yaml-rust2"]
 ini = ["rust-ini"]
 json5 = ["json5_rs", "serde/derive"]
 convert-case = ["convert_case"]
 preserve_order = ["indexmap", "toml?/preserve_order", "serde_json?/preserve_order", "ron?/indexmap"]
 async = ["async-trait"]
+toml = ["dep:toml"]
 
 [dependencies]
-lazy_static = "1.0"
-serde = "1.0.8"
-nom = "7"
+serde = "1.0"
 
-async-trait = { version = "0.1.50", optional = true }
-toml = { version = "0.8", optional = true }
-serde_json = { version = "1.0.2", optional = true }
-yaml-rust = { version = "0.4", optional = true }
-rust-ini = { version = "0.19", optional = true }
+async-trait = { version = "0.1", optional = true }
+toml = { version = "0.8", optional = true, default-features = false, features = ["parse"] }
+serde_json = { version = "1.0", optional = true }
+yaml-rust2 = { version = "0.10", optional = true }
+rust-ini = { version = "0.21", optional = true }
 ron = { version = "0.9", optional = true }
 json5_rs = { version = "0.4", optional = true, package = "json5" }
-indexmap = { version = "2.0.0", features = ["serde"], optional = true }
+indexmap = { version = "2.2", features = ["serde"], optional = true }
 convert_case = { version = "0.6", optional = true }
 pathdiff = "0.2"
+winnow = "0.7.0"
 
 [dev-dependencies]
-serde_derive = "1.0.8"
-float-cmp = "0.9"
+serde_derive = "1.0"
+float-cmp = "0.10"
 chrono = { version = "0.4", features = ["serde"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "io-util", "time"]}
-warp = "=0.3.6"
-futures = "0.3.15"
-reqwest = "0.11.10"
+warp = "0.3"
+futures = "0.3"
+reqwest = "0.12"
 
-serde = "1.0"
 glob = "0.3"
-lazy_static = "1"
-notify = "^6.0.0"
-temp-env = "0.3.0"
+notify = "7.0"
+temp-env = "0.3"
 log = { version = "0.4", features = ["serde"] }
+snapbox = "0.6.21"
+
+[[example]]
+name = "async_source"
+required-features = ["json", "async"]
+
+[lints]
+workspace = true

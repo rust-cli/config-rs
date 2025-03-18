@@ -1,25 +1,37 @@
-#![allow(deprecated)]
-use config::{Config, File};
-use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::mpsc::channel;
+use std::sync::OnceLock;
 use std::sync::RwLock;
 use std::time::Duration;
 
-lazy_static::lazy_static! {
-    static ref SETTINGS: RwLock<Config> = RwLock::new({
-        let mut settings = Config::default();
-        settings.merge(File::with_name("examples/watch/Settings.toml")).unwrap();
+use config::{Config, File};
+use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 
-        settings
-    });
+fn settings() -> &'static RwLock<Config> {
+    static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();
+    CONFIG.get_or_init(|| {
+        let settings = load();
+
+        RwLock::new(settings)
+    })
+}
+
+fn refresh() {
+    *settings().write().unwrap() = load();
+}
+
+fn load() -> Config {
+    Config::builder()
+        .add_source(File::with_name("examples/watch/Settings.toml"))
+        .build()
+        .unwrap()
 }
 
 fn show() {
     println!(
         " * Settings :: \n\x1b[31m{:?}\x1b[0m",
-        SETTINGS
+        settings()
             .read()
             .unwrap()
             .clone()
@@ -28,7 +40,7 @@ fn show() {
     );
 }
 
-fn watch() {
+fn watch() -> ! {
     // Create a channel to receive the events.
     let (tx, rx) = channel();
 
@@ -58,11 +70,11 @@ fn watch() {
                 ..
             })) => {
                 println!(" * Settings.toml written; refreshing configuration ...");
-                SETTINGS.write().unwrap().refresh().unwrap();
+                refresh();
                 show();
             }
 
-            Err(e) => println!("watch error: {:?}", e),
+            Err(e) => println!("watch error: {e:?}"),
 
             _ => {
                 // Ignore event

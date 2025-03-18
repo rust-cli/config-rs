@@ -9,8 +9,8 @@ use crate::map::Map;
 
 /// Underlying kind of the configuration value.
 ///
-/// Standard operations on a `Value` by users of this crate do not require
-/// knowledge of `ValueKind`. Introspection of underlying kind is only required
+/// Standard operations on a [`Value`] by users of this crate do not require
+/// knowledge of [`ValueKind`]. Introspection of underlying kind is only required
 /// when the configuration values are unstructured or do not have known types.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ValueKind {
@@ -26,8 +26,8 @@ pub enum ValueKind {
     Array(Array),
 }
 
-pub type Array = Vec<Value>;
-pub type Table = Map<String, Value>;
+pub(crate) type Array = Vec<Value>;
+pub(crate) type Table = Map<String, Value>;
 
 impl Default for ValueKind {
     fn default() -> Self {
@@ -151,29 +151,29 @@ where
 }
 
 impl Display for ValueKind {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use std::fmt::Write;
 
         match *self {
-            Self::String(ref value) => write!(f, "{}", value),
-            Self::Boolean(value) => write!(f, "{}", value),
-            Self::I64(value) => write!(f, "{}", value),
-            Self::I128(value) => write!(f, "{}", value),
-            Self::U64(value) => write!(f, "{}", value),
-            Self::U128(value) => write!(f, "{}", value),
-            Self::Float(value) => write!(f, "{}", value),
+            Self::String(ref value) => write!(f, "{value}"),
+            Self::Boolean(value) => write!(f, "{value}"),
+            Self::I64(value) => write!(f, "{value}"),
+            Self::I128(value) => write!(f, "{value}"),
+            Self::U64(value) => write!(f, "{value}"),
+            Self::U128(value) => write!(f, "{value}"),
+            Self::Float(value) => write!(f, "{value}"),
             Self::Nil => write!(f, "nil"),
             Self::Table(ref table) => {
                 let mut s = String::new();
                 for (k, v) in table.iter() {
-                    write!(s, "{} => {}, ", k, v)?
+                    write!(s, "{k} => {v}, ")?;
                 }
                 write!(f, "{{ {s} }}")
             }
             Self::Array(ref array) => {
                 let mut s = String::new();
                 for e in array.iter() {
-                    write!(s, "{}, ", e)?;
+                    write!(s, "{e}, ")?;
                 }
                 write!(f, "{s:?}")
             }
@@ -193,7 +193,7 @@ pub struct Value {
     ///
     /// A Value originating from the environment would contain:
     /// ```text
-    /// the envrionment
+    /// the environment
     /// ```
     ///
     /// A Value originating from a remote source might contain:
@@ -718,7 +718,7 @@ impl<'de> Deserialize<'de> for Value {
         impl<'de> Visitor<'de> for ValueVisitor {
             type Value = Value;
 
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            fn expecting(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
                 formatter.write_str("any valid configuration value")
             }
 
@@ -786,7 +786,7 @@ impl<'de> Deserialize<'de> for Value {
                 let num: i128 = value.try_into().map_err(|_| {
                     E::invalid_type(
                         ::serde::de::Unexpected::Other(
-                            format!("integer `{}` as u128", value).as_str(),
+                            format!("integer `{value}` as u128").as_str(),
                         ),
                         &self,
                     )
@@ -875,7 +875,7 @@ where
 }
 
 impl Display for Value {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.kind)
     }
 }
@@ -888,9 +888,15 @@ mod tests {
     use crate::FileFormat;
 
     #[test]
+    #[cfg(feature = "toml")]
     fn test_i64() {
         let c = Config::builder()
-            .add_source(File::new("tests/types/i64.toml", FileFormat::Toml))
+            .add_source(File::from_str(
+                "
+value = 120
+",
+                FileFormat::Toml,
+            ))
             .build()
             .unwrap();
 

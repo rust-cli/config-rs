@@ -173,7 +173,7 @@ impl<'de> de::Deserializer<'de> for Value {
 
 struct StrDeserializer<'a>(&'a str);
 
-impl<'de, 'a> de::Deserializer<'de> for StrDeserializer<'a> {
+impl<'de> de::Deserializer<'de> for StrDeserializer<'_> {
     type Error = ConfigError;
 
     #[inline]
@@ -269,15 +269,15 @@ struct EnumAccess {
 }
 
 impl EnumAccess {
-    fn variant_deserializer(&self, name: &str) -> Result<StrDeserializer> {
+    fn variant_deserializer(&self, name: &str) -> Result<StrDeserializer<'_>> {
         self.variants
             .iter()
-            .find(|&&s| s.to_lowercase() == name.to_lowercase()) // changing to lowercase will enable deserialization of lowercase values to enums
+            .find(|&&s| s == name)
             .map(|&s| StrDeserializer(s))
             .ok_or_else(|| self.no_constructor_error(name))
     }
 
-    fn table_deserializer(&self, table: &Table) -> Result<StrDeserializer> {
+    fn table_deserializer(&self, table: &Table) -> Result<StrDeserializer<'_>> {
         if table.len() == 1 {
             self.variant_deserializer(table.iter().next().unwrap().0)
         } else {
@@ -363,122 +363,56 @@ impl<'de> de::VariantAccess<'de> for EnumAccess {
     }
 }
 
+/// Define `$method`s, `deserialize_foo`, by forwarding to `Value`
+///
+/// `($arg: $argtype, ...)`, if supplied, are the formal arguments
+macro_rules! config_deserialize_via_value { { $(
+    $method:ident $( ( $( $arg:ident: $argtype:ty ),* ) )? ;
+)* } => { $(
+    #[inline]
+        fn $method<V: de::Visitor<'de>>(
+            self,
+      $( $( $arg: $argtype, )* )?
+            visitor: V,
+        ) -> Result<V::Value> {
+        self.cache.$method( $( $( $arg, )* )? visitor)
+    }
+)* } }
+
 impl<'de> de::Deserializer<'de> for Config {
     type Error = ConfigError;
 
-    #[inline]
-    fn deserialize_any<V>(self, visitor: V) -> Result<V::Value>
-    where
-        V: de::Visitor<'de>,
-    {
-        // Delegate deserialization to Value
-        de::Deserializer::deserialize_any(self.cache, visitor)
-    }
+    config_deserialize_via_value! {
+        deserialize_any;
+        deserialize_bool;
+        deserialize_i8;
+        deserialize_i16;
+        deserialize_i32;
+        deserialize_i64;
+        deserialize_u8;
+        deserialize_u16;
+        deserialize_u32;
+        deserialize_u64;
+        deserialize_f32;
+        deserialize_f64;
+        deserialize_str;
+        deserialize_string;
+        deserialize_option;
 
-    #[inline]
-    fn deserialize_bool<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        visitor.visit_bool(self.cache.into_bool()?)
-    }
+        deserialize_char;
+        deserialize_seq;
+        deserialize_bytes;
+        deserialize_byte_buf;
+        deserialize_map;
+        deserialize_unit;
+        deserialize_identifier;
+        deserialize_ignored_any;
 
-    #[inline]
-    fn deserialize_i8<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        let num = try_convert_number!(signed, self.cache, "8");
-        visitor.visit_i8(num)
-    }
-
-    #[inline]
-    fn deserialize_i16<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        let num = try_convert_number!(signed, self.cache, "16");
-        visitor.visit_i16(num)
-    }
-
-    #[inline]
-    fn deserialize_i32<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        let num = try_convert_number!(signed, self.cache, "32");
-        visitor.visit_i32(num)
-    }
-
-    #[inline]
-    fn deserialize_i64<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        let num = try_convert_number!(signed, self.cache, "64");
-        visitor.visit_i64(num)
-    }
-
-    #[inline]
-    fn deserialize_u8<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        let num = try_convert_number!(unsigned, self.cache, "8");
-        visitor.visit_u8(num)
-    }
-
-    #[inline]
-    fn deserialize_u16<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        let num = try_convert_number!(unsigned, self.cache, "16");
-        visitor.visit_u16(num)
-    }
-
-    #[inline]
-    fn deserialize_u32<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        let num = try_convert_number!(unsigned, self.cache, "32");
-        visitor.visit_u32(num)
-    }
-
-    #[inline]
-    fn deserialize_u64<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        let num = try_convert_number!(unsigned, self.cache, "64");
-        visitor.visit_u64(num)
-    }
-
-    #[inline]
-    fn deserialize_f32<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        visitor.visit_f32(self.cache.into_float()? as f32)
-    }
-
-    #[inline]
-    fn deserialize_f64<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        visitor.visit_f64(self.cache.into_float()?)
-    }
-
-    #[inline]
-    fn deserialize_str<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        visitor.visit_string(self.cache.into_string()?)
-    }
-
-    #[inline]
-    fn deserialize_string<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
-        visitor.visit_string(self.cache.into_string()?)
-    }
-
-    #[inline]
-    fn deserialize_option<V>(self, visitor: V) -> Result<V::Value>
-    where
-        V: de::Visitor<'de>,
-    {
-        // Match an explicit nil as None and everything else as Some
-        match self.cache.kind {
-            ValueKind::Nil => visitor.visit_none(),
-            _ => visitor.visit_some(self),
-        }
-    }
-
-    fn deserialize_enum<V>(
-        self,
-        name: &'static str,
-        variants: &'static [&'static str],
-        visitor: V,
-    ) -> Result<V::Value>
-    where
-        V: de::Visitor<'de>,
-    {
-        visitor.visit_enum(EnumAccess {
-            value: self.cache,
-            name,
-            variants,
-        })
-    }
-
-    serde::forward_to_deserialize_any! {
-        char seq
-        bytes byte_buf map struct unit newtype_struct
-        identifier ignored_any unit_struct tuple_struct tuple
+        deserialize_enum(name: &'static str, variants: &'static [&'static str]);
+        deserialize_unit_struct(name: &'static str);
+        deserialize_newtype_struct(name: &'static str);
+        deserialize_tuple(n: usize);
+        deserialize_tuple_struct(name: &'static str, n: usize);
+        deserialize_struct(name: &'static str, fields: &'static [&'static str]);
     }
 }

@@ -6,7 +6,7 @@ use crate::value::{Value, ValueKind};
 
 #[derive(serde::Deserialize, Debug)]
 #[serde(untagged)]
-pub enum Val {
+pub(crate) enum Val {
     Null,
     Boolean(bool),
     Integer(i64),
@@ -16,7 +16,7 @@ pub enum Val {
     Object(Map<String, Self>),
 }
 
-pub fn parse(
+pub(crate) fn parse(
     uri: Option<&String>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {

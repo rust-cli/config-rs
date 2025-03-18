@@ -38,6 +38,8 @@ use crate::{config::Config, path::Expression, source::Source, value::Value};
 /// # use config::*;
 /// # use std::error::Error;
 /// # fn main() -> Result<(), Box<dyn Error>> {
+/// # #[cfg(feature = "json")]
+/// # {
 /// let mut builder = Config::builder()
 ///     .set_default("default", "1")?
 ///     .add_source(File::new("config/settings", FileFormat::Json))
@@ -52,6 +54,7 @@ use crate::{config::Config, path::Expression, source::Source, value::Value};
 ///         // something went wrong
 ///     }
 /// }
+/// # }
 /// # Ok(())
 /// # }
 /// ```
@@ -64,11 +67,14 @@ use crate::{config::Config, path::Expression, source::Source, value::Value};
 /// # use std::error::Error;
 /// # use config::*;
 /// # fn main() -> Result<(), Box<dyn Error>> {
+/// # #[cfg(feature = "json")]
+/// # {
 /// let mut builder = Config::builder();
 /// builder = builder.set_default("default", "1")?;
 /// builder = builder.add_source(File::new("config/settings", FileFormat::Json));
 /// builder = builder.add_source(File::new("config/settings.prod", FileFormat::Json));
 /// builder = builder.set_override("override", "1")?;
+/// # }
 /// # Ok(())
 /// # }
 /// ```
@@ -97,33 +103,13 @@ pub struct ConfigBuilder<St: BuilderState> {
 /// Represents [`ConfigBuilder`] state.
 pub trait BuilderState {}
 
-/// Represents data specific to builder in default, sychronous state, without support for async.
+/// Represents data specific to builder in default, synchronous state, without support for async.
 #[derive(Debug, Default, Clone)]
 pub struct DefaultState {
     sources: Vec<Box<dyn Source + Send + Sync>>,
 }
 
-/// The asynchronous configuration builder.
-///
-/// Similar to a [`ConfigBuilder`] it maintains a set of defaults, a set of sources, and overrides.
-///
-/// Defaults do not override anything, sources override defaults, and overrides override anything else.
-/// Within those three groups order of adding them at call site matters - entities added later take precedence.
-///
-/// For more detailed description and examples see [`ConfigBuilder`].
-/// [`AsyncConfigBuilder`] is just an extension of it that takes async functions into account.
-///
-/// To obtain a [`Config`] call [`build`](AsyncConfigBuilder::build) or [`build_cloned`](AsyncConfigBuilder::build_cloned)
-///
-/// # Example
-/// Since this library does not implement any [`AsyncSource`] an example in rustdocs cannot be given.
-/// Detailed explanation about why such a source is not implemented is in [`AsyncSource`]'s documentation.
-///
-/// Refer to [`ConfigBuilder`] for similar API sample usage or to the examples folder of the crate, where such a source is implemented.
-#[derive(Debug, Clone, Default)]
-pub struct AsyncConfigBuilder {}
-
-/// Represents data specific to builder in asychronous state, with support for async.
+/// Represents data specific to builder in asynchronous state, with support for async.
 #[derive(Debug, Default, Clone)]
 pub struct AsyncState {
     sources: Vec<SourceType>,
@@ -139,9 +125,8 @@ enum SourceType {
 impl BuilderState for DefaultState {}
 impl BuilderState for AsyncState {}
 
+/// Operations allowed in any state
 impl<St: BuilderState> ConfigBuilder<St> {
-    // operations allowed in any state
-
     /// Set a default `value` at `key`
     ///
     /// This value can be overwritten by any [`Source`], [`AsyncSource`] or override.
@@ -197,9 +182,8 @@ impl<St: BuilderState> ConfigBuilder<St> {
     }
 }
 
+/// Operations allowed in sync state
 impl ConfigBuilder<DefaultState> {
-    // operations allowed in sync state
-
     /// Registers new [`Source`] in this builder.
     ///
     /// Calling this method does not invoke any I/O. [`Source`] is only saved in internal register for later use.
@@ -287,9 +271,8 @@ impl ConfigBuilder<DefaultState> {
     }
 }
 
+/// Operations allowed in async state
 impl ConfigBuilder<AsyncState> {
-    // operations allowed in async state
-
     /// Registers new [`Source`] in this builder.
     ///
     /// Calling this method does not invoke any I/O. [`Source`] is only saved in internal register for later use.

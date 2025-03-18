@@ -4,7 +4,303 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+<!-- next-header -->
+## [Unreleased] - ReleaseDate
+
+## [0.15.11] - 2025-03-12
+
+### Features
+
+- Deserialize YAML real keys as strings
+
+## [0.15.10] - 2025-03-12
+
+### Features
+
+- Deserialize YAML boolean keys as strings
+
+### Fixes
+
+- Don't panic on non-string YAML keys
+
+## [0.15.9] - 2025-03-04
+
+### Compatibility
+
+- Upgrade to `yaml-rust2` 0.10
+
+### Documentation
+
+- Provided more jumping off points in the documentation
+
+## [0.15.8] - 2025-02-10
+
+### Fix
+
+- Don't panic on non-unicode env variable names and values
+
+## [0.15.7] - 2025-01-30
+
+### Internal
+
+- Update a dependency
+
+## [0.15.6] - 2025-01-14
+
+### Fixes
+
+- Fix regression from 0.15.3 with reading a table from an empty config
+
+## [0.15.5] - 2025-01-10
+
+### Fixes
+
+- Include the `key` on all serde errors
+
+### Performance
+
+- Don't clone when merging sources
+
+## [0.15.4] - 2024-12-20
+
+### Performance
+
+- Reduce TOML build times
+
+## [0.15.3] - 2024-12-19
+
+### Internal
+
+- Clean ups
+
+## [0.15.2] - 2024-12-19
+
+### Fixes
+
+- Provide an error message on path parsing errors (regression from 0.15.0)
+- Improve quality of path parsing error messages
+
+## [0.15.1] - 2024-12-19
+
+### Fixes
+
+- Don't crash on `get(arr[-1])` on empty arrays
+- Don't crash on `set_override(arr[-1])` on empty arrays
+
+## [0.15.0] - 2024-12-17
+
+### Compatibility
+
+- `ConfigError` is no longer exhaustive
+- `ConfigError::Parse`s type changed
+- `FileFormat` is no longer exhaustive
+- Deprecated functions removed
+- Case insensitivity from 0.14.0 was reverted
+
+### Fixes
+
+- Struct fields, variants, and lookup paths with uppercase letters can be used again (regression from 0.14.0)
+
+## [0.14.1] - 2024-10-23
+
+### Compatibility
+
+- MSRV is now 1.75
+
+### Internal
+
+- Remove dependency on `lazy_static`
+- Update rust-ini from 0.19 to 0.20
+- Switch from yaml-rust to yaml-rust2
+
+## 0.14.0 - 2024-02-01
+
+This is a maintenance release, mostly to get some dependency updates out, but
+also with some fixes and changes that have piled up over a rather long time.
+
+### Features
+
+ - [#100] Fix #99: expose file::source::FileSource
+ - [#318] Add Value::origin()
+ - [#379] Add clone to builder state types
+ - [#381] env: add a 'convert_case' field to ease dealing with kebab-case
+ - [#402] Gate async-traits behind a feature
+ - [#413] Attach key to type error generated from Config::get_<type>()
+ - [#480] Hide and deprecate AsyncConfigBuilder
+
+### Fixes
+
+ - [#306] fix: dot in config name
+ - [#334] errors: clarify names of integer types
+ - [#343] fix yaml to parse int keys
+ - [#353] Use TryInto for more permissive deserialization for integers
+ - [#354] Fix uppercase lowercase issues
+ - [#374] Fix FIXME in de.rs and value.rs
+ - [#395] Fix: Do not use deprecated function
+ - [#429] Make the parse list key to lowercase when insert the keys
+ - [#465] Fix nested arrays (by reworking array handling)
+ - [#481] Fix docs warnings
+
+### Dependency updates
+
+ - [#271] Update warp requirement from =0.3.1 to =0.3.2
+ - [#316] test: Adopt test-env to fix random test failure
+ - [#335] Update MSRV: 1.56.0 -> 1.56.1
+ - [#350] Bump actions/checkout from 2.4.0 to 3.0.2
+ - [#367] Update ron requirement from 0.7 to 0.8
+ - [#373] Update notify (4.0.0 -> 5.0.0)
+ - [#375] Update temp-env requirement from 0.2.0 to 0.3.0
+ - [#378] Update warp requirement from =0.3.2 to =0.3.3
+ - [#382] Bump actions/checkout from 3.0.2 to 3.1.0
+ - [#389] Update MSRV: 1.56.1 -> 1.59.0
+ - [#403] Bump actions/checkout from 3.1.0 to 3.2.0
+ - [#411] Bump actions/checkout from 3.2.0 to 3.3.0
+ - [#420] Update MSRV: 1.59.0 -> 1.60.0
+ - [#421] Update toml requirement from 0.5 to 0.7
+ - [#422] Update MSRV in cron workflow
+ - [#425] Bump actions/checkout from 3.3.0 to 3.4.0
+ - [#426] Update MSRV: 1.60.0 -> 1.64.0
+ - [#427] Bump actions/checkout from 3.4.0 to 3.5.0
+ - [#430] Update warp requirement from =0.3.3 to =0.3.4
+ - [#433] Bump actions/checkout from 3.5.0 to 3.5.1
+ - [#434] Bump actions/checkout from 3.5.1 to 3.5.2
+ - [#436] Update warp requirement from =0.3.4 to =0.3.5
+ - [#437] Update rust-ini requirement from 0.18 to 0.19
+ - [#438] Update notify requirement from ^5.0.0 to ^6.0.0
+ - [#440] Bump actions/checkout from 3.5.2 to 3.5.3
+ - [#441] Update indexmap requirement from 1.7.0 to 2.0.0
+ - [#451] Bump actions/checkout from 3.5.3 to 3.6.0
+ - [#453] Bump actions/checkout from 3.6.0 to 4.0.0
+ - [#455] MSRV: 1.64.0 -> 1.66.0
+ - [#456] Update toml requirement from 0.7 to 0.8
+ - [#458] Update MSRV in cron job
+ - [#459] Bump actions/checkout from 4.0.0 to 4.1.0
+ - [#462] Update warp requirement from =0.3.5 to =0.3.6
+ - [#477] Bump actions/checkout from 4.1.0 to 4.1.1
+ - [#483] Update MSRV: 1.66.0 -> 1.70.0
+ - [#503] Bump actions/setup-python from 4 to 5
+
+#### Misc
+
+ - [#188] Add test for log::Level deserialization
+ - [#274] move 'must_use' attribute to struct for 'builder' types
+ - [#283] Add cron job
+ - [#299] docs(builder): fix typo in doc comment
+ - [#344] Fix clippy: Derive Eq as well
+ - [#347] Fix clippy: use first() instead of get(0)
+ - [#348] actions: Remove "minimal" setting, as workflow does not support this key
+ - [#356] refactoring deserialize-any in config
+ - [#359] Add test to deserialize unsigned int
+ - [#360] Duplicate test for type conversion with unsigned int
+ - [#362] Run clippy only on MSRV
+ - [#363] Backport CHANGELOG entry for 0.13.2
+ - [#388] Add documentation to File required setter
+ - [#392] Add simple example using lazy_static
+ - [#393] More clippy fixes
+ - [#396] Replace actions rs
+ - [#401] Backport changelog
+ - [#404] Replace fixupmerge with gitlint
+ - [#406] Fix clippy: Remove unnecessary cast
+ - [#410] Copy member docs to builder functions
+ - [#416] Replace actions-rs with run scripts
+ - [#423] Fix clippy: Remove needless borrowed reference
+ - [#445] Update license field following SPDX 2.1 license expression standard
+ - [#460] Use weak features for preserve_order
+ - [#469] chore: Use a common method in parsers to check root is a table
+ - [#471] Clippy exact toolchains
+ - [#479] docs: Example for conditionally loading sources
+ - [#485] Add DCO
+ - [#488] Unify deser impl (redux)
+ - [#489] deserialize: strings: Introduce string_serialize_via_display macro
+ - [#507] Check external types
+ - [#511] Fix: cargo-check-external-types must use nightly 2023-10-10
+
+[#100]: https://github.com/mehcode/config-rs/pull/100
+[#188]: https://github.com/mehcode/config-rs/pull/188
+[#271]: https://github.com/mehcode/config-rs/pull/271
+[#274]: https://github.com/mehcode/config-rs/pull/274
+[#283]: https://github.com/mehcode/config-rs/pull/283
+[#299]: https://github.com/mehcode/config-rs/pull/299
+[#306]: https://github.com/mehcode/config-rs/pull/306
+[#316]: https://github.com/mehcode/config-rs/pull/316
+[#318]: https://github.com/mehcode/config-rs/pull/318
+[#334]: https://github.com/mehcode/config-rs/pull/334
+[#335]: https://github.com/mehcode/config-rs/pull/335
+[#343]: https://github.com/mehcode/config-rs/pull/343
+[#344]: https://github.com/mehcode/config-rs/pull/344
+[#347]: https://github.com/mehcode/config-rs/pull/347
+[#348]: https://github.com/mehcode/config-rs/pull/348
+[#350]: https://github.com/mehcode/config-rs/pull/350
+[#353]: https://github.com/mehcode/config-rs/pull/353
+[#354]: https://github.com/mehcode/config-rs/pull/354
+[#356]: https://github.com/mehcode/config-rs/pull/356
+[#359]: https://github.com/mehcode/config-rs/pull/359
+[#360]: https://github.com/mehcode/config-rs/pull/360
+[#362]: https://github.com/mehcode/config-rs/pull/362
+[#363]: https://github.com/mehcode/config-rs/pull/363
+[#367]: https://github.com/mehcode/config-rs/pull/367
+[#373]: https://github.com/mehcode/config-rs/pull/373
+[#374]: https://github.com/mehcode/config-rs/pull/374
+[#375]: https://github.com/mehcode/config-rs/pull/375
+[#378]: https://github.com/mehcode/config-rs/pull/378
+[#379]: https://github.com/mehcode/config-rs/pull/379
+[#381]: https://github.com/mehcode/config-rs/pull/381
+[#382]: https://github.com/mehcode/config-rs/pull/382
+[#388]: https://github.com/mehcode/config-rs/pull/388
+[#389]: https://github.com/mehcode/config-rs/pull/389
+[#392]: https://github.com/mehcode/config-rs/pull/392
+[#393]: https://github.com/mehcode/config-rs/pull/393
+[#395]: https://github.com/mehcode/config-rs/pull/395
+[#396]: https://github.com/mehcode/config-rs/pull/396
+[#401]: https://github.com/mehcode/config-rs/pull/401
+[#402]: https://github.com/mehcode/config-rs/pull/402
+[#403]: https://github.com/mehcode/config-rs/pull/403
+[#404]: https://github.com/mehcode/config-rs/pull/404
+[#406]: https://github.com/mehcode/config-rs/pull/406
+[#410]: https://github.com/mehcode/config-rs/pull/410
+[#411]: https://github.com/mehcode/config-rs/pull/411
+[#413]: https://github.com/mehcode/config-rs/pull/413
+[#416]: https://github.com/mehcode/config-rs/pull/416
+[#420]: https://github.com/mehcode/config-rs/pull/420
+[#421]: https://github.com/mehcode/config-rs/pull/421
+[#422]: https://github.com/mehcode/config-rs/pull/422
+[#423]: https://github.com/mehcode/config-rs/pull/423
+[#425]: https://github.com/mehcode/config-rs/pull/425
+[#426]: https://github.com/mehcode/config-rs/pull/426
+[#427]: https://github.com/mehcode/config-rs/pull/427
+[#429]: https://github.com/mehcode/config-rs/pull/429
+[#430]: https://github.com/mehcode/config-rs/pull/430
+[#433]: https://github.com/mehcode/config-rs/pull/433
+[#434]: https://github.com/mehcode/config-rs/pull/434
+[#436]: https://github.com/mehcode/config-rs/pull/436
+[#437]: https://github.com/mehcode/config-rs/pull/437
+[#438]: https://github.com/mehcode/config-rs/pull/438
+[#440]: https://github.com/mehcode/config-rs/pull/440
+[#441]: https://github.com/mehcode/config-rs/pull/441
+[#445]: https://github.com/mehcode/config-rs/pull/445
+[#451]: https://github.com/mehcode/config-rs/pull/451
+[#453]: https://github.com/mehcode/config-rs/pull/453
+[#455]: https://github.com/mehcode/config-rs/pull/455
+[#456]: https://github.com/mehcode/config-rs/pull/456
+[#458]: https://github.com/mehcode/config-rs/pull/458
+[#459]: https://github.com/mehcode/config-rs/pull/459
+[#460]: https://github.com/mehcode/config-rs/pull/460
+[#462]: https://github.com/mehcode/config-rs/pull/462
+[#465]: https://github.com/mehcode/config-rs/pull/465
+[#469]: https://github.com/mehcode/config-rs/pull/469
+[#471]: https://github.com/mehcode/config-rs/pull/471
+[#477]: https://github.com/mehcode/config-rs/pull/477
+[#479]: https://github.com/mehcode/config-rs/pull/479
+[#480]: https://github.com/mehcode/config-rs/pull/480
+[#481]: https://github.com/mehcode/config-rs/pull/481
+[#483]: https://github.com/mehcode/config-rs/pull/483
+[#485]: https://github.com/mehcode/config-rs/pull/485
+[#488]: https://github.com/mehcode/config-rs/pull/488
+[#489]: https://github.com/mehcode/config-rs/pull/489
+[#503]: https://github.com/mehcode/config-rs/pull/503
+[#507]: https://github.com/mehcode/config-rs/pull/507
+[#511]: https://github.com/mehcode/config-rs/pull/511
+
 
 ## 0.13.3 - 2022-12-04
 
@@ -44,7 +340,7 @@ update its MSRV.
 
 ## 0.13.0 - 2022-04-03
 
- - Prefix-Seperator support was added [#292]
+ - Prefix-Separator support was added [#292]
  - Environment lists can now be parsed [#255]
  - Setting an overwrite from an Option was added [#303]
  - Option to keep the prefix from an environment variable was added [#298]
@@ -281,3 +577,19 @@ update its MSRV.
 
 ## 0.2.0 - 2017-01-29
 Initial release.
+
+<!-- next-url -->
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.11...HEAD
+[0.15.11]: https://github.com/rust-cli/config-rs/compare/v0.15.10...v0.15.11
+[0.15.10]: https://github.com/rust-cli/config-rs/compare/v0.15.9...v0.15.10
+[0.15.9]: https://github.com/rust-cli/config-rs/compare/v0.15.8...v0.15.9
+[0.15.8]: https://github.com/rust-cli/config-rs/compare/v0.15.7...v0.15.8
+[0.15.7]: https://github.com/rust-cli/config-rs/compare/v0.15.6...v0.15.7
+[0.15.6]: https://github.com/rust-cli/config-rs/compare/v0.15.5...v0.15.6
+[0.15.5]: https://github.com/rust-cli/config-rs/compare/v0.15.4...v0.15.5
+[0.15.4]: https://github.com/rust-cli/config-rs/compare/v0.15.3...v0.15.4
+[0.15.3]: https://github.com/rust-cli/config-rs/compare/v0.15.2...v0.15.3
+[0.15.2]: https://github.com/rust-cli/config-rs/compare/v0.15.1...v0.15.2
+[0.15.1]: https://github.com/rust-cli/config-rs/compare/v0.15.0...v0.15.1
+[0.15.0]: https://github.com/rust-cli/config-rs/compare/v0.14.1...v0.15.0
+[0.14.1]: https://github.com/rust-cli/config-rs/compare/0.14.0...v0.14.1

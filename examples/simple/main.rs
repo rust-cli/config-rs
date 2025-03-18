@@ -1,5 +1,6 @@
-use config::Config;
 use std::collections::HashMap;
+
+use config::Config;
 
 fn main() {
     let settings = Config::builder()

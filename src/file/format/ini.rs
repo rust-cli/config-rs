@@ -5,7 +5,7 @@ use ini::Ini;
 use crate::map::Map;
 use crate::value::{Value, ValueKind};
 
-pub fn parse(
+pub(crate) fn parse(
     uri: Option<&String>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {

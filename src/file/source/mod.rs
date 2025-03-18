@@ -1,12 +1,12 @@
-pub mod file;
-pub mod string;
+pub(crate) mod file;
+pub(crate) mod string;
 
 use std::error::Error;
 use std::fmt::Debug;
 
 use crate::{file::FileStoredFormat, Format};
 
-/// Describes where the file is sourced
+/// Describes where the [`File`][super::File] is sourced
 pub trait FileSource<T>: Debug + Clone
 where
     T: Format + FileStoredFormat,

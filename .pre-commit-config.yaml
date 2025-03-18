@@ -1,0 +1,18 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+    - id: check-merge-conflict
+      stages: [commit]
+    - id: check-case-conflict
+      stages: [commit]
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.26.0
+    hooks:
+    - id: typos
+      stages: [commit]
+  - repo: https://github.com/crate-ci/committed
+    rev: v1.0.20
+    hooks:
+    - id: committed
+      stages: [commit-msg]

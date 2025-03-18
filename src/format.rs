@@ -25,7 +25,7 @@ pub trait Format {
 }
 
 // Have a proper error fire if the root of a file is ever not a Table
-pub fn extract_root_table(
+pub(crate) fn extract_root_table(
     uri: Option<&String>,
     value: Value,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {

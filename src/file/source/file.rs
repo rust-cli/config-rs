@@ -5,7 +5,7 @@ use std::io;
 use std::path::PathBuf;
 
 use crate::file::{
-    format::ALL_EXTENSIONS, source::FileSourceResult, FileSource, FileStoredFormat, Format,
+    format::all_extensions, source::FileSourceResult, FileSource, FileStoredFormat, Format,
 };
 
 /// Describes a file sourced from a file
@@ -38,7 +38,7 @@ impl FileSourceFile {
             return if let Some(format) = format_hint {
                 Ok((filename, Box::new(format)))
             } else {
-                for (format, extensions) in ALL_EXTENSIONS.iter() {
+                for (format, extensions) in all_extensions().iter() {
                     if extensions.contains(
                         &filename
                             .extension()
@@ -75,7 +75,7 @@ impl FileSourceFile {
             }
 
             None => {
-                for format in ALL_EXTENSIONS.keys() {
+                for format in all_extensions().keys() {
                     for ext in format.extensions() {
                         filename.set_extension(ext);
 

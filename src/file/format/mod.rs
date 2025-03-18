@@ -1,10 +1,6 @@
-// If no features are used, there is an "unused mut" warning in `ALL_EXTENSIONS`
-// BUG: ? For some reason this doesn't do anything if I try and function scope this
-#![allow(unused_mut)]
-
-use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::error::Error;
+use std::sync::OnceLock;
 
 use crate::map::Map;
 use crate::{file::FileStoredFormat, value::Value, Format};
@@ -29,22 +25,23 @@ mod json5;
 
 /// File formats provided by the library.
 ///
-/// Although it is possible to define custom formats using [`Format`] trait it is recommended to use FileFormat if possible.
+/// Although it is possible to define custom formats using [`Format`] trait it is recommended to use `FileFormat` if possible.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
+#[non_exhaustive]
 pub enum FileFormat {
     /// TOML (parsed with toml)
     #[cfg(feature = "toml")]
     Toml,
 
-    /// JSON (parsed with serde_json)
+    /// JSON (parsed with `serde_json`)
     #[cfg(feature = "json")]
     Json,
 
-    /// YAML (parsed with yaml_rust)
+    /// YAML (parsed with `yaml_rust2`)
     #[cfg(feature = "yaml")]
     Yaml,
 
-    /// INI (parsed with rust_ini)
+    /// INI (parsed with `rust_ini`)
     #[cfg(feature = "ini")]
     Ini,
 
@@ -57,10 +54,11 @@ pub enum FileFormat {
     Json5,
 }
 
-lazy_static! {
-    #[doc(hidden)]
-    // #[allow(unused_mut)] ?
-    pub static ref ALL_EXTENSIONS: HashMap<FileFormat, Vec<&'static str>> = {
+pub(crate) fn all_extensions() -> &'static HashMap<FileFormat, Vec<&'static str>> {
+    #![allow(unused_mut)] // If no features are used, there is an "unused mut" warning in `all_extensions`
+
+    static ALL_EXTENSIONS: OnceLock<HashMap<FileFormat, Vec<&'static str>>> = OnceLock::new();
+    ALL_EXTENSIONS.get_or_init(|| {
         let mut formats: HashMap<FileFormat, Vec<_>> = HashMap::new();
 
         #[cfg(feature = "toml")]
@@ -82,15 +80,15 @@ lazy_static! {
         formats.insert(FileFormat::Json5, vec!["json5"]);
 
         formats
-    };
+    })
 }
 
 impl FileFormat {
     pub(crate) fn extensions(&self) -> &'static [&'static str] {
         // It should not be possible for this to fail
         // A FileFormat would need to be declared without being added to the
-        // ALL_EXTENSIONS map.
-        ALL_EXTENSIONS.get(self).unwrap()
+        // all_extensions map.
+        all_extensions().get(self).unwrap()
     }
 
     pub(crate) fn parse(
