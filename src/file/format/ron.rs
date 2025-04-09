@@ -17,8 +17,9 @@ fn from_ron_value(
     value: ron::Value,
 ) -> Result<Value, Box<dyn Error + Send + Sync>> {
     let kind = match value {
+        // Option<Boxed<ron::Value>> requires deref of boxed value
         ron::Value::Option(value) => match value {
-            Some(value) => from_ron_value(uri, *value)?.kind,
+            Some(boxed) => from_ron_value(uri, *boxed)?.kind,
             None => ValueKind::Nil,
         },
 
@@ -27,9 +28,19 @@ fn from_ron_value(
         ron::Value::Bool(value) => ValueKind::Boolean(value),
 
         ron::Value::Number(value) => match value {
-            ron::Number::Float(value) => ValueKind::Float(value.get()),
-            ron::Number::Integer(value) => ValueKind::I64(value),
+            ron::Number::F32(value) => ValueKind::Float(value.get() as f64),
+            ron::Number::F64(value) => ValueKind::Float(value.get()),
+            ron::Number::I8(value) => ValueKind::I64(value.into()),
+            ron::Number::I16(value) => ValueKind::I64(value.into()),
+            ron::Number::I32(value) => ValueKind::I64(value.into()),
+            ron::Number::I64(value) => ValueKind::I64(value),
+            ron::Number::U8(value) => ValueKind::U64(value.into()),
+            ron::Number::U16(value) => ValueKind::U64(value.into()),
+            ron::Number::U32(value) => ValueKind::U64(value.into()),
+            ron::Number::U64(value) => ValueKind::U64(value),
         },
+
+        ron::Value::Bytes(_) => todo!(),
 
         ron::Value::Char(value) => ValueKind::String(value.to_string()),
 
