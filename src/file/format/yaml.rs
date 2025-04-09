@@ -2,7 +2,7 @@ use std::error::Error;
 use std::fmt;
 use std::mem;
 
-use yaml_rust2 as yaml;
+use saphyr as yaml;
 
 use crate::format;
 use crate::map::Map;
@@ -13,9 +13,9 @@ pub(crate) fn parse(
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     // Parse a YAML object from file
-    let mut docs = yaml::YamlLoader::load_from_str(text)?;
+    let mut docs = yaml::Yaml::load_from_str(text)?;
     let root = match docs.len() {
-        0 => yaml::Yaml::Hash(yaml::yaml::Hash::new()),
+        0 => yaml::Yaml::Hash(yaml::Hash::new()),
         1 => mem::replace(&mut docs[0], yaml::Yaml::Null),
         n => {
             return Err(Box::new(MultipleDocumentsError(n)));
