@@ -37,7 +37,7 @@ fn from_yaml_value(
             value
                 .parse::<f64>()
                 .map_err(|_| {
-                    Box::new(FloatParsingError(value.to_string())) as Box<(dyn Error + Send + Sync)>
+                    Box::new(FloatParsingError(value.clone())) as Box<(dyn Error + Send + Sync)>
                 })
                 .map(ValueKind::Float)
                 .map(|f| Value::new(uri, f))

@@ -15,7 +15,7 @@ pub(crate) fn parse(
 
 fn from_toml_value(uri: Option<&String>, value: &toml::Value) -> Value {
     match *value {
-        toml::Value::String(ref value) => Value::new(uri, value.to_string()),
+        toml::Value::String(ref value) => Value::new(uri, value.clone()),
         toml::Value::Float(value) => Value::new(uri, value),
         toml::Value::Integer(value) => Value::new(uri, value),
         toml::Value::Boolean(value) => Value::new(uri, value),
