@@ -28,6 +28,7 @@ pub struct Environment {
     prefix: Option<String>,
 
     /// Optional character sequence that separates the prefix from the rest of the key.
+    ///
     /// Defaults to [`separator`](Environment::separator()) if that is set, otherwise `_`.
     prefix_separator: Option<String>,
 
@@ -128,6 +129,7 @@ impl Environment {
     }
 
     /// Optional character sequence that separates the prefix from the rest of the key.
+    ///
     /// Defaults to [`separator`](Environment::separator()) if that is set, otherwise `_`.
     pub fn prefix_separator(mut self, s: &str) -> Self {
         self.prefix_separator = Some(s.into());
