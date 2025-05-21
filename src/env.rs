@@ -20,13 +20,16 @@ pub struct Environment {
     /// Optional prefix that will limit access to the environment to only keys that
     /// begin with the defined prefix.
     ///
-    /// A prefix with a separator of `_` is tested to be present on each key before its considered
-    /// to be part of the source environment.
+    /// The prefix is tested to be present on each key before it's considered to be part of the
+    /// source environment. The separator character can be set through
+    /// [`prefix_separator`](Environment::prefix_separator()).
     ///
     /// For example, the key `CONFIG_DEBUG` would become `DEBUG` with a prefix of `config`.
     prefix: Option<String>,
 
-    /// Optional character sequence that separates the prefix from the rest of the key
+    /// Optional character sequence that separates the prefix from the rest of the key.
+    ///
+    /// Defaults to [`separator`](Environment::separator()) if that is set, otherwise `_`.
     prefix_separator: Option<String>,
 
     /// Optional character sequence that separates each key segment in an environment key pattern.
@@ -96,8 +99,9 @@ impl Environment {
     /// Optional prefix that will limit access to the environment to only keys that
     /// begin with the defined prefix.
     ///
-    /// A prefix with a separator of `_` is tested to be present on each key before its considered
-    /// to be part of the source environment.
+    /// The prefix is tested to be present on each key before it's considered to be part of the
+    /// source environment. The separator character can be set through
+    /// [`prefix_separator`](Environment::prefix_separator()).
     ///
     /// For example, the key `CONFIG_DEBUG` would become `DEBUG` with a prefix of `config`.
     pub fn with_prefix(s: &str) -> Self {
@@ -124,7 +128,9 @@ impl Environment {
         self
     }
 
-    /// Optional character sequence that separates the prefix from the rest of the key
+    /// Optional character sequence that separates the prefix from the rest of the key.
+    ///
+    /// Defaults to [`separator`](Environment::separator()) if that is set, otherwise `_`.
     pub fn prefix_separator(mut self, s: &str) -> Self {
         self.prefix_separator = Some(s.into());
         self
