@@ -1,0 +1,5 @@
+verbose=1
+
+[cred]
+user="robert"
+key="123456789"
