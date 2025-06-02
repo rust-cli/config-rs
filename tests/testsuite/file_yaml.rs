@@ -228,7 +228,7 @@ fn test_override_lowercase_value_for_struct() {
         bar: String,
     }
 
-    std::env::set_var("config_bar", "I have been overridden_with_lower_case");
+    std::env::set_var("config_foo", "I have been overridden_with_lower_case");
 
     let cfg = Config::builder()
         .add_source(File::from_str(
@@ -259,10 +259,10 @@ bar: I am bar
 
     let values: StructSettings = cfg.try_deserialize().unwrap();
     assert_eq!(
-        values.bar,
+        values.foo,
         "I have been overridden_with_lower_case".to_owned()
     );
-    assert_ne!(values.bar, "I am bar".to_owned());
+    assert_eq!(values.bar, "I am bar".to_owned());
 }
 
 #[test]

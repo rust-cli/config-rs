@@ -243,7 +243,7 @@ fn test_override_lowercase_value_for_struct() {
         values.foo,
         "I have been overridden_with_lower_case".to_owned()
     );
-    assert_ne!(values.foo, "I am bar".to_owned());
+    assert_eq!(values.bar, "I am bar".to_owned());
 }
 
 #[test]
