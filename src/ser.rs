@@ -8,7 +8,7 @@ use crate::value::{Value, ValueKind};
 use crate::Config;
 
 #[derive(Default, Debug)]
-pub struct ConfigSerializer {
+pub(crate) struct ConfigSerializer {
     keys: Vec<SerKey>,
     pub output: Config,
 }
@@ -31,7 +31,7 @@ pub(crate) enum Unreachable {}
 ///
 /// Existence of this wrapper implies that `.0.keys.last()` is
 /// `Some(SerKey::Seq(next_index))`.
-pub struct SeqSerializer<'a>(&'a mut ConfigSerializer);
+pub(crate) struct SeqSerializer<'a>(&'a mut ConfigSerializer);
 
 impl ConfigSerializer {
     fn serialize_primitive<T>(&mut self, value: T) -> Result<()>

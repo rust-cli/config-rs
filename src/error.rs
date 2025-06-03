@@ -5,6 +5,7 @@ use std::result;
 use serde::de;
 use serde::ser;
 
+#[allow(unnameable_types)] // Unsure if/how to expose this
 #[derive(Debug)]
 pub enum Unexpected {
     Bool(bool),
