@@ -59,3 +59,7 @@ pub use crate::map::Map;
 pub use crate::source::AsyncSource;
 pub use crate::source::Source;
 pub use crate::value::{Value, ValueKind};
+
+#[doc = include_str!("../README.md")]
+#[cfg(doctest)]
+pub struct ReadmeDoctests;

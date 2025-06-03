@@ -17,6 +17,7 @@ where
     ) -> Result<FileSourceResult, Box<dyn Error + Send + Sync>>;
 }
 
+#[allow(unnameable_types)] // Unsure if/how to expose this
 pub struct FileSourceResult {
     pub(crate) uri: Option<String>,
     pub(crate) content: String,
