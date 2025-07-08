@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Performance
+
+- Upgrade to `toml` v0.9
+
 ## [0.15.11] - 2025-03-12
 
 ### Features
