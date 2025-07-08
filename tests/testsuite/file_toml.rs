@@ -161,9 +161,8 @@ error = tru
 TOML parse error at line 3, column 9
   |
 3 | error = tru
-  |         ^
-invalid string
-expected `"`, `'`
+  |         ^^^
+invalid boolean, expected `true`
 
 "#]]
     );
