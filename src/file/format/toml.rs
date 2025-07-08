@@ -8,33 +8,33 @@ pub(crate) fn parse(
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     // Parse a TOML value from the provided text
-    let table = from_toml_table(uri, &toml::from_str(text)?);
+    let table = from_toml_table(uri, toml::from_str(text)?);
     Ok(table)
 }
 
-fn from_toml_table(uri: Option<&String>, table: &toml::Table) -> Map<String, Value> {
+fn from_toml_table(uri: Option<&String>, table: toml::Table) -> Map<String, Value> {
     let mut m = Map::new();
 
     for (key, value) in table {
-        m.insert(key.clone(), from_toml_value(uri, value));
+        m.insert(key, from_toml_value(uri, value));
     }
 
     m
 }
 
-fn from_toml_value(uri: Option<&String>, value: &toml::Value) -> Value {
-    match *value {
-        toml::Value::String(ref value) => Value::new(uri, value.clone()),
+fn from_toml_value(uri: Option<&String>, value: toml::Value) -> Value {
+    match value {
+        toml::Value::String(value) => Value::new(uri, value),
         toml::Value::Float(value) => Value::new(uri, value),
         toml::Value::Integer(value) => Value::new(uri, value),
         toml::Value::Boolean(value) => Value::new(uri, value),
 
-        toml::Value::Table(ref table) => {
+        toml::Value::Table(table) => {
             let m = from_toml_table(uri, table);
             Value::new(uri, m)
         }
 
-        toml::Value::Array(ref array) => {
+        toml::Value::Array(array) => {
             let mut l = Vec::new();
 
             for value in array {
@@ -44,6 +44,6 @@ fn from_toml_value(uri: Option<&String>, value: &toml::Value) -> Value {
             Value::new(uri, l)
         }
 
-        toml::Value::Datetime(ref datetime) => Value::new(uri, datetime.to_string()),
+        toml::Value::Datetime(datetime) => Value::new(uri, datetime.to_string()),
     }
 }
