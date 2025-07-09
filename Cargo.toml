@@ -156,7 +156,7 @@ futures = "0.3"
 reqwest = "0.12"
 
 glob = "0.3"
-notify = "7.0"
+notify = "8.0"
 temp-env = "0.3"
 log = { version = "0.4", features = ["serde"] }
 snapbox = "0.6.21"
