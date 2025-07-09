@@ -69,6 +69,18 @@ fn test_file_ext() {
 
 #[test]
 #[cfg(feature = "json")]
+fn test_file_ext_with_utf8_bom() {
+    let c = Config::builder()
+        .add_source(File::with_name("tests/testsuite/file-ext-with-bom.json"))
+        .build()
+        .unwrap();
+
+    assert_eq!(c.get("debug").ok(), Some(true));
+    assert_eq!(c.get("production").ok(), Some(false));
+}
+
+#[test]
+#[cfg(feature = "json")]
 fn test_file_second_ext() {
     let c = Config::builder()
         .add_source(File::with_name("tests/testsuite/file-second-ext.default"))

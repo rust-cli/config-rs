@@ -115,7 +115,17 @@ where
             .unwrap_or_else(|| filename.clone());
 
         // Read contents from file
-        let text = fs::read_to_string(filename)?;
+        let buf = fs::read(filename)?;
+
+        // If it exists, skip the UTF-8 BOM byte sequence: EF BB BF
+        let buf = if buf.len() >= 3 && &buf[0..3] == b"\xef\xbb\xbf" {
+            &buf[3..]
+        } else {
+            &buf
+        };
+
+        let c = String::from_utf8_lossy(buf);
+        let text = c.into_owned();
 
         Ok(FileSourceResult {
             uri: Some(uri.to_string_lossy().into_owned()),
