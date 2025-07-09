@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- Skip UTF-8 BOMs when reading files
+
 ## [0.15.12] - 2025-07-08
 
 ### Performance
