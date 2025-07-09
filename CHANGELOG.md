@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.13] - 2025-07-09
+
 ### Fixes
 
 - Skip UTF-8 BOMs when reading files
@@ -589,7 +591,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.12...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.13...HEAD
+[0.15.13]: https://github.com/rust-cli/config-rs/compare/v0.15.12...v0.15.13
 [0.15.12]: https://github.com/rust-cli/config-rs/compare/v0.15.11...v0.15.12
 [0.15.11]: https://github.com/rust-cli/config-rs/compare/v0.15.10...v0.15.11
 [0.15.10]: https://github.com/rust-cli/config-rs/compare/v0.15.9...v0.15.10
