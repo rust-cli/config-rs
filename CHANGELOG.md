@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Performance
+
+- *(json5)* Reduce overhead when loading json5 files
+
 ## [0.15.13] - 2025-07-09
 
 ### Fixes
