@@ -5,7 +5,7 @@ resolver = "2"
 repository = "https://github.com/rust-cli/config-rs"
 license = "MIT OR Apache-2.0"
 edition = "2018"
-rust-version = "1.75.0"  # MSRV
+rust-version = "1.75.0" # MSRV
 include = [
   "build.rs",
   "src/**/*",
@@ -13,7 +13,7 @@ include = [
   "Cargo.lock",
   "LICENSE*",
   "README.md",
-  "examples/**/*"
+  "examples/**/*",
 ]
 
 [workspace.lints.rust]
@@ -55,7 +55,7 @@ invalid_upcast_comparisons = "warn"
 large_digit_groups = "warn"
 large_stack_arrays = "warn"
 large_types_passed_by_value = "warn"
-let_and_return = "allow"  # sometimes good to name what you are returning
+let_and_return = "allow"                 # sometimes good to name what you are returning
 linkedlist = "warn"
 lossy_float_literal = "warn"
 macro_use_imports = "warn"
@@ -113,21 +113,35 @@ rustdoc-args = ["--cfg", "docsrs", "--generate-link-to-definition"]
 
 [package.metadata.release]
 pre-release-replacements = [
-  {file="CHANGELOG.md", search="Unreleased", replace="{{version}}", min=1},
-  {file="CHANGELOG.md", search="\\.\\.\\.HEAD", replace="...{{tag_name}}", exactly=1},
-  {file="CHANGELOG.md", search="ReleaseDate", replace="{{date}}", min=1},
-  {file="CHANGELOG.md", search="<!-- next-header -->", replace="<!-- next-header -->\n## [Unreleased] - ReleaseDate\n", exactly=1},
-  {file="CHANGELOG.md", search="<!-- next-url -->", replace="<!-- next-url -->\n[Unreleased]: https://github.com/rust-cli/config-rs/compare/{{tag_name}}...HEAD", exactly=1},
+  { file = "CHANGELOG.md", search = "Unreleased", replace = "{{version}}", min = 1 },
+  { file = "CHANGELOG.md", search = "\\.\\.\\.HEAD", replace = "...{{tag_name}}", exactly = 1 },
+  { file = "CHANGELOG.md", search = "ReleaseDate", replace = "{{date}}", min = 1 },
+  { file = "CHANGELOG.md", search = "<!-- next-header -->", replace = "<!-- next-header -->\n## [Unreleased] - ReleaseDate\n", exactly = 1 },
+  { file = "CHANGELOG.md", search = "<!-- next-url -->", replace = "<!-- next-url -->\n[Unreleased]: https://github.com/rust-cli/config-rs/compare/{{tag_name}}...HEAD", exactly = 1 },
 ]
 
 [features]
-default = ["toml", "json", "yaml", "ini", "ron", "json5", "convert-case", "async"]
+default = [
+  "toml",
+  "json",
+  "yaml",
+  "ini",
+  "ron",
+  "json5",
+  "convert-case",
+  "async",
+]
 json = ["serde_json"]
 yaml = ["yaml-rust2"]
 ini = ["rust-ini"]
 json5 = ["json5_rs", "serde/derive"]
 convert-case = ["convert_case"]
-preserve_order = ["indexmap", "toml?/preserve_order", "serde_json?/preserve_order", "ron?/indexmap"]
+preserve_order = [
+  "indexmap",
+  "toml?/preserve_order",
+  "serde_json?/preserve_order",
+  "ron?/indexmap",
+]
 async = ["async-trait"]
 toml = ["dep:toml"]
 
@@ -135,14 +149,17 @@ toml = ["dep:toml"]
 serde = "1.0"
 
 async-trait = { version = "0.1", optional = true }
-toml = { version = "0.9", optional = true, default-features = false, features = ["parse", "serde"] }
+toml = { version = "0.9", optional = true, default-features = false, features = [
+  "parse",
+  "serde",
+] }
 serde_json = { version = "1.0", optional = true }
 yaml-rust2 = { version = "0.10", optional = true }
 rust-ini = { version = "0.21", optional = true }
-ron = { version = "0.8", optional = true }
+ron = { version = "0.10", optional = true }
 json5_rs = { version = "0.4", optional = true, package = "json5" }
 indexmap = { version = "2.10.0", features = ["serde"], optional = true }
-convert_case = { version = "0.6", optional = true }
+convert_case = { version = "0.8", optional = true }
 pathdiff = "0.2"
 winnow = "0.7.0"
 
@@ -150,13 +167,19 @@ winnow = "0.7.0"
 serde_derive = "1.0"
 float-cmp = "0.10"
 chrono = { version = "0.4", features = ["serde"] }
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "fs", "io-util", "time"]}
+tokio = { version = "1", features = [
+  "rt-multi-thread",
+  "macros",
+  "fs",
+  "io-util",
+  "time",
+] }
 warp = "0.3"
 futures = "0.3"
 reqwest = "0.12"
 
 glob = "0.3"
-notify = "7.0"
+notify = "8.1"
 temp-env = "0.3"
 log = { version = "0.4", features = ["serde"] }
 snapbox = "0.6.21"
