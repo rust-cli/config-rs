@@ -125,7 +125,7 @@ default = ["toml", "json", "yaml", "ini", "ron", "json5", "convert-case", "async
 json = ["serde_json"]
 yaml = ["yaml-rust2"]
 ini = ["rust-ini"]
-json5 = ["json5_rs", "serde/derive"]
+json5 = ["json5_rs", "dep:serde-untagged"]
 convert-case = ["convert_case"]
 preserve_order = ["indexmap", "toml?/preserve_order", "serde_json?/preserve_order", "ron?/indexmap"]
 async = ["async-trait"]
@@ -145,6 +145,7 @@ indexmap = { version = "2.10.0", features = ["serde"], optional = true }
 convert_case = { version = "0.6", optional = true }
 pathdiff = "0.2"
 winnow = "0.7.0"
+serde-untagged = { version = "0.1.8", optional = true }
 
 [dev-dependencies]
 serde_derive = "1.0"
