@@ -676,8 +676,6 @@ impl ser::SerializeStructVariant for Unreachable {
 
 #[cfg(test)]
 mod test {
-    use serde::{Deserialize, Serialize};
-    #[cfg(not(feature = "json5"))]
     use serde_derive::{Deserialize, Serialize};
 
     use super::*;
