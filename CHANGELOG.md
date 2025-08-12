@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.14] - 2025-08-12
+
 ### Performance
 
 - *(json5)* Reduce overhead when loading json5 files
@@ -595,7 +597,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.13...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.14...HEAD
+[0.15.14]: https://github.com/rust-cli/config-rs/compare/v0.15.13...v0.15.14
 [0.15.13]: https://github.com/rust-cli/config-rs/compare/v0.15.12...v0.15.13
 [0.15.12]: https://github.com/rust-cli/config-rs/compare/v0.15.11...v0.15.12
 [0.15.11]: https://github.com/rust-cli/config-rs/compare/v0.15.10...v0.15.11
