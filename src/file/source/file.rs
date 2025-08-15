@@ -59,9 +59,10 @@ impl FileSourceFile {
                 )))
             };
         }
-        // Adding a dummy extension will make sure we will not override secondary extensions, i.e. "file.local"
-        // This will make the following set_extension function calls to append the extension.
-        let mut filename = add_dummy_extension(filename);
+
+        // Append an extension that will be replaced when calling `set_extension()`:
+        let mut filename = filename;
+        filename.as_mut_os_string().push(".ext_placeholder");
 
         match format_hint {
             Some(format) => {
@@ -133,19 +134,4 @@ where
             format,
         })
     }
-}
-
-fn add_dummy_extension(mut filename: PathBuf) -> PathBuf {
-    match filename.extension() {
-        Some(extension) => {
-            let mut ext = extension.to_os_string();
-            ext.push(".");
-            ext.push("dummy");
-            filename.set_extension(ext);
-        }
-        None => {
-            filename.set_extension("dummy");
-        }
-    }
-    filename
 }
