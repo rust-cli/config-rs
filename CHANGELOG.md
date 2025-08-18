@@ -233,91 +233,91 @@ also with some fixes and changes that have piled up over a rather long time.
  - [#507] Check external types
  - [#511] Fix: cargo-check-external-types must use nightly 2023-10-10
 
-[#100]: https://github.com/mehcode/config-rs/pull/100
-[#188]: https://github.com/mehcode/config-rs/pull/188
-[#271]: https://github.com/mehcode/config-rs/pull/271
-[#274]: https://github.com/mehcode/config-rs/pull/274
-[#283]: https://github.com/mehcode/config-rs/pull/283
-[#299]: https://github.com/mehcode/config-rs/pull/299
-[#306]: https://github.com/mehcode/config-rs/pull/306
-[#316]: https://github.com/mehcode/config-rs/pull/316
-[#318]: https://github.com/mehcode/config-rs/pull/318
-[#334]: https://github.com/mehcode/config-rs/pull/334
-[#335]: https://github.com/mehcode/config-rs/pull/335
-[#343]: https://github.com/mehcode/config-rs/pull/343
-[#344]: https://github.com/mehcode/config-rs/pull/344
-[#347]: https://github.com/mehcode/config-rs/pull/347
-[#348]: https://github.com/mehcode/config-rs/pull/348
-[#350]: https://github.com/mehcode/config-rs/pull/350
-[#353]: https://github.com/mehcode/config-rs/pull/353
-[#354]: https://github.com/mehcode/config-rs/pull/354
-[#356]: https://github.com/mehcode/config-rs/pull/356
-[#359]: https://github.com/mehcode/config-rs/pull/359
-[#360]: https://github.com/mehcode/config-rs/pull/360
-[#362]: https://github.com/mehcode/config-rs/pull/362
-[#363]: https://github.com/mehcode/config-rs/pull/363
-[#367]: https://github.com/mehcode/config-rs/pull/367
-[#373]: https://github.com/mehcode/config-rs/pull/373
-[#374]: https://github.com/mehcode/config-rs/pull/374
-[#375]: https://github.com/mehcode/config-rs/pull/375
-[#378]: https://github.com/mehcode/config-rs/pull/378
-[#379]: https://github.com/mehcode/config-rs/pull/379
-[#381]: https://github.com/mehcode/config-rs/pull/381
-[#382]: https://github.com/mehcode/config-rs/pull/382
-[#388]: https://github.com/mehcode/config-rs/pull/388
-[#389]: https://github.com/mehcode/config-rs/pull/389
-[#392]: https://github.com/mehcode/config-rs/pull/392
-[#393]: https://github.com/mehcode/config-rs/pull/393
-[#395]: https://github.com/mehcode/config-rs/pull/395
-[#396]: https://github.com/mehcode/config-rs/pull/396
-[#401]: https://github.com/mehcode/config-rs/pull/401
-[#402]: https://github.com/mehcode/config-rs/pull/402
-[#403]: https://github.com/mehcode/config-rs/pull/403
-[#404]: https://github.com/mehcode/config-rs/pull/404
-[#406]: https://github.com/mehcode/config-rs/pull/406
-[#410]: https://github.com/mehcode/config-rs/pull/410
-[#411]: https://github.com/mehcode/config-rs/pull/411
-[#413]: https://github.com/mehcode/config-rs/pull/413
-[#416]: https://github.com/mehcode/config-rs/pull/416
-[#420]: https://github.com/mehcode/config-rs/pull/420
-[#421]: https://github.com/mehcode/config-rs/pull/421
-[#422]: https://github.com/mehcode/config-rs/pull/422
-[#423]: https://github.com/mehcode/config-rs/pull/423
-[#425]: https://github.com/mehcode/config-rs/pull/425
-[#426]: https://github.com/mehcode/config-rs/pull/426
-[#427]: https://github.com/mehcode/config-rs/pull/427
-[#429]: https://github.com/mehcode/config-rs/pull/429
-[#430]: https://github.com/mehcode/config-rs/pull/430
-[#433]: https://github.com/mehcode/config-rs/pull/433
-[#434]: https://github.com/mehcode/config-rs/pull/434
-[#436]: https://github.com/mehcode/config-rs/pull/436
-[#437]: https://github.com/mehcode/config-rs/pull/437
-[#438]: https://github.com/mehcode/config-rs/pull/438
-[#440]: https://github.com/mehcode/config-rs/pull/440
-[#441]: https://github.com/mehcode/config-rs/pull/441
-[#445]: https://github.com/mehcode/config-rs/pull/445
-[#451]: https://github.com/mehcode/config-rs/pull/451
-[#453]: https://github.com/mehcode/config-rs/pull/453
-[#455]: https://github.com/mehcode/config-rs/pull/455
-[#456]: https://github.com/mehcode/config-rs/pull/456
-[#458]: https://github.com/mehcode/config-rs/pull/458
-[#459]: https://github.com/mehcode/config-rs/pull/459
-[#460]: https://github.com/mehcode/config-rs/pull/460
-[#462]: https://github.com/mehcode/config-rs/pull/462
-[#465]: https://github.com/mehcode/config-rs/pull/465
-[#469]: https://github.com/mehcode/config-rs/pull/469
-[#471]: https://github.com/mehcode/config-rs/pull/471
-[#477]: https://github.com/mehcode/config-rs/pull/477
-[#479]: https://github.com/mehcode/config-rs/pull/479
-[#480]: https://github.com/mehcode/config-rs/pull/480
-[#481]: https://github.com/mehcode/config-rs/pull/481
-[#483]: https://github.com/mehcode/config-rs/pull/483
-[#485]: https://github.com/mehcode/config-rs/pull/485
-[#488]: https://github.com/mehcode/config-rs/pull/488
-[#489]: https://github.com/mehcode/config-rs/pull/489
-[#503]: https://github.com/mehcode/config-rs/pull/503
-[#507]: https://github.com/mehcode/config-rs/pull/507
-[#511]: https://github.com/mehcode/config-rs/pull/511
+[#100]: https://github.com/rust-cli/config-rs/pull/100
+[#188]: https://github.com/rust-cli/config-rs/pull/188
+[#271]: https://github.com/rust-cli/config-rs/pull/271
+[#274]: https://github.com/rust-cli/config-rs/pull/274
+[#283]: https://github.com/rust-cli/config-rs/pull/283
+[#299]: https://github.com/rust-cli/config-rs/pull/299
+[#306]: https://github.com/rust-cli/config-rs/pull/306
+[#316]: https://github.com/rust-cli/config-rs/pull/316
+[#318]: https://github.com/rust-cli/config-rs/pull/318
+[#334]: https://github.com/rust-cli/config-rs/pull/334
+[#335]: https://github.com/rust-cli/config-rs/pull/335
+[#343]: https://github.com/rust-cli/config-rs/pull/343
+[#344]: https://github.com/rust-cli/config-rs/pull/344
+[#347]: https://github.com/rust-cli/config-rs/pull/347
+[#348]: https://github.com/rust-cli/config-rs/pull/348
+[#350]: https://github.com/rust-cli/config-rs/pull/350
+[#353]: https://github.com/rust-cli/config-rs/pull/353
+[#354]: https://github.com/rust-cli/config-rs/pull/354
+[#356]: https://github.com/rust-cli/config-rs/pull/356
+[#359]: https://github.com/rust-cli/config-rs/pull/359
+[#360]: https://github.com/rust-cli/config-rs/pull/360
+[#362]: https://github.com/rust-cli/config-rs/pull/362
+[#363]: https://github.com/rust-cli/config-rs/pull/363
+[#367]: https://github.com/rust-cli/config-rs/pull/367
+[#373]: https://github.com/rust-cli/config-rs/pull/373
+[#374]: https://github.com/rust-cli/config-rs/pull/374
+[#375]: https://github.com/rust-cli/config-rs/pull/375
+[#378]: https://github.com/rust-cli/config-rs/pull/378
+[#379]: https://github.com/rust-cli/config-rs/pull/379
+[#381]: https://github.com/rust-cli/config-rs/pull/381
+[#382]: https://github.com/rust-cli/config-rs/pull/382
+[#388]: https://github.com/rust-cli/config-rs/pull/388
+[#389]: https://github.com/rust-cli/config-rs/pull/389
+[#392]: https://github.com/rust-cli/config-rs/pull/392
+[#393]: https://github.com/rust-cli/config-rs/pull/393
+[#395]: https://github.com/rust-cli/config-rs/pull/395
+[#396]: https://github.com/rust-cli/config-rs/pull/396
+[#401]: https://github.com/rust-cli/config-rs/pull/401
+[#402]: https://github.com/rust-cli/config-rs/pull/402
+[#403]: https://github.com/rust-cli/config-rs/pull/403
+[#404]: https://github.com/rust-cli/config-rs/pull/404
+[#406]: https://github.com/rust-cli/config-rs/pull/406
+[#410]: https://github.com/rust-cli/config-rs/pull/410
+[#411]: https://github.com/rust-cli/config-rs/pull/411
+[#413]: https://github.com/rust-cli/config-rs/pull/413
+[#416]: https://github.com/rust-cli/config-rs/pull/416
+[#420]: https://github.com/rust-cli/config-rs/pull/420
+[#421]: https://github.com/rust-cli/config-rs/pull/421
+[#422]: https://github.com/rust-cli/config-rs/pull/422
+[#423]: https://github.com/rust-cli/config-rs/pull/423
+[#425]: https://github.com/rust-cli/config-rs/pull/425
+[#426]: https://github.com/rust-cli/config-rs/pull/426
+[#427]: https://github.com/rust-cli/config-rs/pull/427
+[#429]: https://github.com/rust-cli/config-rs/pull/429
+[#430]: https://github.com/rust-cli/config-rs/pull/430
+[#433]: https://github.com/rust-cli/config-rs/pull/433
+[#434]: https://github.com/rust-cli/config-rs/pull/434
+[#436]: https://github.com/rust-cli/config-rs/pull/436
+[#437]: https://github.com/rust-cli/config-rs/pull/437
+[#438]: https://github.com/rust-cli/config-rs/pull/438
+[#440]: https://github.com/rust-cli/config-rs/pull/440
+[#441]: https://github.com/rust-cli/config-rs/pull/441
+[#445]: https://github.com/rust-cli/config-rs/pull/445
+[#451]: https://github.com/rust-cli/config-rs/pull/451
+[#453]: https://github.com/rust-cli/config-rs/pull/453
+[#455]: https://github.com/rust-cli/config-rs/pull/455
+[#456]: https://github.com/rust-cli/config-rs/pull/456
+[#458]: https://github.com/rust-cli/config-rs/pull/458
+[#459]: https://github.com/rust-cli/config-rs/pull/459
+[#460]: https://github.com/rust-cli/config-rs/pull/460
+[#462]: https://github.com/rust-cli/config-rs/pull/462
+[#465]: https://github.com/rust-cli/config-rs/pull/465
+[#469]: https://github.com/rust-cli/config-rs/pull/469
+[#471]: https://github.com/rust-cli/config-rs/pull/471
+[#477]: https://github.com/rust-cli/config-rs/pull/477
+[#479]: https://github.com/rust-cli/config-rs/pull/479
+[#480]: https://github.com/rust-cli/config-rs/pull/480
+[#481]: https://github.com/rust-cli/config-rs/pull/481
+[#483]: https://github.com/rust-cli/config-rs/pull/483
+[#485]: https://github.com/rust-cli/config-rs/pull/485
+[#488]: https://github.com/rust-cli/config-rs/pull/488
+[#489]: https://github.com/rust-cli/config-rs/pull/489
+[#503]: https://github.com/rust-cli/config-rs/pull/503
+[#507]: https://github.com/rust-cli/config-rs/pull/507
+[#511]: https://github.com/rust-cli/config-rs/pull/511
 
 
 ## 0.13.3 - 2022-12-04
@@ -330,9 +330,9 @@ update its MSRV.
    using float_cmp for testing floats
  - Backport of [#379] adding `Clone` trait derive to builder states
 
-[d54986c54091e4620c199d3dfadde80b82958bb3]: https://github.com/mehcode/config-rs/commit/d54986c54091e4620c199d3dfadde80b82958bb3
-[#362]: https://github.com/mehcode/config-rs/pull/362
-[#379]: https://github.com/mehcode/config-rs/pull/379
+[d54986c54091e4620c199d3dfadde80b82958bb3]: https://github.com/rust-cli/config-rs/commit/d54986c54091e4620c199d3dfadde80b82958bb3
+[#362]: https://github.com/rust-cli/config-rs/pull/362
+[#379]: https://github.com/rust-cli/config-rs/pull/379
 
 ## 0.13.2 - 2022-08-02
 
@@ -343,18 +343,18 @@ update its MSRV.
  - Backport of commit [518a3cafa1e62ba7405709e5c508247e328e0a18] from [#362] to
    fix tests
 
-[#316]: https://github.com/mehcode/config-rs/pull/316
-[#353]: https://github.com/mehcode/config-rs/pull/353
-[518a3cafa1e62ba7405709e5c508247e328e0a18]: https://github.com/mehcode/config-rs/commit/518a3cafa1e62ba7405709e5c508247e328e0a18
-[#362]: https://github.com/mehcode/config-rs/pull/362
+[#316]: https://github.com/rust-cli/config-rs/pull/316
+[#353]: https://github.com/rust-cli/config-rs/pull/353
+[518a3cafa1e62ba7405709e5c508247e328e0a18]: https://github.com/rust-cli/config-rs/commit/518a3cafa1e62ba7405709e5c508247e328e0a18
+[#362]: https://github.com/rust-cli/config-rs/pull/362
 
 ## 0.13.1 - 2022-04-13
 
  - typo in doc comment for ConfigBuilder [#299]
  - dot in config file name handling fixed [#306]
 
-[#299]: https://github.com/mehcode/config-rs/pull/299
-[#306]: https://github.com/mehcode/config-rs/pull/306
+[#299]: https://github.com/rust-cli/config-rs/pull/299
+[#306]: https://github.com/rust-cli/config-rs/pull/306
 
 ## 0.13.0 - 2022-04-03
 
@@ -366,15 +366,15 @@ update its MSRV.
  - MSRV was updated to 1.56.0 [#304]
  - Dependencies were updated [#289], [#301]
 
-[#292]: https://github.com/mehcode/config-rs/pull/292
-[#255]: https://github.com/mehcode/config-rs/pull/255
-[#303]: https://github.com/mehcode/config-rs/pull/303
-[#298]: https://github.com/mehcode/config-rs/pull/298
-[#307]: https://github.com/mehcode/config-rs/pull/307
-[#309]: https://github.com/mehcode/config-rs/pull/309
-[#304]: https://github.com/mehcode/config-rs/pull/304
-[#289]: https://github.com/mehcode/config-rs/pull/289
-[#301]: https://github.com/mehcode/config-rs/pull/301
+[#292]: https://github.com/rust-cli/config-rs/pull/292
+[#255]: https://github.com/rust-cli/config-rs/pull/255
+[#303]: https://github.com/rust-cli/config-rs/pull/303
+[#298]: https://github.com/rust-cli/config-rs/pull/298
+[#307]: https://github.com/rust-cli/config-rs/pull/307
+[#309]: https://github.com/rust-cli/config-rs/pull/309
+[#304]: https://github.com/rust-cli/config-rs/pull/304
+[#289]: https://github.com/rust-cli/config-rs/pull/289
+[#301]: https://github.com/rust-cli/config-rs/pull/301
 
 ## 0.12.0 - 2022-02-10
 
@@ -407,17 +407,17 @@ update its MSRV.
      - `Config::set_once()`
      - `Config::deserialize()`
 
-[#137]: https://github.com/mehcode/config-rs/pull/137
-[#178]: https://github.com/mehcode/config-rs/pull/178
-[#185]: https://github.com/mehcode/config-rs/pull/185
-[#196]: https://github.com/mehcode/config-rs/pull/196
-[#202]: https://github.com/mehcode/config-rs/pull/202
-[#206]: https://github.com/mehcode/config-rs/pull/206
-[#207]: https://github.com/mehcode/config-rs/pull/207
-[#217]: https://github.com/mehcode/config-rs/pull/217
-[#219]: https://github.com/mehcode/config-rs/pull/219
-[#230]: https://github.com/mehcode/config-rs/pull/230
-[#235]: https://github.com/mehcode/config-rs/pull/235
+[#137]: https://github.com/rust-cli/config-rs/pull/137
+[#178]: https://github.com/rust-cli/config-rs/pull/178
+[#185]: https://github.com/rust-cli/config-rs/pull/185
+[#196]: https://github.com/rust-cli/config-rs/pull/196
+[#202]: https://github.com/rust-cli/config-rs/pull/202
+[#206]: https://github.com/rust-cli/config-rs/pull/206
+[#207]: https://github.com/rust-cli/config-rs/pull/207
+[#217]: https://github.com/rust-cli/config-rs/pull/217
+[#219]: https://github.com/rust-cli/config-rs/pull/219
+[#230]: https://github.com/rust-cli/config-rs/pull/230
+[#235]: https://github.com/rust-cli/config-rs/pull/235
 
 ## 0.11.0 - 2021-03-17
  - The `Config` type got a builder-pattern `with_merged()` method [#166].
@@ -427,15 +427,15 @@ update its MSRV.
    This is due to a bug in serde_hjson, see [#169] for more information.
  - Testing is done on github actions [#175]
 
-[#166]: https://github.com/mehcode/config-rs/pull/166
-[#172]: https://github.com/mehcode/config-rs/pull/172
-[#169]: https://github.com/mehcode/config-rs/pull/169
-[#175]: https://github.com/mehcode/config-rs/pull/169
+[#166]: https://github.com/rust-cli/config-rs/pull/166
+[#172]: https://github.com/rust-cli/config-rs/pull/172
+[#169]: https://github.com/rust-cli/config-rs/pull/169
+[#175]: https://github.com/rust-cli/config-rs/pull/169
 
 ## 0.10.1 - 2019-12-07
  - Allow enums as configuration keys [#119]
 
-[#119]: https://github.com/mehcode/config-rs/pull/119
+[#119]: https://github.com/rust-cli/config-rs/pull/119
 
 ## 0.10.0 - 2019-12-07
  - Remove lowercasing of keys (unless the key is coming from an environment variable).
@@ -444,16 +444,16 @@ update its MSRV.
 ## 0.9.3 - 2019-05-09
  - Support deserializing to a struct with `#[serde(default)]` [#106]
 
-[#106]: https://github.com/mehcode/config-rs/pull/106
+[#106]: https://github.com/rust-cli/config-rs/pull/106
 
 ## 0.9.2 - 2019-01-03
  - Support reading `enum`s from configuration. [#85]
  - Improvements to error path (attempting to propagate path). [#89]
  - Fix UB in monomorphic expansion. We weren't re-exporting dependent types. [#91]
 
-[#85]: https://github.com/mehcode/config-rs/pull/85
-[#89]: https://github.com/mehcode/config-rs/pull/89
-[#91]: https://github.com/mehcode/config-rs/issues/91
+[#85]: https://github.com/rust-cli/config-rs/pull/85
+[#89]: https://github.com/rust-cli/config-rs/pull/89
+[#91]: https://github.com/rust-cli/config-rs/issues/91
 
 ## 0.9.1 - 2018-09-25
  - Allow Environment variable collection to ignore empty values. [#78]
@@ -462,7 +462,7 @@ update its MSRV.
    Environment::with_prefix("APP").ignore_empty(true)
    ```
 
-[#78]: https://github.com/mehcode/config-rs/pull/78
+[#78]: https://github.com/rust-cli/config-rs/pull/78
 
 ## 0.9.0 - 2018-07-02
  - **Breaking Change:** Environment does not declare a separator by default.
@@ -479,22 +479,22 @@ update its MSRV.
  - Fix bug with array set by path. [#69]
  - Update to nom 4. [#63]
 
-[#72]: https://github.com/mehcode/config-rs/pull/72
-[#71]: https://github.com/mehcode/config-rs/pull/71
-[#69]: https://github.com/mehcode/config-rs/pull/69
-[#63]: https://github.com/mehcode/config-rs/pull/63
+[#72]: https://github.com/rust-cli/config-rs/pull/72
+[#71]: https://github.com/rust-cli/config-rs/pull/71
+[#69]: https://github.com/rust-cli/config-rs/pull/69
+[#63]: https://github.com/rust-cli/config-rs/pull/63
 
 ## 0.8.0 - 2018-01-26
  - Update lazy_static and yaml_rust
 
 ## 0.7.1 - 2018-01-26
- - Be compatible with nom's verbose_errors feature (#50)[https://github.com/mehcode/config-rs/pull/50]
- - Add `derive(PartialEq)` for Value (#54)[https://github.com/mehcode/config-rs/pull/54]
+ - Be compatible with nom's verbose_errors feature (#50)[https://github.com/rust-cli/config-rs/pull/50]
+ - Add `derive(PartialEq)` for Value (#54)[https://github.com/rust-cli/config-rs/pull/54]
 
 ## 0.7.0 - 2017-08-05
  - Fix conflict with `serde_yaml`. [#39]
 
-[#39]: https://github.com/mehcode/config-rs/issues/39
+[#39]: https://github.com/rust-cli/config-rs/issues/39
 
  - Implement `Source` for `Config`.
  - Implement `serde::de::Deserializer` for `Config`. `my_config.deserialize` may now be called as either `Deserialize::deserialize(my_config)` or `my_config.try_into()`.
@@ -550,7 +550,7 @@ update its MSRV.
  - Parsing errors even for non required files – [@Anthony25] ( [#33] )
 
 [@Anthony25]: https://github.com/Anthony25
-[#33]: https://github.com/mehcode/config-rs/pull/33
+[#33]: https://github.com/rust-cli/config-rs/pull/33
 
 ## 0.5.1 – 2017-06-16
  - Added config category to Cargo.toml
@@ -564,10 +564,10 @@ update its MSRV.
  - Remove many possible panics [#8]
  - `my_config.refresh()` will do a full re-read from the source so live configuration is possible with some work to watch the file
 
-[#8]: https://github.com/mehcode/config-rs/issues/8
-[#35]: https://github.com/mehcode/config-rs/pull/35
-[#26]: https://github.com/mehcode/config-rs/pull/26
-[#25]: https://github.com/mehcode/config-rs/pull/25
+[#8]: https://github.com/rust-cli/config-rs/issues/8
+[#35]: https://github.com/rust-cli/config-rs/pull/35
+[#26]: https://github.com/rust-cli/config-rs/pull/26
+[#25]: https://github.com/rust-cli/config-rs/pull/25
 
 [@impowski]: https://github.com/impowski
 [@JordiPolo]: https://github.com/JordiPolo
