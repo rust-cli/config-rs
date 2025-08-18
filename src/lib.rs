@@ -23,7 +23,7 @@
 //! # }
 //! ```
 //!
-//! See more [examples](https://github.com/mehcode/config-rs/tree/master/examples) for
+//! See more [examples](https://github.com/rust-cli/config-rs/tree/main/examples) for
 //! general usage information.
 
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
