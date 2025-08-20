@@ -60,9 +60,12 @@ impl FileSourceFile {
             };
         }
 
-        // Append an extension that will be replaced when calling `set_extension()`:
         let mut filename = filename;
-        filename.as_mut_os_string().push(".ext_placeholder");
+        // Preserve any extension-like text within the provided file stem by appending a fake extension 
+        // which will be replaced by `set_extension()` calls (e.g.  `file.local.placeholder` => `file.local.json`)
+        if filename.extension().is_some() {
+          filename.as_mut_os_string().push(".placeholder");
+        }
 
         match format_hint {
             Some(format) => {
