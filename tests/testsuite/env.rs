@@ -803,4 +803,61 @@ mod unicode_tests {
             },
         );
     }
+
+    #[test]
+    fn test_safe_os_source_filtering() {
+        use std::ffi::OsString;
+        use config::Map;
+
+        // Test safe filtering using os_source method
+        let mut filtered_env = Map::new();
+
+        // Add some safe environment variables
+        filtered_env.insert(OsString::from("APP_DEBUG"), OsString::from("true"));
+        filtered_env.insert(OsString::from("APP_PORT"), OsString::from("8080"));
+
+        // Add an invalid Unicode value that would panic with env::vars()
+        let invalid_key = make_invalid_unicode_os_string();
+        filtered_env.insert(invalid_key, OsString::from("should_be_ignored"));
+
+        let environment = Environment::with_prefix("APP")
+            .separator("_")
+            .source_os(Some(filtered_env));
+
+        let vars = environment.collect().unwrap();
+
+        // Should contain the valid variables
+        assert!(vars.contains_key("debug"));
+        assert!(vars.contains_key("port"));
+
+        // Invalid Unicode key should be safely ignored (not cause panic)
+        assert_eq!(vars.len(), 2);
+    }
+
+        #[test] 
+    fn test_os_source_precedence_over_source() {
+        use std::ffi::OsString;
+        use config::Map;
+
+        let mut string_source = Map::new();
+        string_source.insert("TEST_VALUE".to_owned(), "from_string_source".to_owned());
+        
+        let mut os_source = Map::new();
+        os_source.insert(
+            OsString::from("TEST_VALUE"),
+            OsString::from("from_os_source"),
+        );
+
+        let environment = Environment::default()
+            .source(Some(string_source))
+            .source_os(Some(os_source));
+
+        let vars = environment.collect().unwrap();
+
+        // os_source should take precedence over source
+        assert_eq!(
+            vars["test_value"].clone().into_string().unwrap(),
+            "from_os_source"
+        );
+    }
 }

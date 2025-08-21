@@ -93,6 +93,11 @@ pub struct Environment {
     /// }
     /// ```
     source: Option<Map<String, String>>,
+
+    /// Alternate source for the environment using `OsString` for keys and values.
+    /// This provides safe handling of non-Unicode environment variables.
+    /// Takes precedence over `source` if both are set.
+    os_source: Option<Map<OsString, OsString>>,
 }
 
 impl Environment {
@@ -219,6 +224,43 @@ impl Environment {
         self.source = source;
         self
     }
+
+    /// Alternate source for the environment using `OsString` for keys and values.
+    /// This provides safe handling of non-Unicode environment variables and
+    /// prevents panics when filtering environment variables.
+    ///
+    /// This method is particularly useful when you need to safely filter
+    /// environment variables without risking Unicode conversion panics.
+    ///
+    /// ## Example
+    ///
+    /// ```rust
+    /// # use config::{Environment, Config};
+    /// # use std::collections::HashMap;
+    /// # use std::ffi::OsString;
+    /// #
+    /// # fn example() -> Result<(), config::ConfigError> {
+    /// let mut filtered_env = HashMap::new();
+    ///
+    /// // Safely filter environment variables without Unicode conversion
+    /// for (key, value) in std::env::vars_os() {
+    ///     if let Some(key_str) = key.to_str() {
+    ///         if key_str.starts_with("MYAPP_") && !is_sensitive(key_str) {
+    ///             filtered_env.insert(key, value);
+    ///         }
+    ///     }
+    /// }
+    ///
+    /// let source = Environment::with_prefix("MYAPP")
+    ///     .source_os(Some(filtered_env));
+    /// # Ok(())
+    /// # }
+    /// # fn is_sensitive(_key: &str) -> bool { false }
+    /// ```
+    pub fn source_os(mut self, source: Option<Map<OsString, OsString>>) -> Self {
+        self.os_source = source;
+        self
+    }
 }
 
 impl Source for Environment {
@@ -328,13 +370,15 @@ impl Source for Environment {
             Ok(())
         };
 
-        match &self.source {
-            Some(source) => source
+        // Prioritize os_source over source for safer Unicode handling
+        match (&self.os_source, &self.source) {
+            (Some(os_source), _) => os_source.clone().into_iter().try_for_each(collector),
+            (None, Some(source)) => source
                 .clone()
                 .into_iter()
                 .map(|(key, value)| (key.into(), value.into()))
                 .try_for_each(collector),
-            None => env::vars_os().try_for_each(collector),
+            (None, None) => env::vars_os().try_for_each(collector),
         }?;
 
         Ok(m)
