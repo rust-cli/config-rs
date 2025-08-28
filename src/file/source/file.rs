@@ -66,7 +66,6 @@ impl FileSourceFile {
         if filename.extension().is_some() {
             filename.as_mut_os_string().push(".placeholder");
         }
-
         match format_hint {
             Some(format) => {
                 for ext in format.file_extensions() {
@@ -77,7 +76,6 @@ impl FileSourceFile {
                     }
                 }
             }
-
             None => {
                 for format in all_extensions().keys() {
                     for ext in format.extensions() {
@@ -90,7 +88,6 @@ impl FileSourceFile {
                 }
             }
         }
-
         Err(Box::new(io::Error::new(
             io::ErrorKind::NotFound,
             format!(
