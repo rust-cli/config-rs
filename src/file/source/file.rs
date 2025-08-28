@@ -45,7 +45,7 @@ impl FileSourceFile {
                 return Err(Box::new(io::Error::new(
                     io::ErrorKind::NotFound,
                     format!(
-                        "configuration file \"{}\" is not of a registered file format",
+                        "configuration file \"{}\" is not of a supported file format",
                         path.to_string_lossy()
                     ),
                 )));
