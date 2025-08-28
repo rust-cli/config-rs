@@ -1,6 +1,4 @@
-use std::collections::HashMap;
 use std::error::Error;
-use std::sync::OnceLock;
 
 use crate::map::Map;
 use crate::{file::FileStoredFormat, value::Value, Format};
@@ -54,41 +52,54 @@ pub enum FileFormat {
     Json5,
 }
 
-pub(crate) fn all_extensions() -> &'static HashMap<FileFormat, Vec<&'static str>> {
-    #![allow(unused_mut)] // If no features are used, there is an "unused mut" warning in `all_extensions`
-
-    static ALL_EXTENSIONS: OnceLock<HashMap<FileFormat, Vec<&'static str>>> = OnceLock::new();
-    ALL_EXTENSIONS.get_or_init(|| {
-        let mut formats: HashMap<FileFormat, Vec<_>> = HashMap::new();
-
-        #[cfg(feature = "toml")]
-        formats.insert(FileFormat::Toml, vec!["toml"]);
-
-        #[cfg(feature = "json")]
-        formats.insert(FileFormat::Json, vec!["json"]);
-
-        #[cfg(feature = "yaml")]
-        formats.insert(FileFormat::Yaml, vec!["yaml", "yml"]);
-
-        #[cfg(feature = "ini")]
-        formats.insert(FileFormat::Ini, vec!["ini"]);
-
-        #[cfg(feature = "ron")]
-        formats.insert(FileFormat::Ron, vec!["ron"]);
-
-        #[cfg(feature = "json5")]
-        formats.insert(FileFormat::Json5, vec!["json5"]);
-
-        formats
-    })
-}
-
 impl FileFormat {
+    pub(crate) fn all() -> &'static [FileFormat] {
+        &[
+            #[cfg(feature = "toml")]
+            FileFormat::Toml,
+            #[cfg(feature = "json")]
+            FileFormat::Json,
+            #[cfg(feature = "yaml")]
+            FileFormat::Yaml,
+            #[cfg(feature = "ini")]
+            FileFormat::Ini,
+            #[cfg(feature = "ron")]
+            FileFormat::Ron,
+            #[cfg(feature = "json5")]
+            FileFormat::Json5,
+        ]
+    }
+
     pub(crate) fn extensions(&self) -> &'static [&'static str] {
-        // It should not be possible for this to fail
-        // A FileFormat would need to be declared without being added to the
-        // all_extensions map.
-        all_extensions().get(self).unwrap()
+        match self {
+            #[cfg(feature = "toml")]
+            FileFormat::Toml => &["toml"],
+
+            #[cfg(feature = "json")]
+            FileFormat::Json => &["json"],
+
+            #[cfg(feature = "yaml")]
+            FileFormat::Yaml => &["yaml", "yml"],
+
+            #[cfg(feature = "ini")]
+            FileFormat::Ini => &["ini"],
+
+            #[cfg(feature = "ron")]
+            FileFormat::Ron => &["ron"],
+
+            #[cfg(feature = "json5")]
+            FileFormat::Json5 => &["json5"],
+
+            #[cfg(all(
+                not(feature = "toml"),
+                not(feature = "json"),
+                not(feature = "yaml"),
+                not(feature = "ini"),
+                not(feature = "ron"),
+                not(feature = "json5"),
+            ))]
+            _ => unreachable!("No features are enabled, this library won't work without features"),
+        }
     }
 
     pub(crate) fn parse(
