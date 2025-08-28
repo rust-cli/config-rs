@@ -25,56 +25,56 @@ impl FileSourceFile {
     where
         F: FileStoredFormat + Format + 'static,
     {
-        let filename = if self.name.is_absolute() {
+        let path = if self.name.is_absolute() {
             self.name.clone()
         } else {
             env::current_dir()?.as_path().join(&self.name)
         };
 
         // First check for an _exact_ match
-        if filename.is_file() {
+        if path.is_file() {
             if let Some(format) = format_hint {
-                return Ok((filename, Box::new(format)));
+                return Ok((path, Box::new(format)));
             } else {
-                let ext = filename.extension().unwrap_or_default().to_string_lossy();
+                let ext = path.extension().unwrap_or_default().to_string_lossy();
                 for format in FileFormat::all() {
                     if format.extensions().contains(&ext.as_ref()) {
-                        return Ok((filename, Box::new(*format)));
+                        return Ok((path, Box::new(*format)));
                     }
                 }
                 return Err(Box::new(io::Error::new(
                     io::ErrorKind::NotFound,
                     format!(
                         "configuration file \"{}\" is not of a registered file format",
-                        filename.to_string_lossy()
+                        path.to_string_lossy()
                     ),
                 )));
             };
         }
 
-        let mut filename = filename;
+        let mut path = path;
         // Preserve any extension-like text within the provided file stem by appending a fake extension
         // which will be replaced by `set_extension()` calls (e.g.  `file.local.placeholder` => `file.local.json`)
-        if filename.extension().is_some() {
-            filename.as_mut_os_string().push(".placeholder");
+        if path.extension().is_some() {
+            path.as_mut_os_string().push(".placeholder");
         }
         match format_hint {
             Some(format) => {
                 for ext in format.file_extensions() {
-                    filename.set_extension(ext);
+                    path.set_extension(ext);
 
-                    if filename.is_file() {
-                        return Ok((filename, Box::new(format)));
+                    if path.is_file() {
+                        return Ok((path, Box::new(format)));
                     }
                 }
             }
             None => {
                 for format in FileFormat::all() {
                     for ext in format.extensions() {
-                        filename.set_extension(ext);
+                        path.set_extension(ext);
 
-                        if filename.is_file() {
-                            return Ok((filename, Box::new(*format)));
+                        if path.is_file() {
+                            return Ok((path, Box::new(*format)));
                         }
                     }
                 }
