@@ -37,37 +37,32 @@ impl FileSourceFile {
         // Ideally there is an exact filename match with a format hint, otherwise:
         // - Without a hint => Try to identify the format via the file extension
         // - Without an exact filename => Try to find a valid file by appending format extensions
-        if filename.is_file() {
-            return if let Some(format) = format_hint {
-                Ok((filename, Box::new(format)))
-            } else {
-                let valid_format = {
-                    all_extensions().keys().cloned()
-                        .find(identify_format(&filename))
-                        .ok_or_else(|| self.error_invalid_format())?
-                };
-
-                Ok((filename, Box::new(*valid_format)))
-            };
-        }
-
         match format_hint {
             Some(_) => {
                 let valid_format = format_hint
-                    .filter(file_exists_with_format(&mut filename))
+                    .filter(|format| {
+                        filename.is_file() || file_exists_with_format(&mut filename)(format)
+                    })
                     .ok_or_else(|| self.error_invalid_path())?;
 
                 Ok((filename, Box::new(valid_format)))
             }
 
+            // Fallback to checking compatibility with internally supported formats (`FileFormat` enum):
             None => {
-                let valid_format = {
-                    all_extensions().keys().cloned()
+                let mut internal_formats = all_extensions().keys().cloned();
+
+                let valid_format = if filename.is_file() {
+                    internal_formats
+                        .find(identify_format(&filename))
+                        .ok_or_else(|| self.error_invalid_format())?
+                } else {
+                    internal_formats
                         .find(file_exists_with_format(&mut filename))
                         .ok_or_else(|| self.error_invalid_path())?
                 };
 
-                Ok((filename, Box::new(*valid_format)))
+                Ok((filename, Box::new(valid_format)))
             }
         }
     }
