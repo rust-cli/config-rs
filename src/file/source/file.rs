@@ -38,14 +38,13 @@ impl FileSourceFile {
             return if let Some(format) = format_hint {
                 Ok((filename, Box::new(format)))
             } else {
-                for (format, extensions) in all_extensions().iter() {
-                    if extensions.contains(
-                        &filename
-                            .extension()
-                            .unwrap_or_default()
-                            .to_string_lossy()
-                            .as_ref(),
-                    ) {
+                let ext = &filename
+                    .extension()
+                    .unwrap_or_default()
+                    .to_string_lossy();
+
+                for format in all_extensions().keys() {
+                    if format.file_extensions().contains(&ext.as_ref()) {
                         return Ok((filename, Box::new(*format)));
                     }
                 }
@@ -63,23 +62,25 @@ impl FileSourceFile {
 
         match format_hint {
             Some(format) => {
-                for ext in format.file_extensions() {
+                // Mutates `filename` to try each extension of format,
+                // short-circuiting via `any()` as soon as the modified filename is valid on disk
+                if format.file_extensions().iter().any(|ext| {
                     filename.set_extension(ext);
-
-                    if filename.is_file() {
-                        return Ok((filename, Box::new(format)));
-                    }
+                    filename.is_file()
+                }) {
+                    return Ok((filename, Box::new(format)));
                 }
             }
 
             None => {
                 for format in all_extensions().keys() {
-                    for ext in format.extensions() {
+                    // Mutates `filename` to try each extension of format,
+                    // short-circuiting via `any()` as soon as the modified filename is valid on disk
+                    if format.file_extensions().iter().any(|ext| {
                         filename.set_extension(ext);
-
-                        if filename.is_file() {
-                            return Ok((filename, Box::new(*format)));
-                        }
+                        filename.is_file()
+                    }) {
+                        return Ok((filename, Box::new(*format)));
                     }
                 }
             }
