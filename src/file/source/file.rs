@@ -2,7 +2,7 @@ use std::env;
 use std::error::Error;
 use std::fs;
 use std::io;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use crate::file::{
     format::all_extensions, source::FileSourceResult, FileSource, FileStoredFormat, Format,
@@ -33,18 +33,19 @@ impl FileSourceFile {
             env::current_dir()?.as_path().join(&self.name)
         };
 
-        // First check for an _exact_ match
+        // Ideally there is an exact filename match with a format hint
         if filename.is_file() {
             return if let Some(format) = format_hint {
                 Ok((filename, Box::new(format)))
             } else {
-                let ext = &filename
-                    .extension()
-                    .unwrap_or_default()
-                    .to_string_lossy();
+                // Without a hint, try to identify the format via the file extension
+
+                // NOTE: Temporary ownership/burrow issue workaround for `filename` that
+                // generates a closure per format, this will be resolved in a follow-up commit.
+                let predicate = |f| identify_format(&filename)(f);
 
                 for format in all_extensions().keys() {
-                    if format.file_extensions().contains(&ext.as_ref()) {
+                    if predicate(format) {
                         return Ok((filename, Box::new(*format)));
                     }
                 }
@@ -53,6 +54,7 @@ impl FileSourceFile {
             };
         }
 
+        // Without an exact filename, try to find a valid file by appending format extensions
         let mut filename = filename;
         // Preserve any extension-like text within the provided file stem by appending a fake extension
         // which will be replaced by `set_extension()` calls (e.g.  `file.local.placeholder` => `file.local.json`)
@@ -62,24 +64,22 @@ impl FileSourceFile {
 
         match format_hint {
             Some(format) => {
-                // Mutates `filename` to try each extension of format,
-                // short-circuiting via `any()` as soon as the modified filename is valid on disk
-                if format.file_extensions().iter().any(|ext| {
-                    filename.set_extension(ext);
-                    filename.is_file()
-                }) {
+                // This generated predicate will mutate `filename` per format extension tried
+                // NOTE: Calling the returned closure in the conditional avoids upsetting the borrow checker.
+                if file_exists_with_format(&mut filename)(&format) {
                     return Ok((filename, Box::new(format)));
                 }
             }
 
             None => {
+                // NOTE: Temporary ownership/burrow issue workaround for `filename` that
+                // generates a closure per format, this will be resolved in a follow-up commit.
+                //
+                // This generated predicate will mutate `filename` per format extension tried each call
+                let mut predicate = |f| file_exists_with_format(&mut filename)(f);
+
                 for format in all_extensions().keys() {
-                    // Mutates `filename` to try each extension of format,
-                    // short-circuiting via `any()` as soon as the modified filename is valid on disk
-                    if format.file_extensions().iter().any(|ext| {
-                        filename.set_extension(ext);
-                        filename.is_file()
-                    }) {
+                    if predicate(format) {
                         return Ok((filename, Box::new(*format)));
                     }
                 }
@@ -105,6 +105,24 @@ impl FileSourceFile {
         );
 
         Box::new(io::Error::new(io::ErrorKind::NotFound, error_message))
+    }
+}
+
+fn identify_format<F: FileStoredFormat>(filename: &Path) -> impl Fn(&F) -> bool + '_ {
+    let ext = filename.extension().unwrap_or_default().to_string_lossy();
+    move |format| format.file_extensions().contains(&ext.as_ref())
+}
+
+// Provides a predicate to verify a file exists with an extension that is compatible with the queried format.
+// To simplify usage at the call sites, `filename` will be mutated by reference with each use of the closure.
+fn file_exists_with_format<F: FileStoredFormat>(
+    filename: &mut PathBuf,
+) -> impl FnMut(&F) -> bool + '_ {
+    move |format| {
+        format.file_extensions().iter().any(|ext| {
+            filename.set_extension(ext);
+            filename.is_file()
+        })
     }
 }
 
