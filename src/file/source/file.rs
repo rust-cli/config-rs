@@ -35,8 +35,8 @@ impl FileSourceFile {
 
         // First check for an _exact_ match
         if filename.is_file() {
-            return if let Some(format) = format_hint {
-                Ok((filename, Box::new(format)))
+            if let Some(format) = format_hint {
+                return Ok((filename, Box::new(format)));
             } else {
                 for (format, extensions) in all_extensions().iter() {
                     if extensions.contains(
@@ -49,14 +49,13 @@ impl FileSourceFile {
                         return Ok((filename, Box::new(*format)));
                     }
                 }
-
-                Err(Box::new(io::Error::new(
+                return Err(Box::new(io::Error::new(
                     io::ErrorKind::NotFound,
                     format!(
                         "configuration file \"{}\" is not of a registered file format",
                         filename.to_string_lossy()
                     ),
-                )))
+                )));
             };
         }
 
