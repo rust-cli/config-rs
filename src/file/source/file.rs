@@ -38,14 +38,9 @@ impl FileSourceFile {
             if let Some(format) = format_hint {
                 return Ok((filename, Box::new(format)));
             } else {
+                let ext = filename.extension().unwrap_or_default().to_string_lossy();
                 for (format, extensions) in all_extensions().iter() {
-                    if extensions.contains(
-                        &filename
-                            .extension()
-                            .unwrap_or_default()
-                            .to_string_lossy()
-                            .as_ref(),
-                    ) {
+                    if extensions.contains(&ext.as_ref()) {
                         return Ok((filename, Box::new(*format)));
                     }
                 }
