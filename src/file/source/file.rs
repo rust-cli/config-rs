@@ -54,7 +54,7 @@ impl FileSourceFile {
                     io::ErrorKind::NotFound,
                     format!(
                         "configuration file \"{}\" is not of a registered file format",
-                        filename.to_string_lossy()
+                        self.name.to_string_lossy()
                     ),
                 )))
             };
