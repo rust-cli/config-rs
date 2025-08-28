@@ -50,13 +50,7 @@ impl FileSourceFile {
                     }
                 }
 
-                Err(Box::new(io::Error::new(
-                    io::ErrorKind::NotFound,
-                    format!(
-                        "configuration file \"{}\" is not of a registered file format",
-                        self.name.to_string_lossy()
-                    ),
-                )))
+                Err(self.error_invalid_format())
             };
         }
 
@@ -91,13 +85,25 @@ impl FileSourceFile {
             }
         }
 
-        Err(Box::new(io::Error::new(
-            io::ErrorKind::NotFound,
-            format!(
-                "configuration file \"{}\" not found",
-                self.name.to_string_lossy()
-            ),
-        )))
+        Err(self.error_invalid_path())
+    }
+
+    fn error_invalid_format(&self) -> Box<dyn Error + Send + Sync> {
+        let error_message = format!(
+            "configuration file \"{}\" is not of a registered file format",
+            self.name.to_string_lossy(),
+        );
+
+        Box::new(io::Error::new(io::ErrorKind::NotFound, error_message))
+    }
+
+    fn error_invalid_path(&self) -> Box<dyn Error + Send + Sync> {
+        let error_message = format!(
+            "configuration file \"{}\" not found",
+            self.name.to_string_lossy(),
+        );
+
+        Box::new(io::Error::new(io::ErrorKind::NotFound, error_message))
     }
 }
 
