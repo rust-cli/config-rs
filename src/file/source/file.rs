@@ -39,54 +39,42 @@ impl FileSourceFile {
                 Ok((filename, Box::new(format)))
             } else {
                 // Without a hint, try to identify the format via the file extension
+                let valid_format = {
+                    let predicate = identify_format(&filename);
 
-                // NOTE: Temporary ownership/burrow issue workaround for `filename` that
-                // generates a closure per format, this will be resolved in a follow-up commit.
-                let predicate = |f| identify_format(&filename)(f);
+                    all_extensions().keys()
+                        .find(|f| predicate(*f))
+                        .ok_or_else(|| self.error_invalid_format())?
+                };
 
-                for format in all_extensions().keys() {
-                    if predicate(format) {
-                        return Ok((filename, Box::new(*format)));
-                    }
-                }
-
-                Err(self.error_invalid_format())
+                Ok((filename, Box::new(*valid_format)))
             };
         }
 
         // Without an exact filename, try to find a valid file by appending format extensions
         let mut filename = filename;
-        // Preserve any extension-like text within the provided file stem by appending a fake extension
-        // which will be replaced by `set_extension()` calls (e.g.  `file.local.placeholder` => `file.local.json`)
-        if filename.extension().is_some() {
-            filename.as_mut_os_string().push(".placeholder");
-        }
 
         match format_hint {
-            Some(format) => {
-                // This generated predicate will mutate `filename` per format extension tried
-                // NOTE: Calling the returned closure in the conditional avoids upsetting the borrow checker.
-                if file_exists_with_format(&mut filename)(&format) {
-                    return Ok((filename, Box::new(format)));
-                }
+            Some(_) => {
+                let valid_format = format_hint
+                    .filter(file_exists_with_format(&mut filename))
+                    .ok_or_else(|| self.error_invalid_path())?;
+
+                Ok((filename, Box::new(valid_format)))
             }
 
             None => {
-                // NOTE: Temporary ownership/burrow issue workaround for `filename` that
-                // generates a closure per format, this will be resolved in a follow-up commit.
-                //
-                // This generated predicate will mutate `filename` per format extension tried each call
-                let mut predicate = |f| file_exists_with_format(&mut filename)(f);
+                let valid_format = {
+                    let mut predicate = file_exists_with_format(&mut filename);
 
-                for format in all_extensions().keys() {
-                    if predicate(format) {
-                        return Ok((filename, Box::new(*format)));
-                    }
-                }
+                    all_extensions().keys()
+                        .find(|f| predicate(*f))
+                        .ok_or_else(|| self.error_invalid_path())?
+                };
+
+                Ok((filename, Box::new(*valid_format)))
             }
         }
-
-        Err(self.error_invalid_path())
     }
 
     fn error_invalid_format(&self) -> Box<dyn Error + Send + Sync> {
@@ -118,6 +106,12 @@ fn identify_format<F: FileStoredFormat>(filename: &Path) -> impl Fn(&F) -> bool 
 fn file_exists_with_format<F: FileStoredFormat>(
     filename: &mut PathBuf,
 ) -> impl FnMut(&F) -> bool + '_ {
+    // Preserve any extension-like text within the provided file stem by appending a fake extension
+    // which will be replaced by `set_extension()` calls (e.g. `example.file.placeholder` => `example.file.json`)
+    if filename.extension().is_some() {
+        filename.as_mut_os_string().push(".placeholder");
+    }
+
     move |format| {
         format.file_extensions().iter().any(|ext| {
             filename.set_extension(ext);
