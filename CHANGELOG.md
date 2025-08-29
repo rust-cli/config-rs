@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.15] - 2025-08-29
+
 ### Fixes
 
 - *(json5)* Correctly deserialize `null` (regressed in 0.15.14)
@@ -601,7 +603,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.14...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.15...HEAD
+[0.15.15]: https://github.com/rust-cli/config-rs/compare/v0.15.14...v0.15.15
 [0.15.14]: https://github.com/rust-cli/config-rs/compare/v0.15.13...v0.15.14
 [0.15.13]: https://github.com/rust-cli/config-rs/compare/v0.15.12...v0.15.13
 [0.15.12]: https://github.com/rust-cli/config-rs/compare/v0.15.11...v0.15.12
