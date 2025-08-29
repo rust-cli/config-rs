@@ -16,6 +16,7 @@ fn test_file() {
         place: Place,
         #[serde(rename = "arr")]
         elements: Vec<String>,
+        nullable: Option<String>,
     }
 
     #[derive(Debug, Deserialize)]
@@ -54,7 +55,8 @@ fn test_file() {
     }
   ),
   FOO: "FOO should be overridden",
-  bar: "I am bar"
+  bar: "I am bar",
+  nullable: None
 )
 "#,
             FileFormat::Ron,
@@ -95,6 +97,7 @@ fn test_file() {
             "John Smith".to_owned()
         );
     }
+    assert_eq!(s.nullable, None);
 }
 
 #[test]

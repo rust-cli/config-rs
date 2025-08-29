@@ -18,6 +18,7 @@ fn test_file() {
         place: Place,
         #[serde(rename = "arr")]
         elements: Vec<String>,
+        nullable: Option<String>,
     }
 
     #[derive(Debug, Deserialize)]
@@ -52,6 +53,7 @@ place:
 # For override tests
 FOO: FOO should be overridden
 bar: I am bar
+nullable: null
 "#,
             FileFormat::Yaml,
         ))
@@ -90,6 +92,7 @@ bar: I am bar
             "John Smith".to_owned()
         );
     }
+    assert_eq!(s.nullable, None);
 }
 
 #[test]
