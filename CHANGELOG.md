@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- *(json5)* Correctly deserialize `null` (regressed in 0.15.14)
+
 ## [0.15.14] - 2025-08-12
 
 ### Performance
