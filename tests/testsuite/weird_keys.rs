@@ -3,14 +3,14 @@
 //!
 //! Please don't be offended!
 
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 use config::{File, FileFormat};
 
 /// Helper fn to test the different deserializations
 fn test_config_as<'a, T>(config: &str, format: FileFormat) -> T
 where
-    T: serde::Deserialize<'a> + std::fmt::Debug,
+    T: Deserialize<'a> + std::fmt::Debug,
 {
     let cfg = config::Config::builder()
         .add_source(File::from_str(config, format))

@@ -15,10 +15,10 @@ pub(crate) enum Val {
     Object(Map<String, Self>),
 }
 
-impl<'de> serde::de::Deserialize<'de> for Val {
+impl<'de> serde_core::de::Deserialize<'de> for Val {
     fn deserialize<D>(d: D) -> Result<Self, D::Error>
     where
-        D: serde::de::Deserializer<'de>,
+        D: serde_core::de::Deserializer<'de>,
     {
         serde_untagged::UntaggedEnumVisitor::new()
             .bool(|value| Ok(Self::Boolean(value)))

@@ -1,7 +1,7 @@
 use std::fmt::Display;
 use std::fmt::Write as _;
 
-use serde::ser;
+use serde_core::ser;
 
 use crate::error::{ConfigError, Result};
 use crate::value::{Value, ValueKind};
@@ -149,7 +149,7 @@ impl<'a> ser::Serializer for &'a mut ConfigSerializer {
     }
 
     fn serialize_bytes(self, v: &[u8]) -> Result<Self::Ok> {
-        use serde::ser::SerializeSeq;
+        use serde_core::ser::SerializeSeq;
         let mut seq = self.serialize_seq(Some(v.len()))?;
         for byte in v {
             seq.serialize_element(byte)?;
@@ -676,7 +676,7 @@ impl ser::SerializeStructVariant for Unreachable {
 
 #[cfg(test)]
 mod test {
-    use serde_derive::{Deserialize, Serialize};
+    use serde::{Deserialize, Serialize};
 
     use super::*;
 

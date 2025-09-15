@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 
-use serde::de::Deserialize;
-use serde::ser::Serialize;
+use serde_core::de::Deserialize;
+use serde_core::ser::Serialize;
 
 use crate::builder::{ConfigBuilder, DefaultState};
 use crate::error::{ConfigError, Result};
