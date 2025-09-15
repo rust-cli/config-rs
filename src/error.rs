@@ -2,8 +2,8 @@ use std::error::Error;
 use std::fmt;
 use std::result;
 
-use serde::de;
-use serde::ser;
+use serde_core::de;
+use serde_core::ser;
 
 #[allow(unnameable_types)] // Unsure if/how to expose this
 #[derive(Debug)]

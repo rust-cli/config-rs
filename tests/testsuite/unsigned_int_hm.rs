@@ -1,11 +1,11 @@
 #![cfg(not(feature = "preserve_order"))]
 
-#[derive(serde_derive::Deserialize, Eq, PartialEq, Debug)]
+#[derive(serde::Deserialize, Eq, PartialEq, Debug)]
 struct Container<T> {
     inner: T,
 }
 
-#[derive(serde_derive::Deserialize, Eq, PartialEq, Debug)]
+#[derive(serde::Deserialize, Eq, PartialEq, Debug)]
 struct Unsigned {
     unsigned: u16,
 }

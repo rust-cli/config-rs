@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use float_cmp::ApproxEqUlps;
-use serde_derive::Deserialize;
+use serde::Deserialize;
 use snapbox::{assert_data_eq, str};
 
 use config::{Config, File, FileFormat, Map, Value};

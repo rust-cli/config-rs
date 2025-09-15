@@ -1,7 +1,7 @@
 #![cfg(feature = "ron")]
 
 use config::{Config, File, FileFormat};
-use serde_derive::Deserialize;
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]

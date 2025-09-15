@@ -2,7 +2,7 @@ use std::convert::TryInto;
 use std::fmt;
 use std::fmt::Display;
 
-use serde::de::{Deserialize, Deserializer, Visitor};
+use serde_core::de::{Deserialize, Deserializer, Visitor};
 
 use crate::error::{ConfigError, Result, Unexpected};
 use crate::map::Map;
@@ -770,10 +770,10 @@ impl<'de> Deserialize<'de> for Value {
             #[inline]
             fn visit_u64<E>(self, value: u64) -> ::std::result::Result<Value, E>
             where
-                E: ::serde::de::Error,
+                E: ::serde_core::de::Error,
             {
                 let num: i64 = value.try_into().map_err(|_| {
-                    E::invalid_type(::serde::de::Unexpected::Unsigned(value), &self)
+                    E::invalid_type(::serde_core::de::Unexpected::Unsigned(value), &self)
                 })?;
                 Ok(num.into())
             }
@@ -781,11 +781,11 @@ impl<'de> Deserialize<'de> for Value {
             #[inline]
             fn visit_u128<E>(self, value: u128) -> ::std::result::Result<Value, E>
             where
-                E: ::serde::de::Error,
+                E: ::serde_core::de::Error,
             {
                 let num: i128 = value.try_into().map_err(|_| {
                     E::invalid_type(
-                        ::serde::de::Unexpected::Other(
+                        ::serde_core::de::Unexpected::Other(
                             format!("integer `{value}` as u128").as_str(),
                         ),
                         &self,
@@ -802,7 +802,7 @@ impl<'de> Deserialize<'de> for Value {
             #[inline]
             fn visit_str<E>(self, value: &str) -> ::std::result::Result<Value, E>
             where
-                E: ::serde::de::Error,
+                E: ::serde_core::de::Error,
             {
                 self.visit_string(String::from(value))
             }
@@ -833,7 +833,7 @@ impl<'de> Deserialize<'de> for Value {
             #[inline]
             fn visit_seq<V>(self, mut visitor: V) -> ::std::result::Result<Value, V::Error>
             where
-                V: ::serde::de::SeqAccess<'de>,
+                V: ::serde_core::de::SeqAccess<'de>,
             {
                 let mut vec = Array::new();
 
@@ -846,7 +846,7 @@ impl<'de> Deserialize<'de> for Value {
 
             fn visit_map<V>(self, mut visitor: V) -> ::std::result::Result<Value, V::Error>
             where
-                V: ::serde::de::MapAccess<'de>,
+                V: ::serde_core::de::MapAccess<'de>,
             {
                 let mut values = Table::new();
 
