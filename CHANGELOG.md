@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.16] - 2025-09-15
+
 ### Performance
 
 - Allow more build parallelism by depending on [`serde_core`](https://crates.io/crates/serde_core)
@@ -607,7 +609,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.15...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.16...HEAD
+[0.15.16]: https://github.com/rust-cli/config-rs/compare/v0.15.15...v0.15.16
 [0.15.15]: https://github.com/rust-cli/config-rs/compare/v0.15.14...v0.15.15
 [0.15.14]: https://github.com/rust-cli/config-rs/compare/v0.15.13...v0.15.14
 [0.15.13]: https://github.com/rust-cli/config-rs/compare/v0.15.12...v0.15.13
