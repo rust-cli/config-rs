@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Performance
+
+- Allow more build parallelism by depending on [`serde_core`](https://crates.io/crates/serde_core)
+
 ## [0.15.15] - 2025-08-29
 
 ### Fixes
