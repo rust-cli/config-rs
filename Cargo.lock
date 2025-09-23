@@ -222,6 +222,7 @@ dependencies = [
  "glob",
  "indexmap",
  "json5",
+ "libcorn",
  "log",
  "notify",
  "pathdiff",
@@ -1041,6 +1042,20 @@ name = "libc"
 version = "0.2.176"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58f929b4d672ea937a23a1ab494143d968337a5f47e56d0815df1e0890ddf174"
+
+[[package]]
+name = "libcorn"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "deeaa03b640fc4dbe8cbc3aadff0e825c994d63b4d99b7589a484029fbd54ae1"
+dependencies = [
+ "cfg-if",
+ "indexmap",
+ "pest",
+ "pest_derive",
+ "serde",
+ "thiserror 1.0.69",
+]
 
 [[package]]
 name = "libredox"

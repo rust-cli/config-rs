@@ -21,6 +21,9 @@ mod ron;
 #[cfg(feature = "json5")]
 mod json5;
 
+#[cfg(feature = "corn")]
+mod corn;
+
 /// File formats provided by the library.
 ///
 /// Although it is possible to define custom formats using [`Format`] trait it is recommended to use `FileFormat` if possible.
@@ -50,6 +53,10 @@ pub enum FileFormat {
     /// JSON5 (parsed with json5)
     #[cfg(feature = "json5")]
     Json5,
+
+    /// Corn (parsed with `libcorn`)
+    #[cfg(feature = "corn")]
+    Corn,
 }
 
 impl FileFormat {
@@ -67,6 +74,8 @@ impl FileFormat {
             FileFormat::Ron,
             #[cfg(feature = "json5")]
             FileFormat::Json5,
+            #[cfg(feature = "corn")]
+            FileFormat::Corn,
         ]
     }
 
@@ -89,6 +98,9 @@ impl FileFormat {
 
             #[cfg(feature = "json5")]
             FileFormat::Json5 => &["json5"],
+
+            #[cfg(feature = "corn")]
+            FileFormat::Corn => &["corn"],
 
             #[cfg(all(
                 not(feature = "toml"),
@@ -125,6 +137,9 @@ impl FileFormat {
 
             #[cfg(feature = "json5")]
             FileFormat::Json5 => json5::parse(uri, text),
+
+            #[cfg(feature = "corn")]
+            FileFormat::Corn => corn::parse(uri, text),
 
             #[cfg(all(
                 not(feature = "toml"),
