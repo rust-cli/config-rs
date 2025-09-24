@@ -37,6 +37,34 @@ impl fmt::Display for Unexpected {
     }
 }
 
+impl From<de::Unexpected<'_>> for Unexpected {
+    fn from(value: de::Unexpected<'_>) -> Self {
+        match value {
+            de::Unexpected::Bool(b) => Self::Bool(b),
+            de::Unexpected::Unsigned(u) => Self::U64(u),
+            de::Unexpected::Signed(s) => Self::I64(s),
+            de::Unexpected::Float(f) => Self::Float(f),
+            de::Unexpected::Char(c) => Self::Str(c.into()),
+            de::Unexpected::Str(s) => Self::Str(s.into()),
+            de::Unexpected::Unit => Self::Unit,
+            de::Unexpected::Seq => Self::Seq,
+            de::Unexpected::Map => Self::Map,
+
+            // TODO Maybe add other items to unexpected if needed?
+            //de::Unexpected::Bytes(items) => todo!(),
+            //de::Unexpected::Option => todo!(),
+            //de::Unexpected::NewtypeStruct => todo!(),
+            //de::Unexpected::Enum => todo!(),
+            //de::Unexpected::UnitVariant => todo!(),
+            //de::Unexpected::NewtypeVariant => todo!(),
+            //de::Unexpected::TupleVariant => todo!(),
+            //de::Unexpected::StructVariant => todo!(),
+            //de::Unexpected::Other(_) => todo!(),
+            _ => Self::Unit,
+        }
+    }
+}
+
 /// Represents all possible errors that can occur when working with
 /// configuration.
 #[non_exhaustive]
@@ -288,6 +316,33 @@ impl Error for ConfigError {}
 impl de::Error for ConfigError {
     fn custom<T: fmt::Display>(msg: T) -> Self {
         Self::Message(msg.to_string())
+    }
+
+    fn missing_field(field: &'static str) -> Self {
+        Self::NotFound(field.into())
+    }
+
+    fn invalid_type(unexp: de::Unexpected<'_>, exp: &dyn de::Expected) -> Self {
+        Self::Type {
+            origin: None,
+            unexpected: unexp.into(),
+            // TODO A better way of doing this? Maybe make "expected" a Cow<str>?
+            expected: exp.to_string().leak(),
+            key: None,
+        }
+    }
+
+    fn invalid_value(unexp: de::Unexpected<'_>, exp: &dyn de::Expected) -> Self {
+        <Self as de::Error>::invalid_type(unexp, exp)
+    }
+
+    fn unknown_variant(variant: &str, expected: &'static [&'static str]) -> Self {
+        Self::Type {
+            origin: None,
+            unexpected: Unexpected::Str(variant.into()),
+            expected: expected.join(",").leak(),
+            key: None,
+        }
     }
 }
 
