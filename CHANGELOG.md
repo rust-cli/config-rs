@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.17] - 2025-09-24
+
 ### Features
 
 - [corn](https://cornlang.dev/) file format support
@@ -613,7 +615,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.16...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.17...HEAD
+[0.15.17]: https://github.com/rust-cli/config-rs/compare/v0.15.16...v0.15.17
 [0.15.16]: https://github.com/rust-cli/config-rs/compare/v0.15.15...v0.15.16
 [0.15.15]: https://github.com/rust-cli/config-rs/compare/v0.15.14...v0.15.15
 [0.15.14]: https://github.com/rust-cli/config-rs/compare/v0.15.13...v0.15.14
