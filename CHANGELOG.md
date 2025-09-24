@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Features
+
+- [corn](https://cornlang.dev/) file format support
+
 ## [0.15.16] - 2025-09-15
 
 ### Performance
