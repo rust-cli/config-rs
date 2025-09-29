@@ -230,7 +230,7 @@ impl fmt::Display for ConfigError {
             ConfigError::Foreign(ref cause) => write!(f, "{cause}"),
 
             ConfigError::NotFound(ref key) => {
-                write!(f, "configuration property {key:?} not found")
+                write!(f, "missing configuration field {key:?}")
             }
 
             ConfigError::Type {

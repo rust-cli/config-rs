@@ -22,7 +22,7 @@ fn test_path_index_bounds() {
     assert!(res.is_err());
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str![[r#"configuration property "arr[2]" not found"#]]
+        str![[r#"missing configuration field "arr[2]""#]]
     );
 }
 
@@ -45,7 +45,7 @@ fn test_path_index_negative_bounds() {
     assert!(res.is_err());
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str![[r#"configuration property "arr[-1]" not found"#]]
+        str![[r#"missing configuration field "arr[-1]""#]]
     );
 }
 
