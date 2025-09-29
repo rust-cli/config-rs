@@ -178,7 +178,7 @@ fn test_override_uppercase_value_for_struct() {
             );
         }
         Err(e) => {
-            if e.to_string().contains("missing field `FOO`") {
+            if matches!(e, config::ConfigError::NotFound(_)) {
                 println!("triggered error {e:?}");
                 assert_eq!(
                     lower_settings.foo,

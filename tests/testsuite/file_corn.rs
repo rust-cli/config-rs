@@ -185,7 +185,7 @@ fn test_override_uppercase_value_for_struct() {
             );
         }
         Err(e) => {
-            if e.to_string().contains("missing field `FOO`") {
+            if matches!(e, config::ConfigError::NotFound(_)) {
                 assert_eq!(
                     lower_settings.foo,
                     "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned()

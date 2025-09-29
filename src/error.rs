@@ -289,6 +289,10 @@ impl de::Error for ConfigError {
     fn custom<T: fmt::Display>(msg: T) -> Self {
         Self::Message(msg.to_string())
     }
+
+    fn missing_field(field: &'static str) -> Self {
+        Self::NotFound(field.into())
+    }
 }
 
 impl ser::Error for ConfigError {
