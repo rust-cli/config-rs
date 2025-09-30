@@ -18,7 +18,7 @@ fn test_not_found() {
     assert!(res.is_err());
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str![[r#"configuration property "not_found" not found"#]]
+        str![[r#"missing configuration field "not_found""#]]
     );
 }
 

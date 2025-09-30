@@ -22,7 +22,7 @@ fn test_path_index_bounds() {
     assert!(res.is_err());
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str![[r#"configuration property "arr[2]" not found"#]]
+        str![[r#"missing configuration field "arr[2]""#]]
     );
 }
 
@@ -45,7 +45,7 @@ fn test_path_index_negative_bounds() {
     assert!(res.is_err());
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str![[r#"configuration property "arr[-1]" not found"#]]
+        str![[r#"missing configuration field "arr[-1]""#]]
     );
 }
 
@@ -158,7 +158,7 @@ fn test_get_missing_field() {
     let res = c.get::<InnerSettings>("inner");
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str!["missing field `value2` for key `inner`"]
+        str![[r#"missing configuration field "value2" for key `inner`"#]]
     );
 }
 
@@ -184,7 +184,7 @@ fn test_get_missing_field_file() {
     let res = c.get::<InnerSettings>("inner");
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str!["missing field `value2` for key `inner`"]
+        str![[r#"missing configuration field "value2" for key `inner`"#]]
     );
 }
 
@@ -436,7 +436,7 @@ fn test_deserialize_missing_field() {
     let res = c.try_deserialize::<Settings>();
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str!["missing field `value2` for key `inner`"]
+        str![[r#"missing configuration field "inner.value2""#]]
     );
 }
 
@@ -468,6 +468,6 @@ fn test_deserialize_missing_field_file() {
     let res = c.try_deserialize::<Settings>();
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str!["missing field `value2` for key `inner`"]
+        str![[r#"missing configuration field "inner.value2""#]]
     );
 }
