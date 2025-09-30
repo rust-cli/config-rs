@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.18] - 2025-09-30
+
 ### Fixes
 
 - Improve consistency between missing field error messages
@@ -619,7 +621,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.17...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.18...HEAD
+[0.15.18]: https://github.com/rust-cli/config-rs/compare/v0.15.17...v0.15.18
 [0.15.17]: https://github.com/rust-cli/config-rs/compare/v0.15.16...v0.15.17
 [0.15.16]: https://github.com/rust-cli/config-rs/compare/v0.15.15...v0.15.16
 [0.15.15]: https://github.com/rust-cli/config-rs/compare/v0.15.14...v0.15.15
