@@ -133,7 +133,7 @@ async = ["async-trait"]
 toml = ["dep:toml"]
 
 [dependencies]
-serde_core = "1.0.226"
+serde_core = "1.0.228"
 
 async-trait = { version = "0.1.89", optional = true }
 toml = { version = "0.9.6", optional = true, default-features = false, features = ["parse", "serde"] }
@@ -150,11 +150,11 @@ winnow = "0.7.13"
 serde-untagged = { version = "0.1.9", optional = true }
 
 [dev-dependencies]
-serde = { version = "1.0.226", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive"] }
 float-cmp = "0.10.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 tokio = { version = "1.47.1", features = ["rt-multi-thread", "macros", "fs", "io-util", "time"]}
-warp = "0.3.7"
+warp = { version = "0.4.2", features = ["server"] }
 futures = "0.3.31"
 reqwest = { version = "0.12.23", default-features = false }
 
