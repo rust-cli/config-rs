@@ -154,7 +154,7 @@ serde = { version = "1.0.226", features = ["derive"] }
 float-cmp = "0.10.0"
 chrono = { version = "0.4.42", features = ["serde"] }
 tokio = { version = "1.47.1", features = ["rt-multi-thread", "macros", "fs", "io-util", "time"]}
-warp = "0.3.7"
+warp = "0.4.0"
 futures = "0.3.31"
 reqwest = { version = "0.12.23", default-features = false }
 
