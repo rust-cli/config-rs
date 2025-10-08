@@ -1,4 +1,5 @@
 use std::env;
+use std::collections::BTreeSet;
 use std::ffi::OsString;
 
 #[cfg(feature = "convert-case")]
@@ -35,6 +36,12 @@ pub struct Environment {
     /// Optional character sequence that separates each key segment in an environment key pattern.
     /// Consider a nested configuration such as `redis.password`, a separator of `_` would allow
     /// an environment key of `REDIS_PASSWORD` to match.
+    /// When using `_` as separator, and field names contain underscores,
+    /// there are some different strategies for resolving the ambiguity, for example:
+    /// 1. Use double underscores as separator to denote nesting with `__`,
+    ///    e.g. `PREFIX__INNER_CONFIG__ANOTHER_MULTIPART_NAME`
+    /// 2. Use a single underscore as separator and enable underscore nesting with
+    ///    [`underscore_nesting`](Environment::underscore_nesting())
     separator: Option<String>,
 
     /// Optional directive to translate collected keys into a form that matches what serializers
@@ -43,10 +50,14 @@ pub struct Environment {
     #[cfg(feature = "convert-case")]
     convert_case: Option<Case>,
 
-    /// Optional character sequence that separates each env value into a vector. only works when `try_parsing` is set to true
-    /// Once set, you cannot have type String on the same environment, unless you set `list_parse_keys`.
+    /// Optional character sequence that separates each env value into a vector.
+    /// Only works when `try_parsing` is set to true.
+    /// Once set, you cannot have type String on the same environment,
+    /// unless you set `list_parse_keys`.
     list_separator: Option<String>,
-    /// A list of keys which should always be parsed as a list. If not set you can have only `Vec<String>` or `String` (not both) in one environment.
+
+    /// A list of keys which should always be parsed as a list.
+    /// If not set you can have only `Vec<String>` or `String` (not both) in one environment.
     list_parse_keys: Option<Vec<String>>,
 
     /// Ignore empty env values (treat as unset).
@@ -57,6 +68,13 @@ pub struct Environment {
 
     // Preserve the prefix while parsing
     keep_prefix: bool,
+
+    /// When enabled in combination with `separator("_")`, environment keys with underscores
+    /// will be interpreted with all possible underscore groupings as nested segments. This allows
+    /// single-underscore separation to coexist with field names that themselves contain underscores.
+    /// For example, `PREFIX_INNER_CONFIG_ANOTHER_MULTIPART_NAME` can match
+    /// `inner_config.another_multipart_name`.
+    underscore_nesting: bool,
 
     /// Alternate source for the environment. This can be used when you want to test your own code
     /// using this source, without the need to change the actual system environment variables.
@@ -154,8 +172,24 @@ impl Environment {
     }
 
     /// Add a key which should be parsed as a list when collecting [`Value`]s from the environment.
-    /// Once `list_separator` is set, the type for string is [`Vec<String>`].
-    /// To switch the default type back to type Strings you need to provide the keys which should be [`Vec<String>`] using this function.
+    /// Once `list_separator` is set, the type for any string is [`Vec<String>`]
+    /// unless `list_parse_keys` is set.
+    /// If you want to use [`Vec<String>`] in combination with [`String`] you need to provide
+    /// the keys which should be [`Vec<String>`] using this function.
+    /// All other keys will remain [`String`] when using `list_separator` with `list_parse_keys`.
+    /// Example:
+    /// ```rust
+    /// # use config::Environment;
+    /// # use serde::Deserialize;
+    /// #[derive(Clone, Debug, Deserialize)]
+    ///   struct MyConfig {
+    ///     pub my_string: String, // will be parsed as String
+    ///     pub my_list: Vec<String>, // will be parsed as Vec<String>
+    ///   }
+    /// let source = Environment::default()
+    ///     .list_separator(",")
+    ///     .with_list_parse_key("my_list");
+    /// ```
     pub fn with_list_parse_key(mut self, key: &str) -> Self {
         let keys = self.list_parse_keys.get_or_insert_with(Vec::new);
         keys.push(key.into());
@@ -179,6 +213,88 @@ impl Environment {
     pub fn keep_prefix(mut self, keep: bool) -> Self {
         self.keep_prefix = keep;
         self
+    }
+
+    /// Enable alternative underscore-based nesting when `separator("_")` is used.
+    ///
+    /// When enabled, each environment key (after prefix removal) is split on `_` and all
+    /// groupings of tokens are generated into dotted keys by joining grouped tokens with `_`
+    /// (preserving underscores within field names) and groups with `.` (denoting nesting).
+    /// This makes it possible to use a single underscore both as a nesting separator and as
+    /// part of field names.
+    ///
+    /// Note: The number of key variants grows as 2^(n-1) for n underscore-separated tokens
+    /// in a key. Typical env keys are short; however, consider leaving this disabled for
+    /// very long keys if performance is a concern and use double underscore strategy
+    /// for nesting.
+    pub fn underscore_nesting(mut self, enable: bool) -> Self {
+        self.underscore_nesting = enable;
+        self
+    }
+
+    // Generate all candidate key variants for a given base (lowercased, post-prefix) env key.
+    // Returns the complete set of dotted key variants and the primary variant (separator replaced
+    // by `.` and case-converted if enabled) which should be used for list parsing decisions.
+    fn generate_key_variants(&self, base_key: &str, separator: &str) -> (BTreeSet<String>, String) {
+        // Primary variant: separator replaced with '.'
+        let mut primary_key = if !separator.is_empty() {
+            base_key.replace(separator, ".")
+        } else {
+            base_key.to_owned()
+        };
+
+        // Generate variants. When underscore_nesting is enabled with "_" separator,
+        // generate all possible ways to group tokens (preserving underscores within field names).
+        let mut variants_vec: Vec<String> = if separator == "_" && self.underscore_nesting {
+            let tokens: Vec<&str> = base_key.split('_').filter(|s| !s.is_empty()).collect();
+            
+            if tokens.is_empty() {
+                vec![primary_key.clone()]
+            } else {
+                // Generate all 2^(n-1) ways to partition n tokens.
+                // Each bit position represents whether to split after that token.
+                let num_partitions = 1usize << tokens.len().saturating_sub(1);
+                let mut variants = Vec::with_capacity(num_partitions + 1);
+                
+                for partition in 0..num_partitions {
+                    let mut groups = Vec::new();
+                    let mut current_group = vec![tokens[0]];
+                    
+                    for i in 1..tokens.len() {
+                        if (partition >> (i - 1)) & 1 == 1 {
+                            // Split here: join current group and start a new one
+                            groups.push(current_group.join("_"));
+                            current_group = vec![tokens[i]];
+                        } else {
+                            // Continue current group
+                            current_group.push(tokens[i]);
+                        }
+                    }
+                    // Add the final group
+                    groups.push(current_group.join("_"));
+                    variants.push(groups.join("."));
+                }
+                
+                variants.push(primary_key.clone());
+                variants
+            }
+        } else {
+            vec![primary_key.clone()]
+        };
+
+        // Apply convert_case to all variants and primary if requested
+        #[cfg(feature = "convert-case")]
+        if let Some(convert_case) = &self.convert_case {
+            for variant in &mut variants_vec {
+                *variant = variant.to_case(*convert_case);
+            }
+            primary_key = primary_key.to_case(*convert_case);
+        }
+
+        // Build the final set, deduplicating in the process
+        let variants: BTreeSet<String> = variants_vec.into_iter().collect();
+
+        (variants, primary_key)
     }
 
     /// Alternate source for the environment. This can be used when you want to test your own code
@@ -231,8 +347,6 @@ impl Source for Environment {
         let uri: String = "the environment".into();
 
         let separator = self.separator.as_deref().unwrap_or("");
-        #[cfg(feature = "convert-case")]
-        let convert_case = &self.convert_case;
         let prefix_separator = match (self.prefix_separator.as_deref(), self.separator.as_deref()) {
             (Some(pre), _) => pre,
             (None, Some(sep)) => sep,
@@ -280,16 +394,11 @@ impl Source for Environment {
                 ))
             })?;
 
-            // If separator is given replace with `.`
-            if !separator.is_empty() {
-                key = key.replace(separator, ".");
-            }
+            // Prepare key variants using helper
+            let base_key = key.clone();
+            let (variants, primary_key) = self.generate_key_variants(&base_key, separator);
 
-            #[cfg(feature = "convert-case")]
-            if let Some(convert_case) = convert_case {
-                key = key.to_case(*convert_case);
-            }
-
+            // Use the primary, possibly case-converted, key for list parsing decisions
             let value = if self.try_parsing {
                 // convert to lowercase because bool parsing expects all lowercase
                 if let Ok(parsed) = value.to_lowercase().parse::<bool>() {
@@ -300,7 +409,7 @@ impl Source for Environment {
                     ValueKind::Float(parsed)
                 } else if let Some(separator) = &self.list_separator {
                     if let Some(keys) = &self.list_parse_keys {
-                        if keys.contains(&key) {
+                        if keys.contains(&primary_key) {
                             let v: Vec<Value> = value
                                 .split(separator)
                                 .map(|s| Value::new(Some(&uri), ValueKind::String(s.to_owned())))
@@ -323,7 +432,9 @@ impl Source for Environment {
                 ValueKind::String(value)
             };
 
-            m.insert(key, Value::new(Some(&uri), value));
+            for k in variants.into_iter() {
+                m.insert(k, Value::new(Some(&uri), value.clone()));
+            }
 
             Ok(())
         };

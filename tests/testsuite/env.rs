@@ -519,6 +519,117 @@ fn test_parse_string_and_list_ignore_list_parse_key_case() {
 }
 
 #[test]
+fn test_parse_nested_double_separator() {
+    #[derive(Deserialize, Debug)]
+    struct TestConfig {
+        single: String,
+        plain: SimpleInner,
+        value_with_multipart_name: String,
+        inner_config: ComplexInner,
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct SimpleInner {
+        val: String,
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct ComplexInner {
+        another_multipart_name: String,
+    }
+
+    temp_env::with_vars(
+        vec![
+            ("PREFIX__SINGLE", Some("test")),
+            ("PREFIX__PLAIN__VAL", Some("simple")),
+            ("PREFIX__VALUE_WITH_MULTIPART_NAME", Some("value1")),
+            (
+                "PREFIX__INNER_CONFIG__ANOTHER_MULTIPART_NAME",
+                Some("value2"),
+            ),
+        ],
+        || {
+            let environment = Environment::default()
+                .prefix("PREFIX")
+                .separator("__");
+
+            let config = Config::builder().add_source(environment).build().unwrap();
+
+            // println!("{config:#?}");
+
+            let config: TestConfig = config.try_deserialize().unwrap();
+
+            assert_eq!(config.single, "test");
+            assert_eq!(config.plain.val, "simple");
+            assert_eq!(config.value_with_multipart_name, "value1");
+            assert_eq!(config.inner_config.another_multipart_name, "value2");
+        },
+    );
+}
+
+#[test]
+fn test_parse_nested_single_separator() {
+    #[derive(Deserialize, Debug)]
+    struct TestConfig {
+        single: String,
+        plain: SimpleInner,
+        value_with_multipart_name: String,
+        inner_config: ComplexInner,
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct SimpleInner {
+        val: String,
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct ComplexInner {
+        another_multipart_value: String, // value vs name, earlier, to test proper sorting of keys
+        another_multipart_name: String,
+        another_1_multipart_value_2: String, // with numbers
+    }
+
+    temp_env::with_vars(
+        vec![
+            ("PREFIX_SINGLE", Some("test")),
+            ("PREFIX_PLAIN_VAL", Some("simple")),
+            ("PREFIX_VALUE_WITH_MULTIPART_NAME", Some("value1")),
+            (
+                "PREFIX_INNER_CONFIG_ANOTHER_MULTIPART_VALUE",
+                Some("value2"),
+            ),
+            (
+                "PREFIX_INNER_CONFIG_ANOTHER_MULTIPART_NAME",
+                Some("value3"),
+            ),
+            (
+                "PREFIX_INNER_CONFIG_ANOTHER_1_MULTIPART_VALUE_2",
+                Some("value4"),
+            ),
+        ],
+        || {
+            let environment = Environment::default()
+                .prefix("PREFIX")
+                .separator("_")
+                .underscore_nesting(true);
+
+            let config = Config::builder().add_source(environment).build().unwrap();
+
+            // println!("{config:#?}");
+
+            let config: TestConfig = config.try_deserialize().unwrap();
+
+            assert_eq!(config.single, "test");
+            assert_eq!(config.plain.val, "simple");
+            assert_eq!(config.value_with_multipart_name, "value1");
+            assert_eq!(config.inner_config.another_multipart_value, "value2");
+            assert_eq!(config.inner_config.another_multipart_name, "value3");
+            assert_eq!(config.inner_config.another_1_multipart_value_2, "value4");
+        },
+    );
+}
+
+#[test]
 #[cfg(feature = "convert-case")]
 fn test_parse_nested_kebab() {
     use config::Case;
