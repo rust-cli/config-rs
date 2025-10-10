@@ -1,11 +1,8 @@
 #![cfg(all(feature = "yaml", feature = "substitute_env"))]
 
-use std::collections::HashMap;
 
-use chrono::{DateTime, TimeZone, Utc};
 use float_cmp::ApproxEqUlps;
 use serde::Deserialize;
-use snapbox::{assert_data_eq, str};
 
 use config::{Config, File, FileFormat, Map, Value};
 
