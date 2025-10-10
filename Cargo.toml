@@ -121,7 +121,7 @@ pre-release-replacements = [
 ]
 
 [features]
-default = ["toml", "json", "yaml", "ini", "ron", "json5", "convert-case", "async","corn","substitute_env"]
+default = ["toml", "json", "yaml", "ini", "ron", "json5", "convert-case", "async"]
 json = ["serde_json"]
 yaml = ["yaml-rust2"]
 ini = ["rust-ini"]
