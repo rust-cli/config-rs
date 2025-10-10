@@ -2,6 +2,7 @@ use std::error::Error;
 
 use crate::format;
 use crate::map::Map;
+use crate::nested_env_vars::ExpandEnvVars;
 use crate::value::{Value, ValueKind};
 
 pub(crate) fn parse(
@@ -33,7 +34,7 @@ fn from_ron_value(
 
         ron::Value::Char(value) => ValueKind::String(value.to_string()),
 
-        ron::Value::String(value) => ValueKind::String(value),
+        ron::Value::String(value) => ValueKind::String(value.expand_env_vars()),
 
         ron::Value::Seq(values) => {
             let array = values
