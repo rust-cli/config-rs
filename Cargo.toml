@@ -121,7 +121,7 @@ pre-release-replacements = [
 ]
 
 [features]
-default = ["toml", "json", "yaml", "ini", "ron", "json5", "convert-case", "async"]
+default = ["toml", "json", "yaml", "ini", "ron", "json5", "convert-case", "async","corn","substitute_env"]
 json = ["serde_json"]
 yaml = ["yaml-rust2"]
 ini = ["rust-ini"]
@@ -131,6 +131,7 @@ convert-case = ["convert_case"]
 preserve_order = ["indexmap", "toml?/preserve_order", "serde_json?/preserve_order", "ron?/indexmap"]
 async = ["async-trait"]
 toml = ["dep:toml"]
+substitute_env = []
 
 [dependencies]
 serde_core = "1.0.228"
