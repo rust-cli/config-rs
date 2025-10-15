@@ -62,6 +62,15 @@ where
             source: FileSourceFile::new(name.into()),
         }
     }
+
+    /// Identical to [`Self::new()`], but allows for using an owned [`PathBuf`].
+    pub fn with_path(path: PathBuf, format: F) -> Self {
+        Self {
+            format: Some(format),
+            required: true,
+            source: FileSourceFile::new(path),
+        }
+    }
 }
 
 impl File<FileSourceFile, FileFormat> {
