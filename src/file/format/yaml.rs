@@ -45,7 +45,7 @@ fn from_yaml_value(
         yaml::Yaml::Integer(value) => Ok(Value::new(uri, ValueKind::I64(value))),
         yaml::Yaml::Boolean(value) => Ok(Value::new(uri, ValueKind::Boolean(value))),
         yaml::Yaml::Hash(ref table) => {
-            let mut m = Map::new();
+            let mut m = Map::with_capacity(table.len());
             for (key, value) in table {
                 match key {
                     yaml::Yaml::String(k) => m.insert(k.to_owned(), from_yaml_value(uri, value)?),
@@ -58,7 +58,7 @@ fn from_yaml_value(
             Ok(Value::new(uri, ValueKind::Table(m)))
         }
         yaml::Yaml::Array(ref array) => {
-            let mut l = Vec::new();
+            let mut l = Vec::with_capacity(array.len());
 
             for value in array {
                 l.push(from_yaml_value(uri, value)?);

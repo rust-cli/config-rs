@@ -14,7 +14,7 @@ pub(crate) fn parse(
     for (sec, prop) in i.iter() {
         match sec {
             Some(sec) => {
-                let mut sec_map: Map<String, Value> = Map::new();
+                let mut sec_map: Map<String, Value> = Map::with_capacity(prop.len());
                 for (k, v) in prop.iter() {
                     sec_map.insert(
                         k.to_owned(),

@@ -30,7 +30,7 @@ fn from_json_value(uri: Option<&String>, value: &serde_json::Value) -> Value {
         serde_json::Value::Bool(value) => Value::new(uri, ValueKind::Boolean(value)),
 
         serde_json::Value::Object(ref table) => {
-            let mut m = Map::new();
+            let mut m = Map::with_capacity(table.len());
 
             for (key, value) in table {
                 m.insert(key.clone(), from_json_value(uri, value));
@@ -40,7 +40,7 @@ fn from_json_value(uri: Option<&String>, value: &serde_json::Value) -> Value {
         }
 
         serde_json::Value::Array(ref array) => {
-            let mut l = Vec::new();
+            let mut l = Vec::with_capacity(array.len());
 
             for value in array {
                 l.push(from_json_value(uri, value));

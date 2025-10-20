@@ -13,7 +13,7 @@ pub(crate) fn parse(
 }
 
 fn from_toml_table(uri: Option<&String>, table: toml::Table) -> Map<String, Value> {
-    let mut m = Map::new();
+    let mut m = Map::with_capacity(table.len());
 
     for (key, value) in table {
         m.insert(key, from_toml_value(uri, value));
@@ -35,7 +35,7 @@ fn from_toml_value(uri: Option<&String>, value: toml::Value) -> Value {
         }
 
         toml::Value::Array(array) => {
-            let mut l = Vec::new();
+            let mut l = Vec::with_capacity(array.len());
 
             for value in array {
                 l.push(from_toml_value(uri, value));
