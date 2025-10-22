@@ -1,0 +1,325 @@
+#![cfg(feature = "dotenv")]
+
+use config::Config;
+use snapbox::{assert_data_eq, str};
+
+#[test]
+fn basic_dotenv() {
+    let s = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+FOO=bar
+BAZ=qux
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .build()
+        .unwrap();
+
+    assert_eq!(s.get::<String>("FOO").unwrap(), "bar");
+    assert_eq!(s.get::<String>("BAZ").unwrap(), "qux");
+}
+
+#[test]
+fn optional_variables() {
+    let s = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+FOO=bar
+BAZ=${FOO}
+BAR=${UNDEFINED:-}
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .build()
+        .unwrap();
+
+    assert_eq!(s.get::<String>("BAR").unwrap(), "");
+}
+
+#[test]
+fn multiple_files() {
+    let s = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+FOO=bar
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .add_source(config::File::from_str(
+            r#"
+BAZ=qux
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .build()
+        .unwrap();
+
+    assert_eq!(s.get::<String>("FOO").unwrap(), "bar");
+    assert_eq!(s.get::<String>("BAZ").unwrap(), "qux");
+}
+
+#[test]
+fn test_file() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct Settings {
+        name: String,
+        longitude: f64,
+        latitude: f64,
+        favorite: bool,
+        reviews: u64,
+        rating: Option<f32>,
+    }
+
+    let c = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+name = "Torre di Pisa"
+longitude = 43.7224985
+latitude = 10.3970522
+favorite = false
+reviews = 3866
+rating = 4.5
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .build()
+        .unwrap();
+    let s: Settings = c.try_deserialize().unwrap();
+    assert_eq!(
+        s,
+        Settings {
+            name: String::from("Torre di Pisa"),
+            longitude: 43.722_498_5,
+            latitude: 10.397_052_2,
+            favorite: false,
+            reviews: 3866,
+            rating: Some(4.5),
+        }
+    );
+}
+
+#[test]
+fn test_error_parse() {
+    let res = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+ok : true,
+error
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .build();
+
+    assert!(res.is_err());
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str![[r#"Error parsing line: 'ok : true,', error at line index: 3"#]]
+    );
+}
+
+#[test]
+fn test_override_uppercase_value_for_struct() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foo: String,
+        bar: String,
+    }
+
+    #[derive(Debug, Deserialize, PartialEq)]
+    #[allow(non_snake_case)]
+    struct CapSettings {
+        FOO: String,
+    }
+
+    std::env::set_var("APP_FOO", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+
+    let cfg = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+debug = true
+production = false
+FOO = "FOO should be overridden"
+bar = "I am bar"
+longitude = 43.7224985
+latitude = 10.3970522
+favorite = false
+reviews = 3866
+rating = 4.5
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .add_source(config::Environment::with_prefix("APP").separator("_"))
+        .build()
+        .unwrap();
+    let cap_settings = cfg.clone().try_deserialize::<CapSettings>();
+    let lower_settings = cfg.try_deserialize::<StructSettings>().unwrap();
+
+    match cap_settings {
+        Ok(v) => {
+            // this assertion will ensure that the map has only lowercase keys
+            assert_eq!(v.FOO, "FOO should be overridden");
+            assert_eq!(
+                lower_settings.foo,
+                "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned()
+            );
+        }
+        Err(e) => {
+            if matches!(e, config::ConfigError::NotFound(_)) {
+                assert_eq!(
+                    lower_settings.foo,
+                    "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE".to_owned()
+                );
+            } else {
+                panic!("{}", e);
+            }
+        }
+    }
+}
+
+#[test]
+fn test_override_lowercase_value_for_struct() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foo: String,
+        bar: String,
+    }
+
+    std::env::set_var("config_foo", "I have been overridden_with_lower_case");
+
+    let cfg = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+FOO = "FOO should be overridden"
+bar = "I am bar"
+longitude = 43.7224985
+latitude = 10.3970522
+favorite = false
+reviews = 3866
+rating = 4.5
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .add_source(config::Environment::with_prefix("config").separator("_"))
+        .build()
+        .unwrap();
+
+    let values: StructSettings = cfg.try_deserialize().unwrap();
+    assert_eq!(
+        values.foo,
+        "I have been overridden_with_lower_case".to_owned()
+    );
+    assert_eq!(values.bar, "I am bar".to_owned());
+}
+
+#[test]
+fn test_override_uppercase_value_for_enums() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    enum EnumSettings {
+        Bar(String),
+    }
+
+    std::env::set_var("APPS_BAR", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+
+    let cfg = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+bar = "bar is a lowercase param"
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .add_source(config::Environment::with_prefix("APPS").separator("_"))
+        .build()
+        .unwrap();
+
+    let param = cfg.try_deserialize::<EnumSettings>();
+    assert!(param.is_err());
+    assert_data_eq!(
+        param.unwrap_err().to_string(),
+        str!["enum EnumSettings does not have variant constructor bar"]
+    );
+}
+
+#[test]
+fn test_override_lowercase_value_for_enums() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    enum EnumSettings {
+        Bar(String),
+    }
+
+    std::env::set_var("test_bar", "I have been overridden_with_lower_case");
+
+    let cfg = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+bar = "bar is a lowercase param"
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .add_source(config::Environment::with_prefix("test").separator("_"))
+        .build()
+        .unwrap();
+
+    let param = cfg.try_deserialize::<EnumSettings>();
+    assert!(param.is_err());
+    assert_data_eq!(
+        param.unwrap_err().to_string(),
+        str!["enum EnumSettings does not have variant constructor bar"]
+    );
+}
+
+#[test]
+fn test_loading_env_file() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foobar: String,
+        foo: String,
+        bar: String,
+    }
+
+    let cfg = Config::builder()
+        .add_source(
+            config::File::with_name("tests/testsuite/.env").format(config::FileFormat::Dotenv),
+        )
+        .build()
+        .unwrap();
+    let s: StructSettings = cfg.try_deserialize().unwrap();
+    assert_eq!(
+        s,
+        StructSettings {
+            foobar: String::from("I am FOOBAR envfile"),
+            foo: String::from("I am foo envfile"),
+            bar: String::from("I am BAR envfile"),
+        }
+    );
+}
+
+#[test]
+fn test_loading_env_file_with_substitution() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foobar: String,
+        foo: String,
+        bar: String,
+    }
+
+    let cfg = Config::builder()
+        .add_source(
+            config::File::with_name("tests/testsuite/.env").format(config::FileFormat::Dotenv),
+        )
+        .add_source(
+            config::File::with_name("tests/testsuite/.env.local")
+                .format(config::FileFormat::Dotenv),
+        )
+        .build()
+        .unwrap();
+    let s: StructSettings = cfg.try_deserialize().unwrap();
+    assert_eq!(
+        s,
+        StructSettings {
+            foobar: String::from("I am FOOBAR envfile local"),
+            foo: String::from("I am foo envfile local"),
+            bar: String::from("I am BAR envfile local"),
+        }
+    );
+}
