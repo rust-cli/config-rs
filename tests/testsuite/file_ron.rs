@@ -115,7 +115,10 @@ fn test_error_parse() {
         .build();
 
     assert!(res.is_err());
-    assert_data_eq!(res.unwrap_err().to_string(), str!["5:1: Expected colon"]);
+    assert_data_eq!(
+        res.unwrap_err().to_string(),
+        str!["4:8-5:1: Expected colon"]
+    );
 }
 
 #[test]

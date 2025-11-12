@@ -1,3 +1,4 @@
+use std::convert::TryInto as _;
 use std::error::Error;
 
 use crate::format;
@@ -27,13 +28,26 @@ fn from_ron_value(
         ron::Value::Bool(value) => ValueKind::Boolean(value),
 
         ron::Value::Number(value) => match value {
-            ron::Number::Float(value) => ValueKind::Float(value.get()),
-            ron::Number::Integer(value) => ValueKind::I64(value),
+            ron::Number::F32(value) => ValueKind::Float(value.get().into()),
+            ron::Number::F64(value) => ValueKind::Float(value.get()),
+            ron::Number::I8(value) => ValueKind::I64(value.into()),
+            ron::Number::I16(value) => ValueKind::I64(value.into()),
+            ron::Number::I32(value) => ValueKind::I64(value.into()),
+            ron::Number::I64(value) => ValueKind::I64(value),
+            ron::Number::U8(value) => ValueKind::I64(value.into()),
+            ron::Number::U16(value) => ValueKind::I64(value.into()),
+            ron::Number::U32(value) => ValueKind::I64(value.into()),
+            ron::Number::U64(value) => ValueKind::I64(value.try_into()?),
+            _ => Err(crate::ConfigError::Message(
+                "unsupported numeric type".to_owned(),
+            ))?,
         },
 
         ron::Value::Char(value) => ValueKind::String(value.to_string()),
 
         ron::Value::String(value) => ValueKind::String(value),
+
+        ron::Value::Bytes(_) => Err(crate::ConfigError::Message("unsupported bytes".to_owned()))?,
 
         ron::Value::Seq(values) => {
             let array = values
