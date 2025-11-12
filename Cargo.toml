@@ -153,16 +153,16 @@ serde-untagged = { version = "0.1.9", optional = true }
 serde = { version = "1.0.228", features = ["derive"] }
 float-cmp = "0.10.0"
 chrono = { version = "0.4.42", features = ["serde"] }
-tokio = { version = "1.47.1", features = ["rt-multi-thread", "macros", "fs", "io-util", "time"]}
+tokio = { version = "1.48.0", features = ["rt-multi-thread", "macros", "fs", "io-util", "time"]}
 warp = { version = "0.4.2", features = ["server"] }
 futures = "0.3.31"
-reqwest = { version = "0.12.23", default-features = false }
+reqwest = { version = "0.12.24", default-features = false }
 
 glob = "0.3.3"
 notify = "7.0.0"
 temp-env = "0.3.6"
 log = { version = "0.4.28", features = ["serde"] }
-snapbox = "0.6.21"
+snapbox = "0.6.23"
 
 [[example]]
 name = "async_source"
