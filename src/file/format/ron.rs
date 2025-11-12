@@ -24,11 +24,29 @@ fn from_ron_value(
 
         ron::Value::Unit => ValueKind::Nil,
 
+        ron::Value::Bytes(value) => ValueKind::String(String::from_utf8_lossy(&value).into_owned()),
+
         ron::Value::Bool(value) => ValueKind::Boolean(value),
 
-        ron::Value::Number(value) => match value {
-            ron::Number::Float(value) => ValueKind::Float(value.get()),
-            ron::Number::Integer(value) => ValueKind::I64(value),
+        ron::Value::Number(value) => {
+            match value {
+                ron::Number::I8(v) => ValueKind::I64(v as i64),
+                ron::Number::I16(v) => ValueKind::I64(v as i64),
+                ron::Number::I32(v) => ValueKind::I64(v as i64),
+                ron::Number::I64(v) => ValueKind::I64(v),
+                #[cfg(feature = "integer128")]
+                ron::Number::I128(v) => ValueKind::I64(v as i64),
+                ron::Number::U8(v) => ValueKind::I64(v as i64),
+                ron::Number::U16(v) => ValueKind::I64(v as i64),
+                ron::Number::U32(v) => ValueKind::I64(v as i64),
+                ron::Number::U64(v) => ValueKind::I64(v as i64),
+                #[cfg(feature = "integer128")]
+                ron::Number::U128(v) => ValueKind::I64(v as i64),
+                ron::Number::F32(v) => ValueKind::Float(v.get() as f64),
+                ron::Number::F64(v) => ValueKind::Float(v.get()),
+                #[cfg(not(doc))]
+                ron::Number::__NonExhaustive(never) => never.never(),
+            }
         },
 
         ron::Value::Char(value) => ValueKind::String(value.to_string()),
