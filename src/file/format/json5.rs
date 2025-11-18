@@ -36,7 +36,7 @@ pub(crate) fn parse(
     uri: Option<&String>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
-    let value = from_json5_value(uri, json5_rs::from_str::<Val>(text)?);
+    let value = from_json5_value(uri, serde_json5::from_str::<Val>(text)?);
     format::extract_root_table(uri, value)
 }
 
