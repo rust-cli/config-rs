@@ -300,7 +300,7 @@ impl Source for Environment {
                     ValueKind::Float(parsed)
                 } else if let Some(separator) = &self.list_separator {
                     if let Some(keys) = &self.list_parse_keys {
-                        if keys.contains(&key) {
+                        if keys.iter().any(|k| wildcard_match(k, &key)) {
                             let v: Vec<Value> = value
                                 .split(separator)
                                 .map(|s| Value::new(Some(&uri), ValueKind::String(s.to_owned())))
@@ -339,4 +339,35 @@ impl Source for Environment {
 
         Ok(m)
     }
+}
+
+fn wildcard_match(pattern: &str, input: &str) -> bool {
+    if pattern == "" {
+        return pattern == input;
+    }
+    if pattern == "*" {
+        return true;
+    }
+    deep_wildcard_match(input.as_bytes(), pattern.as_bytes())
+}
+
+fn deep_wildcard_match(input: &[u8], pattern: &[u8]) -> bool {
+    let mut input = input;
+    let mut pattern = pattern;
+    while pattern.len() > 0 {
+        match pattern[0] {
+            b'*' => {
+                return deep_wildcard_match(input, &pattern[1..])
+                    || (input.len() > 0 && deep_wildcard_match(&input[1..], pattern))
+            }
+            _ => {
+                if input.len() == 0 || input[0] != pattern[0] {
+                    return false;
+                }
+            }
+        }
+        input = &input[1..];
+        pattern = &pattern[1..];
+    }
+    return input.len() == 0 && pattern.len() == 0;
 }
