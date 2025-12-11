@@ -14,6 +14,9 @@ use crate::ConfigError;
 /// config Value type. We have to be aware how the config tree is created from the environment
 /// dictionary, therefore we are mindful about prefixes for the environment keys, level separators,
 /// encoding form (kebab, snake case) etc.
+///
+/// For prefixes take a look at [`with_prefix`](Environment::with_prefix()).
+/// For level separators take a look at [`separator`](Environment::separator()).
 #[must_use]
 #[derive(Clone, Debug, Default)]
 pub struct Environment {
@@ -35,6 +38,9 @@ pub struct Environment {
     /// Optional character sequence that separates each key segment in an environment key pattern.
     /// Consider a nested configuration such as `redis.password`, a separator of `_` would allow
     /// an environment key of `REDIS_PASSWORD` to match.
+    ///
+    /// If unset, `.` (a dot) is used. In such case `REDIS.PASSWORD` would be the correct key
+    /// for the example above.
     separator: Option<String>,
 
     /// Optional directive to translate collected keys into a form that matches what serializers
@@ -139,6 +145,9 @@ impl Environment {
     /// Optional character sequence that separates each key segment in an environment key pattern.
     /// Consider a nested configuration such as `redis.password`, a separator of `_` would allow
     /// an environment key of `REDIS_PASSWORD` to match.
+    ///
+    /// If unset, `.` (a dot) is used. In such case `REDIS.PASSWORD` would be the correct key
+    /// for the example above.
     pub fn separator(mut self, s: &str) -> Self {
         self.separator = Some(s.into());
         self
