@@ -33,14 +33,14 @@ impl<'de> serde_core::de::Deserialize<'de> for Val {
 }
 
 pub(crate) fn parse(
-    uri: Option<&String>,
+    uri: Option<&str>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     let value = from_json5_value(uri, json5_rs::from_str::<Val>(text)?);
     format::extract_root_table(uri, value)
 }
 
-fn from_json5_value(uri: Option<&String>, value: Val) -> Value {
+fn from_json5_value(uri: Option<&str>, value: Val) -> Value {
     let vk = match value {
         Val::Null => ValueKind::Nil,
         Val::String(v) => ValueKind::String(v),

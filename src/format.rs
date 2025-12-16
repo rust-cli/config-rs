@@ -19,14 +19,14 @@ pub trait Format {
     /// It also allows specifying optional URI of the source associated with format instance that can facilitate debugging.
     fn parse(
         &self,
-        uri: Option<&String>,
+        uri: Option<&str>,
         text: &str,
     ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>>;
 }
 
 // Have a proper error fire if the root of a file is ever not a Table
 pub(crate) fn extract_root_table(
-    uri: Option<&String>,
+    uri: Option<&str>,
     value: Value,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     match value.kind {

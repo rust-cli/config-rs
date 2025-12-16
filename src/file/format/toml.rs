@@ -4,7 +4,7 @@ use crate::map::Map;
 use crate::value::Value;
 
 pub(crate) fn parse(
-    uri: Option<&String>,
+    uri: Option<&str>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     // Parse a TOML value from the provided text
@@ -12,7 +12,7 @@ pub(crate) fn parse(
     Ok(table)
 }
 
-fn from_toml_table(uri: Option<&String>, table: toml::Table) -> Map<String, Value> {
+fn from_toml_table(uri: Option<&str>, table: toml::Table) -> Map<String, Value> {
     let mut m = Map::new();
 
     for (key, value) in table {
@@ -22,7 +22,7 @@ fn from_toml_table(uri: Option<&String>, table: toml::Table) -> Map<String, Valu
     m
 }
 
-fn from_toml_value(uri: Option<&String>, value: toml::Value) -> Value {
+fn from_toml_value(uri: Option<&str>, value: toml::Value) -> Value {
     match value {
         toml::Value::String(value) => Value::new(uri, value),
         toml::Value::Float(value) => Value::new(uri, value),

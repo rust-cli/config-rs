@@ -142,7 +142,7 @@ where
 
         // Parse the string using the given format
         format
-            .parse(uri.as_ref(), &contents)
+            .parse(uri.as_deref(), &contents)
             .map_err(|cause| ConfigError::FileParse { uri, cause })
     }
 }

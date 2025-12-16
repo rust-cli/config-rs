@@ -9,7 +9,7 @@ use crate::map::Map;
 use crate::value::{Value, ValueKind};
 
 pub(crate) fn parse(
-    uri: Option<&String>,
+    uri: Option<&str>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     // Parse a YAML object from file
@@ -27,7 +27,7 @@ pub(crate) fn parse(
 }
 
 fn from_yaml_value(
-    uri: Option<&String>,
+    uri: Option<&str>,
     value: &yaml::Yaml,
 ) -> Result<Value, Box<dyn Error + Send + Sync>> {
     match *value {

@@ -33,7 +33,7 @@ pub struct PemFile;
 impl Format for PemFile {
     fn parse(
         &self,
-        uri: Option<&String>,
+        uri: Option<&str>,
         text: &str,
     ) -> Result<Map<String, Value>, Box<dyn std::error::Error + Send + Sync>> {
         // Store any valid keys into this map, they'll be merged with other sources into the final config map:

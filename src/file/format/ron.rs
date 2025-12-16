@@ -6,7 +6,7 @@ use crate::map::Map;
 use crate::value::{Value, ValueKind};
 
 pub(crate) fn parse(
-    uri: Option<&String>,
+    uri: Option<&str>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     let value = from_ron_value(uri, ron::from_str(text)?)?;
@@ -14,7 +14,7 @@ pub(crate) fn parse(
 }
 
 fn from_ron_value(
-    uri: Option<&String>,
+    uri: Option<&str>,
     value: ron::Value,
 ) -> Result<Value, Box<dyn Error + Send + Sync>> {
     let kind = match value {

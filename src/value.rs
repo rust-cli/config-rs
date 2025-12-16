@@ -203,12 +203,12 @@ pub struct Value {
 
 impl Value {
     /// Create a new value instance that will remember its source uri.
-    pub fn new<V>(origin: Option<&String>, kind: V) -> Self
+    pub fn new<V>(origin: Option<&str>, kind: V) -> Self
     where
         V: Into<ValueKind>,
     {
         Self {
-            origin: origin.cloned(),
+            origin: origin.map(String::from),
             kind: kind.into(),
         }
     }

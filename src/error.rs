@@ -120,9 +120,9 @@ impl ConfigError {
     // Have a proper error fire if the root of a file is ever not a Table
     // TODO: for now only json5 checked, need to finish others
     #[doc(hidden)]
-    pub fn invalid_root(origin: Option<&String>, unexpected: Unexpected) -> Box<Self> {
+    pub fn invalid_root(origin: Option<&str>, unexpected: Unexpected) -> Box<Self> {
         Box::new(Self::Type {
-            origin: origin.cloned(),
+            origin: origin.map(String::from),
             unexpected,
             expected: "a map",
             key: None,

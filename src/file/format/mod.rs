@@ -116,7 +116,7 @@ impl FileFormat {
 
     pub(crate) fn parse(
         &self,
-        uri: Option<&String>,
+        uri: Option<&str>,
         text: &str,
     ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
         match self {
@@ -157,7 +157,7 @@ impl FileFormat {
 impl Format for FileFormat {
     fn parse(
         &self,
-        uri: Option<&String>,
+        uri: Option<&str>,
         text: &str,
     ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
         self.parse(uri, text)

@@ -5,7 +5,7 @@ use crate::map::Map;
 use crate::value::{Value, ValueKind};
 
 pub(crate) fn parse(
-    uri: Option<&String>,
+    uri: Option<&str>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     // Parse a JSON object value from the text
@@ -13,7 +13,7 @@ pub(crate) fn parse(
     format::extract_root_table(uri, value)
 }
 
-fn from_json_value(uri: Option<&String>, value: &serde_json::Value) -> Value {
+fn from_json_value(uri: Option<&str>, value: &serde_json::Value) -> Value {
     match *value {
         serde_json::Value::String(ref value) => Value::new(uri, ValueKind::String(value.clone())),
 

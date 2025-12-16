@@ -6,7 +6,7 @@ use crate::map::Map;
 use crate::value::{Value, ValueKind};
 
 pub(crate) fn parse(
-    uri: Option<&String>,
+    uri: Option<&str>,
     text: &str,
 ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
     let mut map: Map<String, Value> = Map::new();

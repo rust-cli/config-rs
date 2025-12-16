@@ -18,7 +18,7 @@ pub struct MyFormat;
 impl Format for MyFormat {
     fn parse(
         &self,
-        uri: Option<&String>,
+        uri: Option<&str>,
         text: &str,
     ) -> Result<Map<String, Value>, Box<dyn std::error::Error + Send + Sync>> {
         // Let's assume our format is somewhat malformed, but this is fine
