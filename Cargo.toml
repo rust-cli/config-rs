@@ -136,7 +136,7 @@ toml = ["dep:toml"]
 serde_core = "1.0.228"
 
 async-trait = { version = "0.1.89", optional = true }
-toml = { version = "0.9.6", optional = true, default-features = false, features = ["parse", "serde"] }
+toml = { version = "0.9.11", optional = true, default-features = false, features = ["parse", "serde"] }
 serde_json = { version = "1.0.145", optional = true }
 yaml-rust2 = { version = "0.10.4", optional = true }
 rust-ini = { version = "0.21.3", optional = true }
