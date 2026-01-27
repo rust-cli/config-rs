@@ -24,3 +24,4 @@ pub mod set;
 pub mod unsigned_int;
 pub mod unsigned_int_hm;
 pub mod weird_keys;
+pub mod file_with_env_vars;

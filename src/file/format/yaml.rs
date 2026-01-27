@@ -6,6 +6,7 @@ use yaml_rust2 as yaml;
 
 use crate::format;
 use crate::map::Map;
+use crate::nested_env_vars::ExpandEnvVars;
 use crate::value::{Value, ValueKind};
 
 pub(crate) fn parse(
@@ -31,7 +32,7 @@ fn from_yaml_value(
     value: &yaml::Yaml,
 ) -> Result<Value, Box<dyn Error + Send + Sync>> {
     match *value {
-        yaml::Yaml::String(ref value) => Ok(Value::new(uri, ValueKind::String(value.clone()))),
+        yaml::Yaml::String(ref value) => Ok(Value::new(uri, ValueKind::String(value.expand_env_vars()))),
         yaml::Yaml::Real(ref value) => {
             // TODO: Figure out in what cases this can panic?
             value

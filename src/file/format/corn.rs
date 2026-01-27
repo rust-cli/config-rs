@@ -1,6 +1,7 @@
 ﻿use crate::value::{Value, ValueKind};
 use crate::{format, Map};
 use std::error::Error;
+use crate::nested_env_vars::ExpandEnvVars;
 
 pub(crate) fn parse(
     uri: Option<&String>,
@@ -12,7 +13,7 @@ pub(crate) fn parse(
 
 fn from_corn_value(uri: Option<&String>, value: &corn::Value<'_>) -> Value {
     match value {
-        corn::Value::String(value) => Value::new(uri, ValueKind::String(value.to_string())),
+        corn::Value::String(value) => Value::new(uri, ValueKind::String(value.expand_env_vars())),
         corn::Value::Integer(value) => Value::new(uri, ValueKind::I64(*value)),
         corn::Value::Float(value) => Value::new(uri, ValueKind::Float(*value)),
         corn::Value::Boolean(value) => Value::new(uri, ValueKind::Boolean(*value)),
