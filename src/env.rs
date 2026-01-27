@@ -1,5 +1,7 @@
+use core::fmt;
 use std::env;
 use std::ffi::OsString;
+use std::sync::Arc;
 
 #[cfg(feature = "convert-case")]
 use convert_case::{Case, Casing};
@@ -9,6 +11,25 @@ use crate::map::Map;
 use crate::source::Source;
 use crate::value::{Value, ValueKind};
 use crate::ConfigError;
+
+/// Functions used to determine if a key should be parsed as a list.
+struct ListParseFn {
+    list_parse_fn: Vec<Arc<dyn Fn(&str) -> bool + Send + Sync>>,
+}
+
+impl fmt::Debug for ListParseFn {
+    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        Ok(())
+    }
+}
+
+impl Clone for ListParseFn {
+    fn clone(&self) -> Self {
+        Self {
+            list_parse_fn: self.list_parse_fn.clone(),
+        }
+    }
+}
 
 /// An environment source collects a dictionary of environment variables values into a hierarchical
 /// config Value type. We have to be aware how the config tree is created from the environment
@@ -54,6 +75,8 @@ pub struct Environment {
     list_separator: Option<String>,
     /// A list of keys which should always be parsed as a list. If not set you can have only `Vec<String>` or `String` (not both) in one environment.
     list_parse_keys: Option<Vec<String>>,
+    /// Functions used to determine if a key should be parsed as a list. If not set you can have only `Vec<String>` or `String` (not both) in one environment.
+    list_parse_fn: Option<ListParseFn>,
 
     /// Ignore empty env values (treat as unset).
     ignore_empty: bool,
@@ -168,6 +191,17 @@ impl Environment {
     pub fn with_list_parse_key(mut self, key: &str) -> Self {
         let keys = self.list_parse_keys.get_or_insert_with(Vec::new);
         keys.push(key.into());
+        self
+    }
+
+    /// Add a function which determined if a key should be parsed as a list when collecting [`Value`]s from the environment.
+    /// Once `list_separator` is set, the type for string is [`Vec<String>`].
+    /// To switch the default type back to type Strings you need to provide the keys which should be [`Vec<String>`] using this function.
+    pub fn with_list_parse_fn(mut self, check_fn: Box<dyn Fn(&str) -> bool + Send + Sync>) -> Self {
+        let fns = self.list_parse_fn.get_or_insert_with(|| ListParseFn {
+            list_parse_fn: Vec::new(),
+        });
+        fns.list_parse_fn.push(Arc::from(check_fn));
         self
     }
 
@@ -308,22 +342,29 @@ impl Source for Environment {
                 } else if let Ok(parsed) = value.parse::<f64>() {
                     ValueKind::Float(parsed)
                 } else if let Some(separator) = &self.list_separator {
+                    let convert_to_array_fn = |v: String| -> Vec<Value> {
+                        v.split(separator)
+                            .map(|s| Value::new(Some(&uri), ValueKind::String(s.to_owned())))
+                            .collect()
+                    };
                     if let Some(keys) = &self.list_parse_keys {
                         if keys.contains(&key) {
-                            let v: Vec<Value> = value
-                                .split(separator)
-                                .map(|s| Value::new(Some(&uri), ValueKind::String(s.to_owned())))
-                                .collect();
-                            ValueKind::Array(v)
+                            ValueKind::Array(convert_to_array_fn(value))
+                        } else {
+                            ValueKind::String(value)
+                        }
+                    } else if let Some(list_parse_fn) = &self.list_parse_fn {
+                        let is_matched = list_parse_fn
+                            .list_parse_fn
+                            .iter()
+                            .any(|parse_fn| parse_fn(&key));
+                        if is_matched {
+                            ValueKind::Array(convert_to_array_fn(value))
                         } else {
                             ValueKind::String(value)
                         }
                     } else {
-                        let v: Vec<Value> = value
-                            .split(separator)
-                            .map(|s| Value::new(Some(&uri), ValueKind::String(s.to_owned())))
-                            .collect();
-                        ValueKind::Array(v)
+                        ValueKind::Array(convert_to_array_fn(value))
                     }
                 } else {
                     ValueKind::String(value)
