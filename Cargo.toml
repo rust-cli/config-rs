@@ -143,7 +143,7 @@ ron = { version = "0.12.0", optional = true }
 json5_rs = { version = "0.4.1", optional = true, package = "json5" }
 corn = { version = "0.10.0", optional = true, package = "libcorn" }
 indexmap = { version = "2.11.4", features = ["serde"], optional = true }
-convert_case = { version = "0.6.0", optional = true }
+convert_case = { version = "0.11.0", optional = true }
 pathdiff = "0.2.3"
 winnow = "0.7.13"
 serde-untagged = { version = "0.1.9", optional = true }
