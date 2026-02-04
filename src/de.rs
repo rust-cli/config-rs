@@ -86,6 +86,11 @@ impl<'de> de::Deserializer<'de> for Value {
     }
 
     #[inline]
+    fn deserialize_i128<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
+        visitor.visit_i128(self.into_int128()?)
+    }
+
+    #[inline]
     fn deserialize_u8<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
         let num = try_convert_number!(unsigned, self, "8");
         visitor.visit_u8(num)
@@ -107,6 +112,11 @@ impl<'de> de::Deserializer<'de> for Value {
     fn deserialize_u64<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
         let num = try_convert_number!(unsigned, self, "u64");
         visitor.visit_u64(num)
+    }
+
+    #[inline]
+    fn deserialize_u128<V: de::Visitor<'de>>(self, visitor: V) -> Result<V::Value> {
+        visitor.visit_u128(self.into_uint128()?)
     }
 
     #[inline]
