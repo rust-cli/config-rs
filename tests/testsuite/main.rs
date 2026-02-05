@@ -9,6 +9,7 @@ pub mod env;
 pub mod errors;
 pub mod file;
 pub mod file_corn;
+pub mod file_dotenv;
 pub mod file_ini;
 pub mod file_json;
 pub mod file_json5;
