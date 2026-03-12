@@ -115,14 +115,7 @@ fn test_error_parse() {
     assert!(res.is_err());
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str![[r#"
- --> 3:7
-  |
-3 |   ok: true
-  |       ^---
-  |
-  = expected null
-"#]]
+        str!["expected comma at line 4 column 3 at line 2 column 1"]
     );
 }
 
