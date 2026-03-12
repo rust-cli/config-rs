@@ -120,7 +120,7 @@ fn test_error_parse() {
 4 |   error
   |   ^---
   |
-  = expected spread or quoted_path_seg
+  = expected spread or pair
 "#]]
     );
 }
