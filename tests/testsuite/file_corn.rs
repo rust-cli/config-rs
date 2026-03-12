@@ -139,7 +139,10 @@ fn test_override_uppercase_value_for_struct() {
         FOO: String,
     }
 
-    std::env::set_var("APP_FOO", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+    // SAFETY: pure rust
+    unsafe {
+        std::env::set_var("APP_FOO", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+    }
 
     let cfg = Config::builder()
         .add_source(File::from_str(
@@ -205,7 +208,10 @@ fn test_override_lowercase_value_for_struct() {
         bar: String,
     }
 
-    std::env::set_var("config_foo", "I have been overridden_with_lower_case");
+    // SAFETY: pure rust
+    unsafe {
+        std::env::set_var("config_foo", "I have been overridden_with_lower_case");
+    }
 
     let cfg = Config::builder()
         .add_source(File::from_str(
@@ -253,7 +259,10 @@ fn test_override_uppercase_value_for_enums() {
         Bar(String),
     }
 
-    std::env::set_var("APPS_BAR", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+    // SAFETY: pure rust
+    unsafe {
+        std::env::set_var("APPS_BAR", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+    }
 
     let cfg = Config::builder()
         .add_source(File::from_str(
@@ -283,7 +292,10 @@ fn test_override_lowercase_value_for_enums() {
         Bar(String),
     }
 
-    std::env::set_var("test_bar", "I have been overridden_with_lower_case");
+    // SAFETY: pure rust
+    unsafe {
+        std::env::set_var("test_bar", "I have been overridden_with_lower_case");
+    }
 
     let cfg = Config::builder()
         .add_source(File::from_str(

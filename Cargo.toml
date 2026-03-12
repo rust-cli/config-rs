@@ -1,11 +1,11 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 repository = "https://github.com/rust-cli/config-rs"
 license = "MIT OR Apache-2.0"
-edition = "2018"
-rust-version = "1.76.0"  # MSRV
+edition = "2024"
+rust-version = "1.85.0"  # MSRV
 include = [
   "build.rs",
   "src/**/*",
