@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- Serialize the full `u64` range
+
+### Internal
+
+- *(toml)* Update to 1.0
+
 ## [0.15.19] - 2025-11-12
 
 ### Internal
