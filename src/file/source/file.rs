@@ -4,7 +4,7 @@ use std::fs;
 use std::io;
 use std::path::PathBuf;
 
-use crate::file::{source::FileSourceResult, FileFormat, FileSource, FileStoredFormat, Format};
+use crate::file::{FileFormat, FileSource, FileStoredFormat, Format, source::FileSourceResult};
 
 /// Describes a file sourced from a file
 #[derive(Clone, Debug)]

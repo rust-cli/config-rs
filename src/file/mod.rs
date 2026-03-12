@@ -5,11 +5,11 @@ use std::fmt::Debug;
 use std::path::{Path, PathBuf};
 
 use self::source::FileSource;
+use crate::Format;
 use crate::error::{ConfigError, Result};
 use crate::map::Map;
 use crate::source::Source;
 use crate::value::Value;
-use crate::Format;
 
 pub use self::format::FileFormat;
 pub use self::source::file::FileSourceFile;

@@ -3,9 +3,9 @@ use std::fmt::Write as _;
 
 use serde_core::ser;
 
+use crate::Config;
 use crate::error::{ConfigError, Result};
 use crate::value::{Value, ValueKind};
-use crate::Config;
 
 #[derive(Default, Debug)]
 pub(crate) struct ConfigSerializer {
@@ -276,7 +276,7 @@ impl ser::SerializeSeq for SeqSerializer<'_> {
             _ => {
                 return Err(ConfigError::Message(
                     "config-rs internal error (ser._element but last not Seq!".to_owned(),
-                ))
+                ));
             }
         };
         Ok(())

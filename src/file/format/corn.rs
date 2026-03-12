@@ -1,5 +1,5 @@
-﻿use crate::value::{Value, ValueKind};
-use crate::{format, Map};
+use crate::value::{Value, ValueKind};
+use crate::{Map, format};
 use std::error::Error;
 
 pub(crate) fn parse(

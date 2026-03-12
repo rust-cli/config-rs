@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::map::Map;
-use crate::{file::FileStoredFormat, value::Value, Format};
+use crate::{Format, file::FileStoredFormat, value::Value};
 
 #[cfg(feature = "toml")]
 mod toml;

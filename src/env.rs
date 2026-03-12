@@ -4,11 +4,11 @@ use std::ffi::OsString;
 #[cfg(feature = "convert-case")]
 use convert_case::{Case, Casing};
 
+use crate::ConfigError;
 use crate::error::Result;
 use crate::map::Map;
 use crate::source::Source;
 use crate::value::{Value, ValueKind};
-use crate::ConfigError;
 
 /// An environment source collects a dictionary of environment variables values into a hierarchical
 /// config Value type. We have to be aware how the config tree is created from the environment
