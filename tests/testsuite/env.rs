@@ -472,6 +472,58 @@ fn test_parse_string_and_list() {
 }
 
 #[test]
+fn test_parse_string_and_list_parse_fn() {
+    // using a struct in an enum here to make serde use `deserialize_any`
+    #[derive(Deserialize, Debug)]
+    #[serde(tag = "tag")]
+    enum TestStringEnum {
+        String(TestString),
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct TestString {
+        string_val: String,
+        string_list: Vec<String>,
+    }
+
+    temp_env::with_vars(
+        vec![
+            ("LIST_STRING_LIST", Some("test,string")),
+            ("LIST_STRING_VAL", Some("test,string")),
+        ],
+        || {
+            let environment = Environment::default()
+                .prefix("LIST")
+                .list_separator(",")
+                .with_list_parse_fn(Box::new(|key: &str| key == "string_list"))
+                .try_parsing(true);
+
+            let config = Config::builder()
+                .set_default("tag", "String")
+                .unwrap()
+                .add_source(environment)
+                .build()
+                .unwrap();
+
+            let config: TestStringEnum = config.try_deserialize().unwrap();
+
+            match config {
+                TestStringEnum::String(TestString {
+                    string_val,
+                    string_list,
+                }) => {
+                    assert_eq!(String::from("test,string"), string_val);
+                    assert_eq!(
+                        vec![String::from("test"), String::from("string")],
+                        string_list
+                    );
+                }
+            }
+        },
+    );
+}
+
+#[test]
 fn test_parse_string_and_list_ignore_list_parse_key_case() {
     // using a struct in an enum here to make serde use `deserialize_any`
     #[derive(Deserialize, Debug)]
