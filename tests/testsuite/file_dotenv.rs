@@ -16,8 +16,8 @@ BAZ=qux
         .build()
         .unwrap();
 
-    assert_eq!(s.get::<String>("FOO").unwrap(), "bar");
-    assert_eq!(s.get::<String>("BAZ").unwrap(), "qux");
+    assert_eq!(s.get::<String>("foo").unwrap(), "bar");
+    assert_eq!(s.get::<String>("baz").unwrap(), "qux");
 }
 
 #[test]
@@ -34,7 +34,7 @@ BAR=${UNDEFINED:-}
         .build()
         .unwrap();
 
-    assert_eq!(s.get::<String>("BAR").unwrap(), "");
+    assert_eq!(s.get::<String>("bar").unwrap(), "");
 }
 
 #[test]
@@ -55,8 +55,8 @@ BAZ=qux
         .build()
         .unwrap();
 
-    assert_eq!(s.get::<String>("FOO").unwrap(), "bar");
-    assert_eq!(s.get::<String>("BAZ").unwrap(), "qux");
+    assert_eq!(s.get::<String>("foo").unwrap(), "bar");
+    assert_eq!(s.get::<String>("baz").unwrap(), "qux");
 }
 
 #[test]
@@ -132,7 +132,9 @@ fn test_override_uppercase_value_for_struct() {
         FOO: String,
     }
 
-    std::env::set_var("APP_FOO", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+    unsafe {
+        std::env::set_var("APP_FOO", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+    }
 
     let cfg = Config::builder()
         .add_source(config::File::from_str(
@@ -185,7 +187,9 @@ fn test_override_lowercase_value_for_struct() {
         bar: String,
     }
 
-    std::env::set_var("config_foo", "I have been overridden_with_lower_case");
+    unsafe {
+        std::env::set_var("config_foo", "I have been overridden_with_lower_case");
+    }
 
     let cfg = Config::builder()
         .add_source(config::File::from_str(
@@ -219,7 +223,9 @@ fn test_override_uppercase_value_for_enums() {
         Bar(String),
     }
 
-    std::env::set_var("APPS_BAR", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+    unsafe {
+        std::env::set_var("APPS_BAR", "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE");
+    }
 
     let cfg = Config::builder()
         .add_source(config::File::from_str(
@@ -247,7 +253,9 @@ fn test_override_lowercase_value_for_enums() {
         Bar(String),
     }
 
-    std::env::set_var("test_bar", "I have been overridden_with_lower_case");
+    unsafe {
+        std::env::set_var("test_bar", "I have been overridden_with_lower_case");
+    }
 
     let cfg = Config::builder()
         .add_source(config::File::from_str(
@@ -320,6 +328,35 @@ fn test_loading_env_file_with_substitution() {
             foobar: String::from("I am FOOBAR envfile local"),
             foo: String::from("I am foo envfile local"),
             bar: String::from("I am BAR envfile local"),
+        }
+    );
+}
+
+#[test]
+fn test_loading_env_file_with_substitution_case_conversion() {
+    #[derive(Debug, Deserialize, PartialEq)]
+    struct StructSettings {
+        foo_bar_case: String,
+        barcase: String,
+    }
+
+    let cfg = Config::builder()
+        .add_source(config::File::from_str(
+            r#"
+FOO_BAR_CASE = "bar is a lowercase param"
+BARCASE = "this is bar"
+"#,
+            config::FileFormat::Dotenv,
+        ))
+        .add_source(config::Environment::with_prefix("test").separator("_"))
+        .build()
+        .unwrap();
+    let s: StructSettings = cfg.try_deserialize().unwrap();
+    assert_eq!(
+        s,
+        StructSettings {
+            foo_bar_case: String::from("bar is a lowercase param"),
+            barcase: String::from("this is bar"),
         }
     );
 }
