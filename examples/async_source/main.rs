@@ -2,9 +2,9 @@ use std::{error::Error, fmt::Debug};
 
 use async_trait::async_trait;
 use config::{
-    builder::AsyncState, AsyncSource, ConfigBuilder, ConfigError, FileFormat, Format, Map,
+    AsyncSource, ConfigBuilder, ConfigError, FileFormat, Format, Map, builder::AsyncState,
 };
-use futures::{select, FutureExt};
+use futures::{FutureExt, select};
 use warp::Filter;
 
 // Example below presents sample configuration server and client.

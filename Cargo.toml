@@ -1,11 +1,11 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 
 [workspace.package]
 repository = "https://github.com/rust-cli/config-rs"
 license = "MIT OR Apache-2.0"
-edition = "2018"
-rust-version = "1.75.0"  # MSRV
+edition = "2024"
+rust-version = "1.85.0"  # MSRV
 include = [
   "build.rs",
   "src/**/*",
@@ -34,7 +34,7 @@ create_dir = "warn"
 dbg_macro = "warn"
 debug_assert_with_mut_call = "warn"
 doc_markdown = "warn"
-empty_enum = "warn"
+empty_enums = "warn"
 enum_glob_use = "warn"
 expl_impl_clone_on_copy = "warn"
 explicit_deref_methods = "warn"
@@ -78,7 +78,6 @@ str_to_string = "warn"
 string_add = "warn"
 string_add_assign = "warn"
 string_lit_as_bytes = "warn"
-string_to_string = "warn"
 todo = "warn"
 trait_duplication_in_bounds = "warn"
 uninlined_format_args = "warn"
@@ -97,7 +96,7 @@ lto = true
 
 [package]
 name = "config"
-version = "0.15.18"
+version = "0.15.21"
 description = "Layered configuration system for Rust applications."
 categories = ["config"]
 keywords = ["config", "configuration", "settings", "env", "environment"]
@@ -125,7 +124,7 @@ default = ["toml", "json", "yaml", "ini", "ron", "json5", "convert-case", "async
 json = ["serde_json"]
 yaml = ["yaml-rust2"]
 ini = ["rust-ini"]
-json5 = ["json5_rs", "dep:serde-untagged"]
+json5 = ["dep:json5", "dep:serde-untagged"]
 corn = ["dep:corn"]
 dotenv = ["dep:dotenvy"]
 convert-case = ["convert_case"]
@@ -137,34 +136,33 @@ toml = ["dep:toml"]
 serde_core = "1.0.228"
 
 async-trait = { version = "0.1.89", optional = true }
-toml = { version = "0.9.6", optional = true, default-features = false, features = ["parse", "serde"] }
-serde_json = { version = "1.0.145", optional = true }
+toml = { version = "1.0.6", optional = true, default-features = false, features = ["parse", "serde"] }
+serde_json = { version = "1.0.149", optional = true }
 yaml-rust2 = { version = "0.10.4", optional = true }
 rust-ini = { version = "0.21.3", optional = true }
-ron = { version = "0.8.1", optional = true }
-json5_rs = { version = "0.4.1", optional = true, package = "json5" }
-corn = { version = "0.10.0", optional = true, package = "libcorn" }
-dotenvy = { version = "0.15.7", optional = true }
-indexmap = { version = "2.11.4", features = ["serde"], optional = true }
+ron = { version = "0.12.0", optional = true }
+json5 = { version = "0.4.1", optional = true }
+corn = { version = "0.10.1", optional = true, package = "libcorn" }
+indexmap = { version = "2.13.0", features = ["serde"], optional = true }
 convert_case = { version = "0.6.0", optional = true }
 pathdiff = "0.2.3"
-winnow = "0.7.13"
+winnow = "0.7.15"
 serde-untagged = { version = "0.1.9", optional = true }
 
 [dev-dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
 float-cmp = "0.10.0"
-chrono = { version = "0.4.42", features = ["serde"] }
-tokio = { version = "1.47.1", features = ["rt-multi-thread", "macros", "fs", "io-util", "time"]}
+chrono = { version = "0.4.44", features = ["serde"] }
+tokio = { version = "1.50.0", features = ["rt-multi-thread", "macros", "fs", "io-util", "time"]}
 warp = { version = "0.4.2", features = ["server"] }
-futures = "0.3.31"
-reqwest = { version = "0.12.23", default-features = false }
+futures = "0.3.32"
+reqwest = { version = "0.13.2", default-features = false }
 
 glob = "0.3.3"
-notify = "7.0.0"
+notify = "8.2.0"
 temp-env = "0.3.6"
-log = { version = "0.4.28", features = ["serde"] }
-snapbox = "0.6.21"
+log = { version = "0.4.29", features = ["serde"] }
+snapbox = "1.1.0"
 
 [[example]]
 name = "async_source"

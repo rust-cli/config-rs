@@ -12,8 +12,9 @@ use crate::map::Map;
 /// Standard operations on a [`Value`] by users of this crate do not require
 /// knowledge of [`ValueKind`]. Introspection of underlying kind is only required
 /// when the configuration values are unstructured or do not have known types.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum ValueKind {
+    #[default]
     Nil,
     Boolean(bool),
     I64(i64),
@@ -28,12 +29,6 @@ pub enum ValueKind {
 
 pub(crate) type Array = Vec<Value>;
 pub(crate) type Table = Map<String, Value>;
-
-impl Default for ValueKind {
-    fn default() -> Self {
-        Self::Nil
-    }
-}
 
 impl<T> From<Option<T>> for ValueKind
 where

@@ -4,7 +4,7 @@ pub(crate) mod string;
 use std::error::Error;
 use std::fmt::Debug;
 
-use crate::{file::FileStoredFormat, Format};
+use crate::{Format, file::FileStoredFormat};
 
 /// Describes where the [`File`][super::File] is sourced
 pub trait FileSource<T>: Debug + Clone

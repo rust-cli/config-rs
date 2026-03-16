@@ -366,6 +366,8 @@ Settings {
     let res = cfg.try_deserialize::<Settings>();
     assert_data_eq!(
         res.unwrap_err().to_string(),
-        str!["invalid type: integer `42`, expected struct Profile for key `profile.int_to_non_empty`"]
+        str![
+            "invalid type: integer `42`, expected struct Profile for key `profile.int_to_non_empty`"
+        ]
     );
 }

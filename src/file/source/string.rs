@@ -1,9 +1,9 @@
 use std::error::Error;
 
 use crate::{
+    Format,
     file::source::FileSourceResult,
     file::{FileSource, FileStoredFormat},
-    Format,
 };
 
 /// Describes a file sourced from a string

@@ -52,7 +52,7 @@ impl Format for PemFile {
                 return Err(Box::new(Error::new(
                     ErrorKind::InvalidData,
                     "PEM file did not contain a Private or Public key",
-                )))
+                )));
             }
         };
 

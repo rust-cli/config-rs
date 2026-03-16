@@ -16,10 +16,10 @@ where
         .add_source(File::from_str(config, format))
         .build();
 
-    assert!(cfg.is_ok(), "Config could not be built: {:?}", cfg);
+    assert!(cfg.is_ok(), "Config could not be built: {cfg:?}");
     let cfg = cfg.unwrap().try_deserialize();
 
-    assert!(cfg.is_ok(), "Config could not be transformed: {:?}", cfg);
+    assert!(cfg.is_ok(), "Config could not be transformed: {cfg:?}");
     let cfg: T = cfg.unwrap();
     cfg
 }

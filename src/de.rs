@@ -243,7 +243,7 @@ impl<'de> de::MapAccess<'de> for MapAccess {
     where
         K: de::DeserializeSeed<'de>,
     {
-        if let Some((ref key_s, _)) = self.elements.front() {
+        if let Some((key_s, _)) = self.elements.front() {
             let key_de = Value::new(None, key_s as &str);
             let key = de::DeserializeSeed::deserialize(seed, key_de)?;
 

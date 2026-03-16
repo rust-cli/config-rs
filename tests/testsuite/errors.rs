@@ -82,7 +82,7 @@ fn test_root_not_table() {
             "invalid type: boolean `false`, expected a map",
             format!("{cause}")
         ),
-        _ => panic!("Wrong error: {:?}", e),
+        _ => panic!("Wrong error: {e:?}"),
     }
 }
 
@@ -304,7 +304,12 @@ fn test_value_deserialize_enum() {
 
     let array_v: Value = vec![100, 100].into();
     let array_d = array_v.try_deserialize::<Diode>();
-    assert_data_eq!(array_d.unwrap_err().to_string(), str!["value of enum Diode should be represented by either string or table with exactly one key"]);
+    assert_data_eq!(
+        array_d.unwrap_err().to_string(),
+        str![
+            "value of enum Diode should be represented by either string or table with exactly one key"
+        ]
+    );
 
     let confused_v: Value = [
         ("Brightness".to_owned(), 100.into()),
@@ -315,7 +320,12 @@ fn test_value_deserialize_enum() {
     .collect::<Map<String, Value>>()
     .into();
     let confused_d = confused_v.try_deserialize::<Diode>();
-    assert_data_eq!(confused_d.unwrap_err().to_string(), str!["value of enum Diode should be represented by either string or table with exactly one key"]);
+    assert_data_eq!(
+        confused_d.unwrap_err().to_string(),
+        str![
+            "value of enum Diode should be represented by either string or table with exactly one key"
+        ]
+    );
 }
 
 #[test]
@@ -359,7 +369,7 @@ fn test_deserialize_invalid_type() {
     {
         assert_eq!(path, "place.name");
     } else {
-        panic!("Wrong error {:?}", e);
+        panic!("Wrong error {e:?}");
     }
 }
 
@@ -400,7 +410,7 @@ fn test_deserialize_invalid_type_file() {
     {
         assert_eq!(path, "place.name");
     } else {
-        panic!("Wrong error {:?}", e);
+        panic!("Wrong error {e:?}");
     }
 }
 

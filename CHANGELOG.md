@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.21] - 2026-03-12
+
+### Compatibility
+
+- Bump MSRV to 1.85
+
+## [0.15.20] - 2026-03-12
+
+### Fixes
+
+- Serialize the full `u64` range
+
+### Internal
+
+- *(toml)* Update to 1.0
+
+## [0.15.19] - 2025-11-12
+
+### Internal
+
+- *(ron)* Update to 0.12
+
 ## [0.15.18] - 2025-09-30
 
 ### Fixes
@@ -621,7 +643,10 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.18...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.21...HEAD
+[0.15.21]: https://github.com/rust-cli/config-rs/compare/v0.15.20...v0.15.21
+[0.15.20]: https://github.com/rust-cli/config-rs/compare/v0.15.19...v0.15.20
+[0.15.19]: https://github.com/rust-cli/config-rs/compare/v0.15.18...v0.15.19
 [0.15.18]: https://github.com/rust-cli/config-rs/compare/v0.15.17...v0.15.18
 [0.15.17]: https://github.com/rust-cli/config-rs/compare/v0.15.16...v0.15.17
 [0.15.16]: https://github.com/rust-cli/config-rs/compare/v0.15.15...v0.15.16

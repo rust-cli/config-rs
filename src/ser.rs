@@ -3,9 +3,9 @@ use std::fmt::Write as _;
 
 use serde_core::ser;
 
+use crate::Config;
 use crate::error::{ConfigError, Result};
 use crate::value::{Value, ValueKind};
-use crate::Config;
 
 #[derive(Default, Debug)]
 pub(crate) struct ConfigSerializer {
@@ -121,15 +121,7 @@ impl<'a> ser::Serializer for &'a mut ConfigSerializer {
     }
 
     fn serialize_u64(self, v: u64) -> Result<Self::Ok> {
-        if v > (i64::MAX as u64) {
-            Err(ConfigError::Message(format!(
-                "value {} is greater than the max {}",
-                v,
-                i64::MAX
-            )))
-        } else {
-            self.serialize_i64(v as i64)
-        }
+        self.serialize_primitive(v)
     }
 
     fn serialize_f32(self, v: f32) -> Result<Self::Ok> {
@@ -284,7 +276,7 @@ impl ser::SerializeSeq for SeqSerializer<'_> {
             _ => {
                 return Err(ConfigError::Message(
                     "config-rs internal error (ser._element but last not Seq!".to_owned(),
-                ))
+                ));
             }
         };
         Ok(())
