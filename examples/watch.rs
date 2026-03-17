@@ -23,7 +23,7 @@ fn refresh() {
 
 fn load() -> Config {
     Config::builder()
-        .add_source(File::with_name("examples/watch/Settings.toml"))
+        .add_source(File::with_name("examples/settings.toml"))
         .build()
         .unwrap()
 }
@@ -56,7 +56,7 @@ fn watch() -> ! {
     // below will be monitored for changes.
     watcher
         .watch(
-            Path::new("examples/watch/Settings.toml"),
+            Path::new("examples/settings.toml"),
             RecursiveMode::NonRecursive,
         )
         .unwrap();
@@ -69,7 +69,7 @@ fn watch() -> ! {
                 kind: notify::event::EventKind::Modify(_),
                 ..
             })) => {
-                println!(" * Settings.toml written; refreshing configuration ...");
+                println!(" * settings.toml written; refreshing configuration ...");
                 refresh();
                 show();
             }
