@@ -62,7 +62,7 @@ impl Settings {
             .add_source(File::with_name("examples/hierarchical-env/config/local").required(false))
             // Add in settings from the environment (with a prefix of APP)
             // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-            .add_source(Environment::with_prefix("app"))
+            .add_source(Environment::with_prefix("APP"))
             // You may also programmatically change settings
             .set_override("database.url", "postgres://")?
             .build()?;
