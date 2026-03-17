@@ -96,7 +96,7 @@ lto = true
 
 [package]
 name = "config"
-version = "0.15.21"
+version = "0.15.22"
 description = "Layered configuration system for Rust applications."
 categories = ["config"]
 keywords = ["config", "configuration", "settings", "env", "environment"]

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.22] - 2026-03-17
+
 ### Documentation
 
 - Polish examples
@@ -651,7 +653,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.21...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.22...HEAD
+[0.15.22]: https://github.com/rust-cli/config-rs/compare/v0.15.21...v0.15.22
 [0.15.21]: https://github.com/rust-cli/config-rs/compare/v0.15.20...v0.15.21
 [0.15.20]: https://github.com/rust-cli/config-rs/compare/v0.15.19...v0.15.20
 [0.15.19]: https://github.com/rust-cli/config-rs/compare/v0.15.18...v0.15.19
