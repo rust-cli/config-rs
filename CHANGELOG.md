@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Documentation
+
+- Polish examples
+
+### Internal
+
+- Update winnow
+
 ## [0.15.21] - 2026-03-12
 
 ### Compatibility
