@@ -19,7 +19,7 @@
 //!
 //! ```rust
 //! # #[cfg(feature = "toml")] {
-#![doc = include_str!("../examples/simple/main.rs")]
+#![doc = include_str!("../examples/simple.rs")]
 //! # }
 //! ```
 //!

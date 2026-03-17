@@ -24,6 +24,7 @@ fn main() {
 
     // Deserialize the config object into your Settings struct:
     let settings: Settings = settings.try_deserialize().unwrap();
+
     println!("{settings:#?}");
 }
 
@@ -65,8 +66,7 @@ impl Format for PemFile {
     }
 }
 
-// A slice of extensions associated to this format, when an extension
-// is omitted from a file source, these will be tried implicitly:
+// When an extension is omitted from a file source, these will be tried implicitly:
 impl FileStoredFormat for PemFile {
     fn file_extensions(&self) -> &'static [&'static str] {
         &["pem"]

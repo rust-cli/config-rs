@@ -3,34 +3,11 @@ use std::env;
 use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
 
-#[derive(Debug, Deserialize)]
-#[allow(unused)]
-struct Database {
-    url: String,
-}
+fn main() {
+    let settings = Settings::new();
 
-#[derive(Debug, Deserialize)]
-#[allow(unused)]
-struct Sparkpost {
-    key: String,
-    token: String,
-    url: String,
-    version: u8,
-}
-
-#[derive(Debug, Deserialize)]
-#[allow(unused)]
-struct Twitter {
-    consumer_token: String,
-    consumer_secret: String,
-}
-
-#[derive(Debug, Deserialize)]
-#[allow(unused)]
-struct Braintree {
-    merchant_id: String,
-    public_key: String,
-    private_key: String,
+    // Print out our settings
+    println!("{settings:?}");
 }
 
 #[derive(Debug, Deserialize)]
@@ -62,7 +39,7 @@ impl Settings {
             .add_source(File::with_name("examples/hierarchical-env/config/local").required(false))
             // Add in settings from the environment (with a prefix of APP)
             // Eg.. `APP_DEBUG=1 ./target/app` would set the `debug` key
-            .add_source(Environment::with_prefix("app"))
+            .add_source(Environment::with_prefix("APP"))
             // You may also programmatically change settings
             .set_override("database.url", "postgres://")?
             .build()?;
@@ -74,4 +51,34 @@ impl Settings {
         // You can deserialize (and thus freeze) the entire configuration as
         s.try_deserialize()
     }
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(unused)]
+struct Database {
+    url: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(unused)]
+struct Sparkpost {
+    key: String,
+    token: String,
+    url: String,
+    version: u8,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(unused)]
+struct Twitter {
+    consumer_token: String,
+    consumer_secret: String,
+}
+
+#[derive(Debug, Deserialize)]
+#[allow(unused)]
+struct Braintree {
+    merchant_id: String,
+    public_key: String,
+    private_key: String,
 }
