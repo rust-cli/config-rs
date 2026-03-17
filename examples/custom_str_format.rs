@@ -2,8 +2,8 @@ use config::{Config, File, FileStoredFormat, Format, Map, Value, ValueKind};
 
 fn main() {
     let config = Config::builder()
-        .add_source(File::from_str("bad", MyFormat))
-        .add_source(File::from_str("good", MyFormat))
+        .add_source(File::from_str("bad", CustomFormat))
+        .add_source(File::from_str("good", CustomFormat))
         .build();
 
     match config {
@@ -13,9 +13,9 @@ fn main() {
 }
 
 #[derive(Debug, Clone)]
-pub struct MyFormat;
+pub struct CustomFormat;
 
-impl Format for MyFormat {
+impl Format for CustomFormat {
     fn parse(
         &self,
         uri: Option<&String>,
@@ -40,11 +40,14 @@ impl Format for MyFormat {
     }
 }
 
-// As strange as it seems for config sourced from a string, legacy demands its sacrifice
-// It is only required for File source, custom sources can use Format without caring for extensions
-static MY_FORMAT_EXT: Vec<&'static str> = vec![];
-impl FileStoredFormat for MyFormat {
+impl FileStoredFormat for CustomFormat {
     fn file_extensions(&self) -> &'static [&'static str] {
-        &MY_FORMAT_EXT
+        &NO_EXTS
     }
 }
+
+/// In-memory format doesn't have any file extensions
+///
+/// It is only required for File source,
+/// custom sources can use Format without caring for extensions
+static NO_EXTS: Vec<&'static str> = vec![];

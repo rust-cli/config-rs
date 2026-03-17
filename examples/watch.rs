@@ -8,36 +8,8 @@ use std::time::Duration;
 use config::{Config, File};
 use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 
-fn settings() -> &'static RwLock<Config> {
-    static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();
-    CONFIG.get_or_init(|| {
-        let settings = load();
-
-        RwLock::new(settings)
-    })
-}
-
-fn refresh() {
-    *settings().write().unwrap() = load();
-}
-
-fn load() -> Config {
-    Config::builder()
-        .add_source(File::with_name("examples/settings.toml"))
-        .build()
-        .unwrap()
-}
-
-fn show() {
-    println!(
-        " * Settings :: \n\x1b[31m{:?}\x1b[0m",
-        settings()
-            .read()
-            .unwrap()
-            .clone()
-            .try_deserialize::<HashMap<String, String>>()
-            .unwrap()
-    );
+fn main() {
+    watch();
 }
 
 fn watch() -> ! {
@@ -55,11 +27,10 @@ fn watch() -> ! {
     // Add a path to be watched. All files and directories at that path and
     // below will be monitored for changes.
     watcher
-        .watch(
-            Path::new("examples/settings.toml"),
-            RecursiveMode::NonRecursive,
-        )
+        .watch(Path::new(SETTINGS_PATH), RecursiveMode::NonRecursive)
         .unwrap();
+
+    show();
 
     // This is a simple loop, but you may want to use more complex logic here,
     // for example to handle I/O.
@@ -83,11 +54,36 @@ fn watch() -> ! {
     }
 }
 
-fn main() {
-    // This is just an example of what could be done, today
-    // We do want this to be built-in to config-rs at some point
-    // Feel free to take a crack at a PR
-
-    show();
-    watch();
+fn show() {
+    println!(
+        " * Settings :: \n\x1b[31m{:?}\x1b[0m",
+        settings()
+            .read()
+            .unwrap()
+            .clone()
+            .try_deserialize::<HashMap<String, String>>()
+            .unwrap()
+    );
 }
+
+pub fn settings() -> &'static RwLock<Config> {
+    static CONFIG: OnceLock<RwLock<Config>> = OnceLock::new();
+    CONFIG.get_or_init(|| {
+        let settings = load();
+
+        RwLock::new(settings)
+    })
+}
+
+pub fn refresh() {
+    *settings().write().unwrap() = load();
+}
+
+fn load() -> Config {
+    Config::builder()
+        .add_source(File::with_name(SETTINGS_PATH))
+        .build()
+        .unwrap()
+}
+
+static SETTINGS_PATH: &str = "examples/settings.toml";
