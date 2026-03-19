@@ -518,6 +518,32 @@ fn test_parse_string_and_list_ignore_list_parse_key_case() {
     );
 }
 
+#[cfg(feature = "convert-case")]
+fn build_convert_case_config(case: config::Case) -> Config {
+    temp_env::with_vars(
+        vec![
+            ("PREFIX__SINGLE", Some("test")),
+            ("PREFIX__PLAIN__VAL", Some("simple")),
+            ("PREFIX__VALUE_WITH_MULTIPART_NAME", Some("value1")),
+            (
+                "PREFIX__INNER_CONFIG__ANOTHER_MULTIPART_NAME",
+                Some("value2"),
+            ),
+        ],
+        || {
+            Config::builder()
+                .add_source(
+                    Environment::default()
+                        .prefix("PREFIX")
+                        .convert_case(case)
+                        .separator("__"),
+                )
+                .build()
+                .unwrap()
+        },
+    )
+}
+
 #[test]
 #[cfg(feature = "convert-case")]
 fn test_parse_nested_kebab() {
@@ -544,34 +570,50 @@ fn test_parse_nested_kebab() {
         another_multipart_name: String,
     }
 
-    temp_env::with_vars(
-        vec![
-            ("PREFIX__SINGLE", Some("test")),
-            ("PREFIX__PLAIN__VAL", Some("simple")),
-            ("PREFIX__VALUE_WITH_MULTIPART_NAME", Some("value1")),
-            (
-                "PREFIX__INNER_CONFIG__ANOTHER_MULTIPART_NAME",
-                Some("value2"),
-            ),
-        ],
-        || {
-            let environment = Environment::default()
-                .prefix("PREFIX")
-                .convert_case(Case::Kebab)
-                .separator("__");
+    let config: TestConfig = build_convert_case_config(Case::Kebab)
+        .try_deserialize()
+        .unwrap();
 
-            let config = Config::builder().add_source(environment).build().unwrap();
+    assert_eq!(config.single, "test");
+    assert_eq!(config.plain.val, "simple");
+    assert_eq!(config.value_with_multipart_name, "value1");
+    assert_eq!(config.inner_config.another_multipart_name, "value2");
+}
 
-            println!("{config:#?}");
+#[test]
+#[cfg(feature = "convert-case")]
+fn test_parse_pascal() {
+    use config::Case;
 
-            let config: TestConfig = config.try_deserialize().unwrap();
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "PascalCase")]
+    struct TestConfig {
+        single: String,
+        plain: SimpleInner,
+        value_with_multipart_name: String,
+        inner_config: ComplexInner,
+    }
 
-            assert_eq!(config.single, "test");
-            assert_eq!(config.plain.val, "simple");
-            assert_eq!(config.value_with_multipart_name, "value1");
-            assert_eq!(config.inner_config.another_multipart_name, "value2");
-        },
-    );
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "PascalCase")]
+    struct SimpleInner {
+        val: String,
+    }
+
+    #[derive(Deserialize, Debug)]
+    #[serde(rename_all = "PascalCase")]
+    struct ComplexInner {
+        another_multipart_name: String,
+    }
+
+    let config: TestConfig = build_convert_case_config(Case::Pascal)
+        .try_deserialize()
+        .unwrap();
+
+    assert_eq!(config.single, "test");
+    assert_eq!(config.plain.val, "simple");
+    assert_eq!(config.value_with_multipart_name, "value1");
+    assert_eq!(config.inner_config.another_multipart_name, "value2");
 }
 
 #[test]
