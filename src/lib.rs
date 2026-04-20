@@ -43,6 +43,8 @@ mod ser;
 mod source;
 mod value;
 
+mod nested_env_vars;
+
 // Re-export
 #[cfg(feature = "convert-case")]
 pub use convert_case::Case;

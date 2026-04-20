@@ -2,6 +2,7 @@ use std::error::Error;
 
 use crate::format;
 use crate::map::Map;
+use crate::nested_env_vars::ExpandEnvVars;
 use crate::value::{Value, ValueKind};
 
 #[derive(Debug)]
@@ -43,7 +44,7 @@ pub(crate) fn parse(
 fn from_json5_value(uri: Option<&String>, value: Val) -> Value {
     let vk = match value {
         Val::Null => ValueKind::Nil,
-        Val::String(v) => ValueKind::String(v),
+        Val::String(v) => ValueKind::String(v.expand_env_vars()),
         Val::Integer(v) => ValueKind::I64(v),
         Val::Float(v) => ValueKind::Float(v),
         Val::Boolean(v) => ValueKind::Boolean(v),

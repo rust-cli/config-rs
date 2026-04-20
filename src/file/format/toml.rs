@@ -1,6 +1,7 @@
 use std::error::Error;
 
 use crate::map::Map;
+use crate::nested_env_vars::ExpandEnvVars;
 use crate::value::Value;
 
 pub(crate) fn parse(
@@ -24,7 +25,7 @@ fn from_toml_table(uri: Option<&String>, table: toml::Table) -> Map<String, Valu
 
 fn from_toml_value(uri: Option<&String>, value: toml::Value) -> Value {
     match value {
-        toml::Value::String(value) => Value::new(uri, value),
+        toml::Value::String(value) => Value::new(uri, value.expand_env_vars()),
         toml::Value::Float(value) => Value::new(uri, value),
         toml::Value::Integer(value) => Value::new(uri, value),
         toml::Value::Boolean(value) => Value::new(uri, value),
