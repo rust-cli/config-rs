@@ -68,3 +68,81 @@ fn invalid_signedness() {
 
     let _: u32 = c.get("settings.port").unwrap();
 }
+
+#[cfg(feature = "preserve_order")]
+#[test]
+fn serde_i128_min() {
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
+    struct Container<T> {
+        inner: T,
+    }
+
+    #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+    struct I128 {
+        val: i128,
+    }
+
+    impl From<I128> for config::ValueKind {
+        fn from(i: I128) -> Self {
+            let mut properties = indexmap::IndexMap::new();
+            properties.insert("val".to_owned(), config::Value::from(i.val));
+
+            Self::Table(properties)
+        }
+    }
+
+    let num = I128 { val: i128::MIN };
+    let container = Container { inner: num };
+    let built = Config::builder()
+        .set_default("inner", num)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    let deserialized = built.clone().try_deserialize::<Container<I128>>().unwrap();
+    assert_eq!(deserialized, container);
+
+    let serialized = Config::try_from(&container).unwrap();
+    assert_eq!(serialized.cache, built.cache);
+}
+
+#[cfg(feature = "preserve_order")]
+#[test]
+fn serde_u128_max() {
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
+    struct Container<T> {
+        inner: T,
+    }
+
+    #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+    struct U128 {
+        val: u128,
+    }
+
+    impl From<U128> for config::ValueKind {
+        fn from(i: U128) -> Self {
+            let mut properties = indexmap::IndexMap::new();
+            properties.insert("val".to_owned(), config::Value::from(i.val));
+
+            Self::Table(properties)
+        }
+    }
+
+    let num = U128 { val: u128::MAX };
+    let container = Container { inner: num };
+    let built = Config::builder()
+        .set_default("inner", num)
+        .unwrap()
+        .build()
+        .unwrap();
+
+    let deserialized = built.clone().try_deserialize::<Container<U128>>().unwrap();
+    assert_eq!(deserialized, container);
+
+    let serialized = Config::try_from(&container).unwrap();
+    assert_eq!(serialized.cache, built.cache);
+}
