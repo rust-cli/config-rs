@@ -24,6 +24,9 @@ mod json5;
 #[cfg(feature = "corn")]
 mod corn;
 
+#[cfg(feature = "dotenv")]
+mod dotenv;
+
 /// File formats provided by the library.
 ///
 /// Although it is possible to define custom formats using [`Format`] trait it is recommended to use `FileFormat` if possible.
@@ -57,6 +60,10 @@ pub enum FileFormat {
     /// Corn (parsed with `libcorn`)
     #[cfg(feature = "corn")]
     Corn,
+
+    /// Dotenv (parsed with `dotenvy`)
+    #[cfg(feature = "dotenv")]
+    Dotenv,
 }
 
 impl FileFormat {
@@ -76,6 +83,8 @@ impl FileFormat {
             FileFormat::Json5,
             #[cfg(feature = "corn")]
             FileFormat::Corn,
+            #[cfg(feature = "dotenv")]
+            FileFormat::Dotenv,
         ]
     }
 
@@ -102,6 +111,9 @@ impl FileFormat {
             #[cfg(feature = "corn")]
             FileFormat::Corn => &["corn"],
 
+            #[cfg(feature = "dotenv")]
+            FileFormat::Dotenv => &["dotenv"],
+
             #[cfg(all(
                 not(feature = "toml"),
                 not(feature = "json"),
@@ -109,6 +121,7 @@ impl FileFormat {
                 not(feature = "ini"),
                 not(feature = "ron"),
                 not(feature = "json5"),
+                not(feature = "dotenv"),
             ))]
             _ => unreachable!("No features are enabled, this library won't work without features"),
         }
@@ -141,6 +154,9 @@ impl FileFormat {
             #[cfg(feature = "corn")]
             FileFormat::Corn => corn::parse(uri, text),
 
+            #[cfg(feature = "dotenv")]
+            FileFormat::Dotenv => dotenv::parse(uri, text),
+
             #[cfg(all(
                 not(feature = "toml"),
                 not(feature = "json"),
@@ -148,6 +164,7 @@ impl FileFormat {
                 not(feature = "ini"),
                 not(feature = "ron"),
                 not(feature = "json5"),
+                not(feature = "dotenv"),
             ))]
             _ => unreachable!("No features are enabled, this library won't work without features"),
         }
