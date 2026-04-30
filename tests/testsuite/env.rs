@@ -804,3 +804,33 @@ mod unicode_tests {
         );
     }
 }
+
+#[test]
+fn test_adjacently_tagged_enum_deterministic() {
+    #[derive(Deserialize, Debug, PartialEq)]
+    #[serde(tag = "type", content = "value")]
+    enum A {
+        V1(u64),
+        V2(String),
+    }
+
+    // Run 20 times to catch non-deterministic HashMap ordering
+    for _ in 0..20 {
+        let config = Config::builder()
+            .add_source(
+                Environment::with_prefix("APP_ADJ_TAG")
+                    .separator("_")
+                    .try_parsing(true)
+                    .source(Some({
+                        let mut env = std::collections::HashMap::new();
+                        env.insert("APP_ADJ_TAG_TYPE".into(), "V1".into());
+                        env.insert("APP_ADJ_TAG_VALUE".into(), "42".into());
+                        env
+                    })),
+            )
+            .build()
+            .unwrap();
+        let a: A = config.try_deserialize().unwrap();
+        assert_eq!(a, A::V1(42));
+    }
+}
