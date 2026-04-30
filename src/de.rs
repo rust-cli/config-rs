@@ -230,9 +230,9 @@ struct MapAccess {
 
 impl MapAccess {
     fn new(table: Map<String, Value>) -> Self {
-        Self {
-            elements: table.into_iter().collect(),
-        }
+        let mut elements: VecDeque<(String, Value)> = table.into_iter().collect();
+        elements.make_contiguous().sort_by_key(|(k, _)| k.clone());
+        Self { elements }
     }
 }
 
