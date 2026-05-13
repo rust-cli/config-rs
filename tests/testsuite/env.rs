@@ -576,7 +576,6 @@ fn test_parse_nested_kebab() {
 
 #[test]
 #[cfg(feature = "convert-case")]
-#[should_panic = "missing configuration field"]
 fn test_parse_nested_upper_camel() {
     use config::Case;
 
