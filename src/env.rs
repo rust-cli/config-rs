@@ -296,7 +296,11 @@ impl Source for Environment {
 
             #[cfg(feature = "convert-case")]
             if let Some(convert_case) = convert_case {
-                key = key.to_case(*convert_case);
+                key = key
+                    .split('.')
+                    .map(|segment| segment.to_case(*convert_case))
+                    .collect::<Vec<_>>()
+                    .join(".");
             }
 
             let value = if self.try_parsing {

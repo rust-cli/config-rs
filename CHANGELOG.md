@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- `Environment::convert_case` now applies the case conversion to each nested key segment
+
 ## [0.15.22] - 2026-03-17
 
 ### Documentation

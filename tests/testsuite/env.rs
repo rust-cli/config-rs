@@ -575,6 +575,38 @@ fn test_parse_nested_kebab() {
 }
 
 #[test]
+#[cfg(feature = "convert-case")]
+fn test_parse_nested_upper_camel() {
+    use config::Case;
+
+    #[derive(Deserialize, Debug)]
+    struct TestConfig {
+        #[serde(rename = "Otel")]
+        otel: Inner,
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct Inner {
+        #[serde(rename = "Endpoint")]
+        endpoint: String,
+    }
+
+    temp_env::with_var("CONFIG_OTEL__ENDPOINT", Some("from env"), || {
+        let environment = Environment::default()
+            .prefix("CONFIG")
+            .prefix_separator("_")
+            .separator("__")
+            .convert_case(Case::UpperCamel);
+
+        let config = Config::builder().add_source(environment).build().unwrap();
+
+        let config: TestConfig = config.try_deserialize().unwrap();
+
+        assert_eq!(config.otel.endpoint, "from env");
+    });
+}
+
+#[test]
 fn test_parse_string() {
     // using a struct in an enum here to make serde use `deserialize_any`
     #[derive(Deserialize, Debug)]
