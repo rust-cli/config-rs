@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixes
 
-- `Environment::convert_case` now applies the case conversion to each nested key segment
+- `Environment::convert_case`: correctly apply casing to each key segment
 
 ## [0.15.22] - 2026-03-17
 
