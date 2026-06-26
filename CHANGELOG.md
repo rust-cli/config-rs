@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Fixes
+
+- *(ron)* Support `u64`, and not just `i64`
+
 ## [0.15.24] - 2026-06-16
 
 ### Fixes
