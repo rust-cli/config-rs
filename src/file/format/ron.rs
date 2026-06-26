@@ -1,4 +1,3 @@
-use std::convert::TryInto as _;
 use std::error::Error;
 
 use crate::format;
@@ -37,7 +36,7 @@ fn from_ron_value(
             ron::Number::U8(value) => ValueKind::I64(value.into()),
             ron::Number::U16(value) => ValueKind::I64(value.into()),
             ron::Number::U32(value) => ValueKind::I64(value.into()),
-            ron::Number::U64(value) => ValueKind::I64(value.try_into()?),
+            ron::Number::U64(value) => ValueKind::U64(value),
             _ => Err(crate::ConfigError::Message(
                 "unsupported numeric type".to_owned(),
             ))?,
