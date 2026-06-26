@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.25] - 2026-06-26
+
 ### Fixes
 
 - *(ron)* Support `u64`, and not just `i64`
@@ -669,7 +671,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.24...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.25...HEAD
+[0.15.25]: https://github.com/rust-cli/config-rs/compare/v0.15.24...v0.15.25
 [0.15.24]: https://github.com/rust-cli/config-rs/compare/v0.15.23...v0.15.24
 [0.15.23]: https://github.com/rust-cli/config-rs/compare/v0.15.22...v0.15.23
 [0.15.22]: https://github.com/rust-cli/config-rs/compare/v0.15.21...v0.15.22
