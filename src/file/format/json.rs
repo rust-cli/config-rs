@@ -2,6 +2,7 @@ use std::error::Error;
 
 use crate::format;
 use crate::map::Map;
+use crate::nested_env_vars::ExpandEnvVars;
 use crate::value::{Value, ValueKind};
 
 pub(crate) fn parse(
@@ -15,7 +16,7 @@ pub(crate) fn parse(
 
 fn from_json_value(uri: Option<&String>, value: &serde_json::Value) -> Value {
     match *value {
-        serde_json::Value::String(ref value) => Value::new(uri, ValueKind::String(value.clone())),
+        serde_json::Value::String(ref value) => Value::new(uri, ValueKind::String(value.expand_env_vars())),
 
         serde_json::Value::Number(ref value) => {
             if let Some(value) = value.as_i64() {
