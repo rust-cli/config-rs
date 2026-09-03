@@ -126,6 +126,7 @@ yaml = ["yaml-rust2"]
 ini = ["rust-ini"]
 json5 = ["dep:json5", "dep:serde-untagged"]
 corn = ["dep:corn"]
+dotenv = ["dep:dotenvy"]
 convert-case = ["convert_case"]
 preserve_order = ["indexmap", "toml?/preserve_order", "serde_json?/preserve_order", "ron?/indexmap"]
 async = ["async-trait"]
@@ -147,6 +148,7 @@ convert_case = { version = "0.6.0", optional = true }
 pathdiff = "0.2.3"
 winnow = "1.0.0"
 serde-untagged = { version = "0.1.9", optional = true }
+dotenvy = { version = "0", optional = true }
 
 [dev-dependencies]
 serde = { version = "1.0.228", features = ["derive"] }
