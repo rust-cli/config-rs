@@ -23,16 +23,16 @@ pub enum Unexpected {
 impl fmt::Display for Unexpected {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> result::Result<(), fmt::Error> {
         match *self {
-            Unexpected::Bool(b) => write!(f, "boolean `{b}`"),
-            Unexpected::I64(i) => write!(f, "64-bit integer `{i}`"),
-            Unexpected::I128(i) => write!(f, "128-bit integer `{i}`"),
-            Unexpected::U64(i) => write!(f, "64-bit unsigned integer `{i}`"),
-            Unexpected::U128(i) => write!(f, "128-bit unsigned integer `{i}`"),
-            Unexpected::Float(v) => write!(f, "floating point `{v}`"),
-            Unexpected::Str(ref s) => write!(f, "string {s:?}"),
-            Unexpected::Unit => write!(f, "unit value"),
-            Unexpected::Seq => write!(f, "sequence"),
-            Unexpected::Map => write!(f, "map"),
+            Self::Bool(b) => write!(f, "boolean `{b}`"),
+            Self::I64(i) => write!(f, "64-bit integer `{i}`"),
+            Self::I128(i) => write!(f, "128-bit integer `{i}`"),
+            Self::U64(i) => write!(f, "64-bit unsigned integer `{i}`"),
+            Self::U128(i) => write!(f, "128-bit unsigned integer `{i}`"),
+            Self::Float(v) => write!(f, "floating point `{v}`"),
+            Self::Str(ref s) => write!(f, "string {s:?}"),
+            Self::Unit => write!(f, "unit value"),
+            Self::Seq => write!(f, "sequence"),
+            Self::Map => write!(f, "map"),
         }
     }
 }
@@ -82,7 +82,7 @@ pub enum ConfigError {
     /// Custom message
     At {
         /// Error being extended with a path
-        error: Box<ConfigError>,
+        error: Box<Self>,
 
         /// The URI that references the source that the value came from.
         /// Example: `/path/to/config.json` or `Environment` or `etcd://localhost`
@@ -221,19 +221,19 @@ impl fmt::Debug for ConfigError {
 impl fmt::Display for ConfigError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
-            ConfigError::Frozen => write!(f, "configuration is frozen"),
+            Self::Frozen => write!(f, "configuration is frozen"),
 
-            ConfigError::PathParse { ref cause } => write!(f, "{cause}"),
+            Self::PathParse { ref cause } => write!(f, "{cause}"),
 
-            ConfigError::Message(ref s) => write!(f, "{s}"),
+            Self::Message(ref s) => write!(f, "{s}"),
 
-            ConfigError::Foreign(ref cause) => write!(f, "{cause}"),
+            Self::Foreign(ref cause) => write!(f, "{cause}"),
 
-            ConfigError::NotFound(ref key) => {
+            Self::NotFound(ref key) => {
                 write!(f, "missing configuration field {key:?}")
             }
 
-            ConfigError::Type {
+            Self::Type {
                 ref origin,
                 ref unexpected,
                 expected,
@@ -252,7 +252,7 @@ impl fmt::Display for ConfigError {
                 Ok(())
             }
 
-            ConfigError::At {
+            Self::At {
                 ref error,
                 ref origin,
                 ref key,
@@ -270,7 +270,7 @@ impl fmt::Display for ConfigError {
                 Ok(())
             }
 
-            ConfigError::FileParse { ref cause, ref uri } => {
+            Self::FileParse { ref cause, ref uri } => {
                 write!(f, "{cause}")?;
 
                 if let Some(ref uri) = *uri {

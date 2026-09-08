@@ -24,7 +24,7 @@ impl<'de> serde_core::de::Deserialize<'de> for Val {
             .bool(|value| Ok(Self::Boolean(value)))
             .i64(|value| Ok(Self::Integer(value)))
             .f64(|value| Ok(Self::Float(value)))
-            .string(|value| Ok(Val::String(value.to_owned())))
+            .string(|value| Ok(Self::String(value.to_owned())))
             .unit(|| Ok(Self::Null))
             .seq(|value| value.deserialize().map(Val::Array))
             .map(|value| value.deserialize().map(Val::Object))
