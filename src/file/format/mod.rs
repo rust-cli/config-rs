@@ -60,47 +60,47 @@ pub enum FileFormat {
 }
 
 impl FileFormat {
-    pub(crate) fn all() -> &'static [FileFormat] {
+    pub(crate) fn all() -> &'static [Self] {
         &[
             #[cfg(feature = "toml")]
-            FileFormat::Toml,
+            Self::Toml,
             #[cfg(feature = "json")]
-            FileFormat::Json,
+            Self::Json,
             #[cfg(feature = "yaml")]
-            FileFormat::Yaml,
+            Self::Yaml,
             #[cfg(feature = "ini")]
-            FileFormat::Ini,
+            Self::Ini,
             #[cfg(feature = "ron")]
-            FileFormat::Ron,
+            Self::Ron,
             #[cfg(feature = "json5")]
-            FileFormat::Json5,
+            Self::Json5,
             #[cfg(feature = "corn")]
-            FileFormat::Corn,
+            Self::Corn,
         ]
     }
 
     pub(crate) fn extensions(&self) -> &'static [&'static str] {
         match self {
             #[cfg(feature = "toml")]
-            FileFormat::Toml => &["toml"],
+            Self::Toml => &["toml"],
 
             #[cfg(feature = "json")]
-            FileFormat::Json => &["json"],
+            Self::Json => &["json"],
 
             #[cfg(feature = "yaml")]
-            FileFormat::Yaml => &["yaml", "yml"],
+            Self::Yaml => &["yaml", "yml"],
 
             #[cfg(feature = "ini")]
-            FileFormat::Ini => &["ini"],
+            Self::Ini => &["ini"],
 
             #[cfg(feature = "ron")]
-            FileFormat::Ron => &["ron"],
+            Self::Ron => &["ron"],
 
             #[cfg(feature = "json5")]
-            FileFormat::Json5 => &["json5"],
+            Self::Json5 => &["json5"],
 
             #[cfg(feature = "corn")]
-            FileFormat::Corn => &["corn"],
+            Self::Corn => &["corn"],
 
             #[cfg(all(
                 not(feature = "toml"),
@@ -121,25 +121,25 @@ impl FileFormat {
     ) -> Result<Map<String, Value>, Box<dyn Error + Send + Sync>> {
         match self {
             #[cfg(feature = "toml")]
-            FileFormat::Toml => toml::parse(uri, text),
+            Self::Toml => toml::parse(uri, text),
 
             #[cfg(feature = "json")]
-            FileFormat::Json => json::parse(uri, text),
+            Self::Json => json::parse(uri, text),
 
             #[cfg(feature = "yaml")]
-            FileFormat::Yaml => yaml::parse(uri, text),
+            Self::Yaml => yaml::parse(uri, text),
 
             #[cfg(feature = "ini")]
-            FileFormat::Ini => ini::parse(uri, text),
+            Self::Ini => ini::parse(uri, text),
 
             #[cfg(feature = "ron")]
-            FileFormat::Ron => ron::parse(uri, text),
+            Self::Ron => ron::parse(uri, text),
 
             #[cfg(feature = "json5")]
-            FileFormat::Json5 => json5::parse(uri, text),
+            Self::Json5 => json5::parse(uri, text),
 
             #[cfg(feature = "corn")]
-            FileFormat::Corn => corn::parse(uri, text),
+            Self::Corn => corn::parse(uri, text),
 
             #[cfg(all(
                 not(feature = "toml"),
