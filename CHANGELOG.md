@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Compatibility
+
+- Bump MSRV to 1.88
+
+### Internal
+
+- Upgrade json5 to 1.3
+
 ## [0.15.25] - 2026-06-26
 
 ### Fixes
