@@ -5,7 +5,7 @@ resolver = "3"
 repository = "https://github.com/rust-cli/config-rs"
 license = "MIT OR Apache-2.0"
 edition = "2024"
-rust-version = "1.85.0"  # MSRV
+rust-version = "1.88.0"  # MSRV
 include = [
   "/build.rs",
   "/src/**/*",
