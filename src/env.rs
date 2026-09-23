@@ -17,6 +17,7 @@ use crate::value::{Value, ValueKind};
 ///
 /// For prefixes take a look at [`with_prefix`](Environment::with_prefix()).
 /// For level separators take a look at [`separator`](Environment::separator()).
+/// For trimming whitespace off values take a look at [`trim_values`](Environment::trim_values()).
 #[must_use]
 #[derive(Clone, Debug, Default)]
 pub struct Environment {
@@ -57,6 +58,9 @@ pub struct Environment {
 
     /// Ignore empty env values (treat as unset).
     ignore_empty: bool,
+
+    /// Trim leading and trailing whitespace from env values.
+    trim_values: bool,
 
     /// Parses booleans, integers and floats if they're detected (can be safely parsed).
     try_parsing: bool,
@@ -177,6 +181,24 @@ impl Environment {
         self
     }
 
+    /// Trim leading and trailing whitespace from env values.
+    ///
+    /// The value is trimmed before any other processing, so `" 42 "` is parsed as an integer when
+    /// [`try_parsing`](Self::try_parsing) is enabled. Likewise, when
+    /// [`list_separator`](Self::list_separator) is set and `try_parsing` is true, the items of a
+    /// list are trimmed individually (`"a, b"` yields `["a", "b"]`).
+    ///
+    /// When combined with [`ignore_empty`](Self::ignore_empty), a value consisting only of
+    /// whitespace is treated as unset. That applies to the value as a whole, not to individual
+    /// list items: a whitespace-only item becomes an empty string rather than being dropped, so
+    /// `"a, , b"` yields `["a", "", "b"]`.
+    ///
+    /// Keys are never trimmed.
+    pub fn trim_values(mut self, trim: bool) -> Self {
+        self.trim_values = trim;
+        self
+    }
+
     /// Note: enabling `try_parsing` can reduce performance it will try and parse
     /// each environment variable 3 times (bool, i64, f64)
     pub fn try_parsing(mut self, try_parsing: bool) -> Self {
@@ -261,11 +283,6 @@ impl Source for Environment {
                 Err(_) => return Ok(()),
             };
 
-            // Treat empty environment variables as unset
-            if self.ignore_empty && value.is_empty() {
-                return Ok(());
-            }
-
             let mut key = key.to_lowercase();
 
             // Check for prefix
@@ -283,11 +300,26 @@ impl Source for Environment {
 
             // At this point, we don't know if the key is required or not.
             // Therefore if the value is not a valid unicode string, we error out.
-            let value = value.into_string().map_err(|os_string| {
-                ConfigError::Message(format!(
-                    "env variable {key:?} contains non-Unicode data: {os_string:?}"
-                ))
-            })?;
+            let value = value
+                .into_string()
+                .map(|value| {
+                    if self.trim_values {
+                        value.trim().to_owned()
+                    } else {
+                        value
+                    }
+                })
+                .map_err(|os_string| {
+                    ConfigError::Message(format!(
+                        "env variable {key:?} contains non-Unicode data: {os_string:?}"
+                    ))
+                })?;
+
+            // Treat empty environment variables as unset; a value that is only whitespace is
+            // empty once trimmed.
+            if self.ignore_empty && value.is_empty() {
+                return Ok(());
+            }
 
             // If separator is given replace with `.`
             if !separator.is_empty() {
@@ -312,22 +344,22 @@ impl Source for Environment {
                 } else if let Ok(parsed) = value.parse::<f64>() {
                     ValueKind::Float(parsed)
                 } else if let Some(separator) = &self.list_separator {
-                    if let Some(keys) = &self.list_parse_keys {
-                        if keys.contains(&key) {
-                            let v: Vec<Value> = value
+                    if self
+                        .list_parse_keys
+                        .as_ref()
+                        .is_none_or(|keys| keys.contains(&key))
+                    {
+                        ValueKind::Array(
+                            value
                                 .split(separator)
-                                .map(|s| Value::new(Some(&uri), ValueKind::String(s.to_owned())))
-                                .collect();
-                            ValueKind::Array(v)
-                        } else {
-                            ValueKind::String(value)
-                        }
+                                .map(|s| {
+                                    let s = if self.trim_values { s.trim() } else { s };
+                                    Value::new(Some(&uri), ValueKind::String(s.to_owned()))
+                                })
+                                .collect(),
+                        )
                     } else {
-                        let v: Vec<Value> = value
-                            .split(separator)
-                            .map(|s| Value::new(Some(&uri), ValueKind::String(s.to_owned())))
-                            .collect();
-                        ValueKind::Array(v)
+                        ValueKind::String(value)
                     }
                 } else {
                     ValueKind::String(value)
