@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.15.27] - 2026-09-30
+
 ### Performance
 
 - *(toml)* Reduced parsing overhead
@@ -685,7 +687,8 @@ update its MSRV.
 Initial release.
 
 <!-- next-url -->
-[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.26...HEAD
+[Unreleased]: https://github.com/rust-cli/config-rs/compare/v0.15.27...HEAD
+[0.15.27]: https://github.com/rust-cli/config-rs/compare/v0.15.26...v0.15.27
 [0.15.26]: https://github.com/rust-cli/config-rs/compare/v0.15.25...v0.15.26
 [0.15.25]: https://github.com/rust-cli/config-rs/compare/v0.15.24...v0.15.25
 [0.15.24]: https://github.com/rust-cli/config-rs/compare/v0.15.23...v0.15.24
