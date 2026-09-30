@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Performance
+
+- *(toml)* Reduced parsing overhead
+
 ## [0.15.26] - 2026-09-21
 
 ### Compatibility
