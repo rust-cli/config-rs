@@ -52,7 +52,7 @@ fn postfix(i: &mut &str) -> ModalResult<Postfix> {
 }
 
 fn ident(i: &mut &str) -> ModalResult<String> {
-    take_while(1.., ('a'..='z', 'A'..='Z', '0'..='9', '_', '-'))
+    take_while(1.., ('a'..='z', 'A'..='Z', '0'..='9', '_', '-', '/'))
         .map(ToOwned::to_owned)
         .context(StrContext::Label("identifier"))
         .context(StrContext::Expected(StrContextValue::Description(
@@ -143,6 +143,22 @@ Expression {
         ),
         Key(
             "ijkl",
+        ),
+    ],
+}
+
+"#]]
+        );
+
+        let parsed: Expression = from_str("nested/slash.v").unwrap();
+        assert_data_eq!(
+            parsed.to_debug(),
+            str![[r#"
+Expression {
+    root: "nested/slash",
+    postfix: [
+        Key(
+            "v",
         ),
     ],
 }
