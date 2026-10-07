@@ -276,21 +276,21 @@ impl Value {
                 ConfigError::invalid_type(
                     self.origin,
                     Unexpected::I128(value),
-                    "an signed 64 bit or less integer",
+                    "a signed 64 bit or less integer",
                 )
             }),
             ValueKind::U64(value) => value.try_into().map_err(|_| {
                 ConfigError::invalid_type(
                     self.origin,
                     Unexpected::U64(value),
-                    "an signed 64 bit or less integer",
+                    "a signed 64 bit or less integer",
                 )
             }),
             ValueKind::U128(value) => value.try_into().map_err(|_| {
                 ConfigError::invalid_type(
                     self.origin,
                     Unexpected::U128(value),
-                    "an signed 64 bit or less integer",
+                    "a signed 64 bit or less integer",
                 )
             }),
 
@@ -343,7 +343,7 @@ impl Value {
                 ConfigError::invalid_type(
                     self.origin,
                     Unexpected::U128(value),
-                    "an signed 128 bit integer",
+                    "a signed 128 bit integer",
                 )
             }),
 
