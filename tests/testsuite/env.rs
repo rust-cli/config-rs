@@ -472,6 +472,56 @@ fn test_parse_string_and_list() {
 }
 
 #[test]
+fn test_parse_string_and_list_with_wildcard() {
+    #[derive(Deserialize, Debug, PartialEq)]
+    struct Nested {
+        list_val: Vec<String>,
+        string_val: String,
+    }
+
+    #[derive(Deserialize, Debug, PartialEq)]
+    struct TestConfig {
+        nested: Vec<Nested>,
+    }
+
+    temp_env::with_vars(
+        vec![
+            ("list_nested[0].list_val", Some("test0,string0")),
+            ("list_nested[0].string_val", Some("test0,string0")),
+            ("list_nested[1].list_val", Some("test1,string1")),
+            ("list_nested[1].string_val", Some("test1,string1")),
+        ],
+        || {
+            let environment = Environment::default()
+                .prefix("LIST")
+                .list_separator(",")
+                .with_list_parse_key("nested[*].list_val")
+                .try_parsing(true);
+
+            let config = Config::builder().add_source(environment).build().unwrap();
+
+            let config: TestConfig = config.try_deserialize().unwrap();
+
+            assert_eq!(
+                config,
+                TestConfig {
+                    nested: vec![
+                        Nested {
+                            list_val: vec![String::from("test0"), String::from("string0")],
+                            string_val: String::from("test0,string0"),
+                        },
+                        Nested {
+                            list_val: vec![String::from("test1"), String::from("string1")],
+                            string_val: String::from("test1,string1"),
+                        },
+                    ]
+                }
+            )
+        },
+    );
+}
+
+#[test]
 fn test_parse_string_and_list_ignore_list_parse_key_case() {
     // using a struct in an enum here to make serde use `deserialize_any`
     #[derive(Deserialize, Debug)]
