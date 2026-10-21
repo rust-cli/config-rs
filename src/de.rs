@@ -416,3 +416,58 @@ impl<'de> de::Deserializer<'de> for Config {
         deserialize_struct(name: &'static str, fields: &'static [&'static str]);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::Config;
+    use crate::File;
+    use crate::FileFormat;
+
+    #[derive(Deserialize)]
+    struct CFG {
+        e: EnumConfig,
+    }
+
+    #[derive(Deserialize)]
+    enum EnumConfig {
+        Foo,
+        Bar { filename: std::path::PathBuf },
+    }
+
+    #[test]
+    fn test_unreachable_reachable_not_panicing_1() {
+        let working_config = r#"
+            e.Bar.filename = "blah"
+        "#;
+
+        let mut c = Config::default();
+        c.merge(File::from_str(working_config, FileFormat::Toml))
+            .unwrap();
+        let c: CFG = c.try_into().unwrap();
+    }
+    #[test]
+    fn test_unreachable_reachable_not_panicing_2() {
+        let working_config = r#"
+            e = "Foo"
+        "#;
+
+        let mut c = Config::default();
+        c.merge(File::from_str(working_config, FileFormat::Toml))
+            .unwrap();
+        let c: CFG = c.try_into().unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_unreachable_reachable_panicing() {
+        let panicing_config = r#"
+            e = "Bar"
+        "#;
+
+        let mut c = Config::default();
+        c.merge(File::from_str(panicing_config, FileFormat::Toml))
+            .unwrap();
+        let c: CFG = c.try_into().unwrap();
+    }
+}
