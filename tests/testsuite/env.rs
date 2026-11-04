@@ -754,6 +754,322 @@ fn test_parse_uint_default() {
     assert_eq!(config.int_val, 42);
 }
 
+#[test]
+fn test_whitespace_is_preserved_by_default() {
+    // using a struct in an enum here to make serde use `deserialize_any`
+    #[derive(Deserialize, Debug)]
+    #[serde(tag = "tag")]
+    enum TestTrimEnum {
+        Trim(TestTrim),
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct TestTrim {
+        string_val: String,
+        int_val: String,
+        string_list: Vec<String>,
+    }
+
+    temp_env::with_vars(
+        vec![
+            ("TRIMOFF_STRING_VAL", Some("  value  ")),
+            ("TRIMOFF_INT_VAL", Some(" 42 ")),
+            ("TRIMOFF_STRING_LIST", Some("a, b")),
+        ],
+        || {
+            let environment = Environment::default()
+                .prefix("TRIMOFF")
+                .list_separator(",")
+                .with_list_parse_key("string_list")
+                .try_parsing(true);
+
+            let config = Config::builder()
+                .set_default("tag", "Trim")
+                .unwrap()
+                .add_source(environment)
+                .build()
+                .unwrap();
+
+            let config: TestTrimEnum = config.try_deserialize().unwrap();
+
+            match config {
+                TestTrimEnum::Trim(TestTrim {
+                    string_val,
+                    int_val,
+                    string_list,
+                }) => {
+                    assert_eq!(String::from("  value  "), string_val);
+                    // Whitespace defeats `try_parsing`, so this stays a string
+                    assert_eq!(String::from(" 42 "), int_val);
+                    assert_eq!(vec![String::from("a"), String::from(" b")], string_list);
+                }
+            }
+        },
+    );
+}
+
+#[test]
+fn test_trim_values() {
+    // using a struct in an enum here to make serde use `deserialize_any`
+    #[derive(Deserialize, Debug)]
+    #[serde(tag = "tag")]
+    enum TestTrimEnum {
+        Trim(TestTrim),
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct TestTrim {
+        string_val: String,
+        inner_val: String,
+        whitespace_val: String,
+        nbsp_val: String,
+    }
+
+    temp_env::with_vars(
+        vec![
+            ("TRIM_STRING_VAL", Some("  value  ")),
+            ("TRIM_INNER_VAL", Some("  two words  ")),
+            // Tabs and a CRLF, as picked up from a Windows-style `.env` file
+            ("TRIM_WHITESPACE_VAL", Some("\t value \r\n")),
+            ("TRIM_NBSP_VAL", Some("\u{a0}value\u{a0}")),
+        ],
+        || {
+            let environment = Environment::default().prefix("TRIM").trim_values(true);
+
+            let config = Config::builder()
+                .set_default("tag", "Trim")
+                .unwrap()
+                .add_source(environment)
+                .build()
+                .unwrap();
+
+            let config: TestTrimEnum = config.try_deserialize().unwrap();
+
+            match config {
+                TestTrimEnum::Trim(TestTrim {
+                    string_val,
+                    inner_val,
+                    whitespace_val,
+                    nbsp_val,
+                }) => {
+                    assert_eq!(String::from("value"), string_val);
+                    // Only the ends are trimmed
+                    assert_eq!(String::from("two words"), inner_val);
+                    assert_eq!(String::from("value"), whitespace_val);
+                    // Trimming follows Unicode `White_Space`, not just ASCII, so a
+                    // non-breaking space is stripped too
+                    assert_eq!(String::from("value"), nbsp_val);
+                }
+            }
+        },
+    );
+}
+
+#[test]
+fn test_trim_values_with_try_parsing() {
+    // using a struct in an enum here to make serde use `deserialize_any`
+    #[derive(Deserialize, Debug)]
+    #[serde(tag = "tag")]
+    enum TestTrimEnum {
+        Trim(TestTrim),
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct TestTrim {
+        int_val: i32,
+        float_val: f64,
+        bool_val: bool,
+    }
+
+    temp_env::with_vars(
+        vec![
+            ("TRIMPARSE_INT_VAL", Some(" 42 ")),
+            ("TRIMPARSE_FLOAT_VAL", Some(" 4.2 ")),
+            ("TRIMPARSE_BOOL_VAL", Some(" true ")),
+        ],
+        || {
+            let environment = Environment::default()
+                .prefix("TRIMPARSE")
+                .trim_values(true)
+                .try_parsing(true);
+
+            let config = Config::builder()
+                .set_default("tag", "Trim")
+                .unwrap()
+                .add_source(environment)
+                .build()
+                .unwrap();
+
+            let config: TestTrimEnum = config.try_deserialize().unwrap();
+
+            match config {
+                TestTrimEnum::Trim(TestTrim {
+                    int_val,
+                    float_val,
+                    bool_val,
+                }) => {
+                    assert_eq!(42, int_val);
+                    assert_eq!(4.2, float_val);
+                    assert!(bool_val);
+                }
+            }
+        },
+    );
+}
+
+#[test]
+fn test_trim_values_trims_list_items() {
+    // using a struct in an enum here to make serde use `deserialize_any`
+    #[derive(Deserialize, Debug)]
+    #[serde(tag = "tag")]
+    enum TestListEnum {
+        StringList(TestList),
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct TestList {
+        string_list: Vec<String>,
+    }
+
+    temp_env::with_var("TRIMLIST_STRING_LIST", Some(" a , b ,c "), || {
+        let environment = Environment::default()
+            .prefix("TRIMLIST")
+            .trim_values(true)
+            .list_separator(",")
+            .with_list_parse_key("string_list")
+            .try_parsing(true);
+
+        let config = Config::builder()
+            .set_default("tag", "StringList")
+            .unwrap()
+            .add_source(environment)
+            .build()
+            .unwrap();
+
+        let config: TestListEnum = config.try_deserialize().unwrap();
+
+        let expected = vec![String::from("a"), String::from("b"), String::from("c")];
+
+        match config {
+            TestListEnum::StringList(TestList { string_list }) => {
+                assert_eq!(expected, string_list);
+            }
+        }
+    });
+}
+
+#[test]
+fn test_trim_values_keeps_blank_list_items() {
+    // using a struct in an enum here to make serde use `deserialize_any`
+    #[derive(Deserialize, Debug)]
+    #[serde(tag = "tag")]
+    enum TestListEnum {
+        StringList(TestList),
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct TestList {
+        string_list: Vec<String>,
+    }
+
+    temp_env::with_var("TRIMBLANKITEM_STRING_LIST", Some(" a , , b "), || {
+        // `ignore_empty` applies to the value as a whole, not to individual list items, so an
+        // item that is only whitespace becomes an empty string rather than being dropped
+        let environment = Environment::default()
+            .prefix("TRIMBLANKITEM")
+            .trim_values(true)
+            .ignore_empty(true)
+            .list_separator(",")
+            .with_list_parse_key("string_list")
+            .try_parsing(true);
+
+        let config = Config::builder()
+            .set_default("tag", "StringList")
+            .unwrap()
+            .add_source(environment)
+            .build()
+            .unwrap();
+
+        let config: TestListEnum = config.try_deserialize().unwrap();
+
+        let expected = vec![String::from("a"), String::new(), String::from("b")];
+
+        match config {
+            TestListEnum::StringList(TestList { string_list }) => {
+                assert_eq!(expected, string_list);
+            }
+        }
+    });
+}
+
+#[test]
+fn test_trim_values_does_not_split_list_without_try_parsing() {
+    // using a struct in an enum here to make serde use `deserialize_any`
+    #[derive(Deserialize, Debug)]
+    #[serde(tag = "tag")]
+    enum TestStringEnum {
+        String(TestString),
+    }
+
+    #[derive(Deserialize, Debug)]
+    struct TestString {
+        string_list: String,
+    }
+
+    temp_env::with_var("TRIMNOPARSE_STRING_LIST", Some(" a , b "), || {
+        let environment = Environment::default()
+            .prefix("TRIMNOPARSE")
+            .trim_values(true)
+            .list_separator(",")
+            .with_list_parse_key("string_list")
+            .try_parsing(false);
+
+        let config = Config::builder()
+            .set_default("tag", "String")
+            .unwrap()
+            .add_source(environment)
+            .build()
+            .unwrap();
+
+        let config: TestStringEnum = config.try_deserialize().unwrap();
+
+        match config {
+            TestStringEnum::String(TestString { string_list }) => {
+                // `list_separator` is only consulted when `try_parsing` is enabled, so the
+                // value is trimmed but kept whole rather than split into an array
+                assert_eq!(String::from("a , b"), string_list);
+            }
+        }
+    });
+}
+
+#[test]
+fn test_trim_values_with_ignore_empty() {
+    temp_env::with_vars(
+        vec![
+            ("TRIMEMPTY_BLANK_VAL", Some("   ")),
+            ("TRIMEMPTY_STRING_VAL", Some(" value ")),
+        ],
+        || {
+            // A whitespace-only value is empty once trimmed, so it is treated as unset
+            let environment = Environment::default()
+                .prefix("TRIMEMPTY")
+                .trim_values(true)
+                .ignore_empty(true);
+
+            let values = environment.collect().unwrap();
+
+            assert!(!values.contains_key("blank_val"));
+            assert!(values.contains_key("string_val"));
+
+            // Without `ignore_empty` the trimmed value is kept as an empty string
+            let environment = Environment::default().prefix("TRIMEMPTY").trim_values(true);
+
+            assert!(environment.collect().unwrap().contains_key("blank_val"));
+        },
+    );
+}
+
 #[cfg(any(unix, windows))]
 #[cfg(test)]
 mod unicode_tests {
