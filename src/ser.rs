@@ -3,9 +3,9 @@ use std::fmt::Write as _;
 
 use serde_core::ser;
 
-use crate::Config;
 use crate::error::{ConfigError, Result};
 use crate::value::{Value, ValueKind};
+use crate::Config;
 
 #[derive(Default, Debug)]
 pub(crate) struct ConfigSerializer {
@@ -20,6 +20,7 @@ enum SerKey {
 }
 
 /// An uninhabited type: no values like this can ever exist!
+#[allow(clippy::empty_enums)]
 pub(crate) enum Unreachable {}
 
 /// Serializer for numbered sequences
