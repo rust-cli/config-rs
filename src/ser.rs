@@ -3,9 +3,9 @@ use std::fmt::Write as _;
 
 use serde_core::ser;
 
+use crate::Config;
 use crate::error::{ConfigError, Result};
 use crate::value::{Value, ValueKind};
-use crate::Config;
 
 #[derive(Default, Debug)]
 pub(crate) struct ConfigSerializer {
