@@ -3,7 +3,7 @@
 ### What does this PR try to solve?
 
 <!-- a maintainer-approved Issue is required for non-trivial changes -->
-Closes #<!-- Issue # -->
+Fixes #<!-- Issue # -->
 
 ### Notes to reviewers
 
