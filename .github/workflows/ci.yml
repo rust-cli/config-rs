@@ -99,7 +99,7 @@ jobs:
     - name: Downgrade dependencies to minimal versions
       run: cargo +nightly generate-lockfile -Z minimal-versions
     - name: Hack around bad deps
-      run: cargo update --recursive json5 yaml-rust2
+      run: cargo update --recursive json5
     - name: Compile with minimal versions
       run: cargo +stable check --workspace --all-features --locked --keep-going
   lockfile:
